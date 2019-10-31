@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="SettlementSimulation.Viewer.Views.StepperTwo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SettlementSimulation.Viewer.Views"
+             xmlns:converters="clr-namespace:SettlementSimulation.Viewer.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:fa="http://schemas.fontawesome.io/icons/"
+             xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:command="http://www.galasoft.ch/mvvmlight"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" 
+             DataContext="{Binding Source={StaticResource Locator}, Path=StepperTwo}">
+    <UserControl.Resources>
+        <converters:BitmapToImageSource x:Key="BitmapToImageSource"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1.5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Image
+                x:Name="Image"
+                Stretch="Uniform"
+                Source="{Binding Path=HeightMap, Converter={StaticResource BitmapToImageSource},
+                                        NotifyOnSourceUpdated=True}" Margin="3"
+               HorizontalAlignment="Center" VerticalAlignment="Center">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseMove">
+                        <command:EventToCommand PassEventArgsToCommand="True" Command="{Binding OpenPopupCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Image>
+            <Popup x:Name="PopupBox" Placement="Top" PlacementTarget="{Binding ElementName=Image}">
+                <Grid Background="AliceBlue">
+                    <Label Content="{Binding RgbVal}" FontSize="22"/>
+                </Grid>
+                <Popup.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=Image,Path=IsMouseOver}" Value="True">
+                                <Setter Property="Popup.IsOpen" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Popup.Style>
+            </Popup>
+            <fa:ImageAwesome Icon="Spinner" Visibility="{Binding SpinnerVisibility}" Foreground="{DynamicResource PrimaryHueDarkBrush}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" Spin="True" Height="80" Width="80" />
+        </Grid>
+        <StackPanel VerticalAlignment="Stretch" Grid.Column="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel VerticalAlignment="Stretch" Margin="5">
+                    <TextBox Text="{Binding MinHeight,Mode=TwoWay}"
+                             Margin="5"
+                             materialDesign:HintAssist.Hint="Minimum height"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                    <TextBox Text="{Binding MaxHeight,Mode=TwoWay}"
+                             Margin="5"
+                             materialDesign:HintAssist.Hint="Maximum height"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                </StackPanel>
+
+                <Button Grid.Column="1" VerticalAlignment="Center" 
+                        Width="100" Content="Find area" Command="{Binding FindAreaCommand}"/>
+            </Grid>
+
+            <TabControl Style="{StaticResource MaterialDesignTabControl}" Margin="5">
+                <TabItem Header="Histogram">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                        <wpf:CartesianChart Series="{Binding HistogramValues}"  Height="400" Width="1400"/>
+                    </ScrollViewer>
+                </TabItem>
+              
+                <TabItem Header="Info">
+
+                    <ListBox ItemsSource="{Binding AdditionalInfo}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="5">
+                                    <Label Content="{Binding Key, Mode=OneWay}" FontSize="16"/>
+                                    <Label Content="  :  " FontSize="16"/>
+                                    <Label Content="{Binding Value, Mode=OneWay}" FontSize="16"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+            </TabControl>
+        </StackPanel>
+    </Grid>
+</UserControl>

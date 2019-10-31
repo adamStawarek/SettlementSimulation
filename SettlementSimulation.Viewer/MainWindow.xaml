@@ -1,0 +1,63 @@
+﻿<Window x:Class="SettlementSimulation.Viewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
+        xmlns:model="clr-namespace:MaterialDesignExtensions.Model;assembly=MaterialDesignExtensions"
+        xmlns:viewModel="clr-namespace:SettlementSimulation.Viewer.ViewModel"
+        xmlns:views="clr-namespace:SettlementSimulation.Viewer.Views"
+        xmlns:converters="clr-namespace:SettlementSimulation.Viewer.Converters"
+        mc:Ignorable="d"
+        DataContext="{Binding Source={StaticResource Locator}, Path=Main}"
+        Title="Engineer's thesis project" WindowStartupLocation="CenterScreen" 
+        MinHeight="800" MinWidth="1400">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type viewModel:StepperOneViewModel}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="60"/>
+                </Grid.RowDefinitions>
+                <views:StepperOne Grid.Row="0"/>
+                <controls:StepButtonBar Grid.Row="1" Continue="CONTINUE" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModel:StepperTwoViewModel}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="60"/>
+                </Grid.RowDefinitions>
+                <views:StepperTwo Grid.Row="0"/>
+                <controls:StepButtonBar Grid.Row="1" Back="BACK" />
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+    <DockPanel Background="{DynamicResource PrimaryHueLightBrush}">
+        <Grid DockPanel.Dock="Bottom" Margin="10">
+            <Grid Background="{DynamicResource MaterialDesignPaper}">
+                <controls:Stepper IsLinear="False" Layout="Horizontal" Margin="10">
+                    <model:Step>
+                        <model:Step.Header>
+                            <model:StepTitleHeader FirstLevelTitle="Select height map" />
+                        </model:Step.Header>
+                        <model:Step.Content>
+                            <ContentControl Content="{Binding StepperOneViewModel}" />
+                        </model:Step.Content>
+                    </model:Step>
+
+                    <model:Step>
+                        <model:Step.Header>
+                            <model:StepTitleHeader FirstLevelTitle="Generate map" />
+                        </model:Step.Header>
+                        <model:Step.Content>
+                            <ContentControl Content="{Binding StepperTwoViewModel}" />
+                        </model:Step.Content>
+                    </model:Step>
+                </controls:Stepper>
+            </Grid>
+        </Grid>
+
+    </DockPanel>
+</Window>
