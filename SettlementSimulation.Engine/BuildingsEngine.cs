@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace GeneticAlgorithm
 {
@@ -23,7 +22,7 @@ namespace GeneticAlgorithm
                 case Epoch.First:
                     {
                         buildings.AddRange(GetAllObjectsByType<FirstTypeBuilding>());
-                        break;                    
+                        break;
                     }
                 case Epoch.Second:
                     {
@@ -47,7 +46,7 @@ namespace GeneticAlgorithm
                 cumulative += buildings[i].Probability;
                 if (diceRoll < cumulative)
                 {
-                    return  buildings[i];
+                    return buildings[i];
                 }
             }
             return new EmptyArea();

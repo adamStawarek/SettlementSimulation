@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using rnd = GeneticAlgorithm.RandomProvider;
 
@@ -19,8 +18,8 @@ namespace GeneticAlgorithm
         {
             Generation = 1;
             MutationRate = mutationRate;
-            Population=new List<Dna<T>>(populationSize);
-            BestGenes=new T[dnaSize];
+            Population = new List<Dna<T>>(populationSize);
+            BestGenes = new T[dnaSize];
             for (int i = 0; i < populationSize; i++)
             {
                 Population.Add(new Dna<T>(dnaSize, GetRandomGene, SubjectFitness));
@@ -29,11 +28,11 @@ namespace GeneticAlgorithm
 
         public void NewGeneration()
         {
-            if(!Population.Any()) return;
+            if (!Population.Any()) return;
 
             CalculateFitness();
 
-            var newPopulation=new List<Dna<T>>();
+            var newPopulation = new List<Dna<T>>();
 
             for (int i = 0; i < Population.Count; i++)
             {
@@ -60,19 +59,19 @@ namespace GeneticAlgorithm
         {
             _fitnessSum = 0;
             Dna<T> best = Population[0];
-            Population.ForEach(p=>
+            Population.ForEach(p =>
             {
                 _fitnessSum += p.CalculateFitness(Population.IndexOf(p));
                 best = best.Fitness < p.Fitness ? p : best;
             });
 
             BestFitness = best.Fitness;
-            best.Genes.CopyTo(BestGenes,0);
+            best.Genes.CopyTo(BestGenes, 0);
         }
 
         private Dna<T> ChooseParent()
         {
-            double fitness =  rnd.NextDouble() * _fitnessSum;
+            double fitness = rnd.NextDouble() * _fitnessSum;
             foreach (var subject in Population)
             {
                 if (fitness < subject.Fitness)

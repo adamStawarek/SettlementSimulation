@@ -1,11 +1,11 @@
-using SettlementSimulation.Viewer.Commands;
-using SettlementSimulation.Viewer.ViewModel.Helpers;
 using FastBitmapLib;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using LiveCharts;
 using LiveCharts.Wpf;
+using SettlementSimulation.Viewer.Commands;
+using SettlementSimulation.Viewer.ViewModel.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using SettlementSimulation.AreaGenerator;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
 
@@ -23,8 +24,6 @@ namespace SettlementSimulation.Viewer.ViewModel
     {
         #region private fields
         private Bitmap _originalHeightMap;
-        private readonly Color _areaColor;
-        private Dictionary<Point, byte> _maxAreaPoints;
         #endregion
 
         #region properties
@@ -88,7 +87,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         public ObservableCollection<ObservableKeyValuePair<string, string>> AdditionalInfo { get; set; }
 
         public SeriesCollection HistogramValues { get; set; }
-        
+
         #endregion
 
         #region commands
@@ -100,10 +99,8 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             Messenger.Default.Register<SetHeightMapCommand>(this, this.SetHeightMap);
 
-            _areaColor = Color.Red;
             _minHeight = 0;
             _maxHeight = 70;
-            _maxAreaPoints = new Dictionary<Point, byte>();
             _spinnerVisibility = Visibility.Hidden;
 
             HistogramValues = new SeriesCollection
@@ -168,111 +165,13 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             SpinnerVisibility = Visibility.Visible;
             HeightMap = new Bitmap(_originalHeightMap);
-            _maxAreaPoints.Clear();
-            var potentialArePoints = GetPotentialArePoints();
-            while (potentialArePoints.Count > 0 && potentialArePoints.Count > _maxAreaPoints.Count)
-            {
-                _heightMap = await ApplyFloodFillAsync(potentialArePoints.First(), potentialArePoints);
-            }
+            var (points, bitmap) = await new SettlementBuilder()
+                .WithHeightMap(_heightMap)
+                .WithHeightRange(_minHeight,_maxHeight)
+                .BuildAsync();
+           _heightMap = new Bitmap(bitmap);
             RaisePropertyChanged(nameof(HeightMap));
             SpinnerVisibility = Visibility.Hidden;
-        }
-
-        private List<Point> GetPotentialArePoints()
-        {
-            int offsetWidth = 10;
-            int offsetHeight = 10;
-            var potentialArePoints = new List<Point>();
-            for (int y = offsetHeight; y < _heightMap.Height - offsetHeight; y++)
-            {
-                for (int x = offsetWidth; x < _heightMap.Width - offsetWidth; x++)
-                {
-                    var pixel = _heightMap.GetPixel(x, y);
-                    byte blue = pixel.R;
-                    byte green = pixel.G;
-                    byte red = pixel.B;
-                    byte intensity = GetGreyscale(red, green, blue);
-                    if (intensity >= _minHeight && intensity <= _maxHeight)
-                        potentialArePoints.Add(new Point(x, y));
-                }
-            }
-
-            return potentialArePoints;
-        }
-
-        private async Task<Bitmap> ApplyFloodFillAsync(Point startPoint, List<Point> potentialAreaPoints)
-        {
-            var bitmap = new Bitmap(_heightMap);
-            var fastBitmap = new FastBitmap(bitmap);
-            return await Task.Run(delegate
-            {
-                var timeStarted = DateTime.Now;
-
-                
-                Stack<Point> pixels = new Stack<Point>();
-                fastBitmap.Lock();
-                var targetColor = fastBitmap.GetPixel(startPoint.X, startPoint.Y);
-                fastBitmap.Unlock();
-                GetGreyscale(targetColor.R, targetColor.G, targetColor.B);
-                pixels.Push(startPoint);
-                var marked = new Dictionary<Point, byte>();
-                while (pixels.Count > 0)
-                {
-                    Point a = pixels.Pop();
-                    if (a.X < fastBitmap.Width && a.X > -1 && a.Y < fastBitmap.Height && a.Y > -1)
-                    {
-                        fastBitmap.Lock();
-                        var pixelColor = fastBitmap.GetPixel(a.X, a.Y);
-                        byte intensity = GetGreyscale(pixelColor.R, pixelColor.G, pixelColor.B);
-                        //when pixel intensity is significantly different that target intensity, set this pixel to black
-                        if (intensity >= _minHeight && intensity <= _maxHeight && !marked.ContainsKey(a))
-                        {
-                            fastBitmap.SetPixel(a.X, a.Y, _areaColor);
-                            marked.Add(a, intensity);
-                            pixels.Push(new Point(a.X - 1, a.Y));
-                            pixels.Push(new Point(a.X + 1, a.Y));
-                            pixels.Push(new Point(a.X, a.Y - 1));
-                            pixels.Push(new Point(a.X, a.Y + 1));
-                        }
-                        fastBitmap.Unlock();
-                    }
-                }
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    potentialAreaPoints.RemoveAll(p => marked.ContainsKey(p));
-                    //remove pixels that are contained in area from potential area pixels
-                });
-
-                fastBitmap.Lock();
-                ////when marked size is less than previous picked area we change its color back
-                if (marked.Count < _maxAreaPoints.Count)
-                    marked.ToList().ForEach(p =>
-                        fastBitmap.SetPixel(p.Key.X, p.Key.Y,
-                            Color.FromArgb(p.Value, p.Value, p.Value)));
-                else
-                {
-                    _maxAreaPoints.ToList().ForEach(p =>
-                        fastBitmap.SetPixel(p.Key.X, p.Key.Y,
-                            Color.FromArgb(p.Value, p.Value, p.Value)));
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        _maxAreaPoints.Clear();
-                        _maxAreaPoints = marked;
-                    });
-                }
-                fastBitmap.Unlock();
-
-
-                var timeEnded = DateTime.Now;
-
-                Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        AdditionalInfo.First(f => f.Key == "Execution time(ms)").Value = (timeEnded - timeStarted).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
-                    });
-
-                return bitmap;
-            });
         }
 
         #region helper functions
@@ -282,11 +181,6 @@ namespace SettlementSimulation.Viewer.ViewModel
             POINT p;
             ColorUnderCursor.GetCursorPos(out p);
             RgbVal = $"Intensity: {GetGreyscale(color)}";
-        }
-
-        private byte GetGreyscale(byte r, byte g, byte b)
-        {
-            return (byte)((r + b + g) / 3);
         }
 
         private byte GetGreyscale(Color color)

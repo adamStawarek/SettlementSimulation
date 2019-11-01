@@ -1,8 +1,8 @@
-using SettlementSimulation.Viewer.Commands;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using SettlementSimulation.Viewer.Commands;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -47,7 +47,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                 _heightMaps = value;
                 RaisePropertyChanged();
             }
-        } 
+        }
         #endregion
 
         public RelayCommand OpenFolderCommand { get; }
@@ -65,7 +65,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             var dialog = new CommonOpenFileDialog { IsFolderPicker = true, Multiselect = true };
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-               SetHeightMaps(dialog.FileName);
+                SetHeightMaps(dialog.FileName);
             }
         }
 
