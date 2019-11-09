@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using rnd = GeneticAlgorithm.RandomProvider;
+using rnd = SettlementSimulation.Engine.RandomProvider;
 
-namespace GeneticAlgorithm
+namespace SettlementSimulation.Engine
 {
     public abstract class BaseGeneticEngine<T>
     {

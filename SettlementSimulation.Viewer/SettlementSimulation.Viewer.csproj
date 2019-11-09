@@ -16,13 +16,10 @@
     <PackageReference Include="MaterialDesignThemes" Version="2.6.0" />
     <PackageReference Include="MvvmLight" Version="5.4.1.1" />
     <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
+    <PackageReference Include="SettlementSimulation.AreaGenerator" Version="1.0.0" />
+    <PackageReference Include="SettlementSimulation.Engine" Version="1.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
     <PackageReference Include="Windows7APICodePack-Shell" Version="1.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SettlementSimulation.AreaGenerator\SettlementSimulation.AreaGenerator.csproj" />
-    <ProjectReference Include="..\SettlementSimulation.Engine\SettlementSimulation.Engine.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <PackageId>SettlementSimulation.AreaGenerator</PackageId>
+    <Version>1.0.3</Version>
+    <Authors>Adam Stawarek</Authors>
+    <Company>Adam Stawarek</Company>
+    <PackageProjectUrl>https://github.com/adamStawarek/Human-settlement-simulation</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adamStawarek/Human-settlement-simulation</RepositoryUrl>
+    <PackageTags>genetic algorithms settlement simulation</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

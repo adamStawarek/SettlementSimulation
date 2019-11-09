@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -15,15 +17,27 @@ namespace SettlementSimulation.Viewer.ViewModel
         public static StepperOneViewModel Instance { get; set; }
 
         #region properties
-        private Bitmap _selectedBitmap;
-        public Bitmap SelectedBitmap
+        private Bitmap _selectedHeightMap;
+        public Bitmap SelectedHeightMap
         {
-            get => _selectedBitmap;
+            get => _selectedHeightMap;
             set
             {
-                _selectedBitmap = value;
+                _selectedHeightMap = value;
                 RaisePropertyChanged();
-                Messenger.Default.Send(new SetHeightMapCommand() { HeightMap = _selectedBitmap });
+                Messenger.Default.Send(new SetHeightMapCommand() { HeightMap = _selectedHeightMap });
+            }
+        }
+
+        private Bitmap _selectedColorMap;
+        public Bitmap SelectedColorMap
+        {
+            get => _selectedColorMap;
+            set
+            {
+                _selectedColorMap = value;
+                RaisePropertyChanged();
+                //Messenger.Default.Send(new SetHeightMapCommand() { HeightMap = _selectedHeightMap });
             }
         }
 
@@ -52,12 +66,30 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         public RelayCommand OpenFolderCommand { get; }
 
+        public RelayCommand<object> SetHeightMapCommand { get; set; }
+
+        public RelayCommand<object> SetColorMapCommand { get; set; }
+
         public StepperOneViewModel()
         {
             Instance = this;
             OpenFolderCommand = new RelayCommand(OpenFolder);
+            SetHeightMapCommand = new RelayCommand<object>(SetHeightMap);
+            SetColorMapCommand = new RelayCommand<object>(SetColorMap);
             HeightMaps = new List<Bitmap>();
             SetHeightMaps(@"C:\Users\adams\Desktop\memes");
+        }
+
+        private void SetHeightMap(object o)
+        {
+            var bitmap = o as Bitmap;
+            SelectedHeightMap = bitmap;
+        }
+
+        private void SetColorMap(object o)
+        {
+            var bitmap = o as Bitmap;
+            SelectedColorMap = bitmap;
         }
 
         private void OpenFolder()

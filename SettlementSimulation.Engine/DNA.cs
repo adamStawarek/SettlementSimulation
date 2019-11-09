@@ -1,7 +1,7 @@
 ﻿using System;
-using rnd = GeneticAlgorithm.RandomProvider;
+using rnd = SettlementSimulation.Engine.RandomProvider;
 
-namespace GeneticAlgorithm
+namespace SettlementSimulation.Engine
 {
     public class Dna<T>
     {

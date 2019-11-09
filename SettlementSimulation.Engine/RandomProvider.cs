@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GeneticAlgorithm
+namespace SettlementSimulation.Engine
 {
     public static class RandomProvider
     {

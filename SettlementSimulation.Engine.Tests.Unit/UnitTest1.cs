@@ -1,6 +1,7 @@
 using NUnit.Framework;
+using SettlementSimulation.Engine.Models;
 
-namespace GeneticAlgorithm.Tests.Unit
+namespace SettlementSimulation.Engine.Tests.Unit
 {
     public class Tests
     {
@@ -13,7 +14,7 @@ namespace GeneticAlgorithm.Tests.Unit
         [Retry(10)]
         public void Test1()
         {
-            var engine = new BuildingsEngine(100, 10);
+            var engine = new SimulationEngine(100, 10);
             var gene = engine.GetRandomGene();
             Assert.IsInstanceOf<Residence>(gene);
         }
@@ -22,8 +23,8 @@ namespace GeneticAlgorithm.Tests.Unit
         [Retry(100)]
         public void Test2()
         {
-            var engine = new BuildingsEngine(100, 10);
-            engine.currentEpoch = Epoch.Second;
+            var engine = new SimulationEngine(100, 10);
+            engine.SetNextEpoch();
             var gene = engine.GetRandomGene();
             Assert.IsInstanceOf<School>(gene);
         }
@@ -32,8 +33,9 @@ namespace GeneticAlgorithm.Tests.Unit
         [Retry(1000)]
         public void Test3()
         {
-            var engine = new BuildingsEngine(100, 10);
-            engine.currentEpoch = Epoch.Third;
+            var engine = new SimulationEngine(100, 10);
+            engine.SetNextEpoch();
+            engine.SetNextEpoch();
             var gene = engine.GetRandomGene();
             Assert.IsInstanceOf<University>(gene);
         }
