@@ -1,22 +1,17 @@
-using FastBitmapLib;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using LiveCharts;
 using LiveCharts.Wpf;
+using SettlementSimulation.AreaGenerator;
 using SettlementSimulation.Viewer.Commands;
 using SettlementSimulation.Viewer.ViewModel.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
-using SettlementSimulation.AreaGenerator;
 using Color = System.Drawing.Color;
-using Point = System.Drawing.Point;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -84,10 +79,18 @@ namespace SettlementSimulation.Viewer.ViewModel
             }
         }
 
-        public ObservableCollection<ObservableKeyValuePair<string, string>> AdditionalInfo { get; set; }
-
         public SeriesCollection HistogramValues { get; set; }
 
+        private bool _canContinue;
+        public bool CanContinue
+        {
+            get => _canContinue;
+            set
+            {
+                _canContinue = value;
+                RaisePropertyChanged();
+            }
+        }
         #endregion
 
         #region commands
@@ -108,22 +111,13 @@ namespace SettlementSimulation.Viewer.ViewModel
                 new ColumnSeries {Values = new ChartValues<double>{}},
             };
 
-            AdditionalInfo = new ObservableCollection<ObservableKeyValuePair<string, string>>
-            {
-                 new ObservableKeyValuePair<string, string>("Width",""),
-                new ObservableKeyValuePair<string, string>("Height",""),
-                new ObservableKeyValuePair<string, string>("Execution time(ms)","")
-            };
-
             FindAreaCommand = new RelayCommand(FindPotentialArea);
             OpenPopupCommand = new RelayCommand<object>(SetCurrentPixelValuesToRgbBox);
         }
 
         private void SetHeightMap(SetHeightMapCommand command)
         {
-            AdditionalInfo.First(f => f.Key == "Width").Value = command.HeightMap.Width.ToString();
-            AdditionalInfo.First(f => f.Key == "Height").Value = command.HeightMap.Height.ToString();
-            RaisePropertyChanged(nameof(AdditionalInfo));
+            CanContinue = false;
             HeightMap = new Bitmap(command.HeightMap);
             _originalHeightMap = new Bitmap(command.HeightMap);
             SetGraphs();
@@ -167,11 +161,12 @@ namespace SettlementSimulation.Viewer.ViewModel
             HeightMap = new Bitmap(_originalHeightMap);
             var (points, bitmap) = await new SettlementBuilder()
                 .WithHeightMap(_heightMap)
-                .WithHeightRange(_minHeight,_maxHeight)
+                .WithHeightRange(_minHeight, _maxHeight)
                 .BuildAsync();
-           _heightMap = new Bitmap(bitmap);
+            _heightMap = new Bitmap(bitmap);
             RaisePropertyChanged(nameof(HeightMap));
             SpinnerVisibility = Visibility.Hidden;
+            CanContinue = true;
         }
 
         #region helper functions

@@ -16,12 +16,12 @@
     <UserControl.Resources>
         <converters:BitmapToImageSource x:Key="BitmapToImageSource"/>
     </UserControl.Resources>
-    <Grid>
+    <Grid Background="White">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="1.5*"/>
         </Grid.ColumnDefinitions>
-        <Grid>
+        <Grid Margin="5">
             <Image
                 x:Name="Image"
                 Stretch="Uniform"
@@ -51,50 +51,28 @@
             <fa:ImageAwesome Icon="Spinner" Visibility="{Binding SpinnerVisibility}" Foreground="{DynamicResource PrimaryHueDarkBrush}"
                          HorizontalAlignment="Center" VerticalAlignment="Center" Spin="True" Height="80" Width="80" />
         </Grid>
-        <StackPanel VerticalAlignment="Stretch" Grid.Column="1">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel VerticalAlignment="Stretch" Margin="5">
-                    <TextBox Text="{Binding MinHeight,Mode=TwoWay}"
-                             Margin="5"
-                             materialDesign:HintAssist.Hint="Minimum height"
-                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
-                    <TextBox Text="{Binding MaxHeight,Mode=TwoWay}"
-                             Margin="5"
-                             materialDesign:HintAssist.Hint="Maximum height"
-                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+        <StackPanel Margin="5" VerticalAlignment="Stretch" Grid.Column="1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <Label Content="Minimum height:" FontSize="16"
+                             Margin="5"/>
+                    <Slider Value="{Binding MinHeight,Mode=TwoWay}" Width="400" VerticalAlignment="Center"
+                            Minimum="0" Maximum="255"/>
                 </StackPanel>
 
-                <Button Grid.Column="1" VerticalAlignment="Center" 
-                        Width="100" Content="Find area" Command="{Binding FindAreaCommand}"/>
-            </Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" Margin="5">
+                    <Label Content="Maximum height:" FontSize="16"
+                           Margin="5"/>
+                    <Slider Value="{Binding MaxHeight,Mode=TwoWay}"  Width="400" VerticalAlignment="Center"
+                            Minimum="0" Maximum="255"/>
+                </StackPanel>
 
-            <TabControl Style="{StaticResource MaterialDesignTabControl}" Margin="5">
-                <TabItem Header="Histogram">
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto">
-                        <wpf:CartesianChart Series="{Binding HistogramValues}"  Height="400" Width="1400"/>
-                    </ScrollViewer>
-                </TabItem>
-              
-                <TabItem Header="Info">
+                <Button Width="150" HorizontalAlignment="Center" Content="Find area" Command="{Binding FindAreaCommand}"/>
+            </StackPanel>
 
-                    <ListBox ItemsSource="{Binding AdditionalInfo}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="5">
-                                    <Label Content="{Binding Key, Mode=OneWay}" FontSize="16"/>
-                                    <Label Content="  :  " FontSize="16"/>
-                                    <Label Content="{Binding Value, Mode=OneWay}" FontSize="16"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </TabItem>
-            </TabControl>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="5">
+                <wpf:CartesianChart Series="{Binding HistogramValues}"  MinHeight="340" Width="1400"/>
+            </ScrollViewer>
         </StackPanel>
     </Grid>
 </UserControl>

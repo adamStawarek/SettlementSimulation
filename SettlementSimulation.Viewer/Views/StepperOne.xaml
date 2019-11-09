@@ -12,80 +12,82 @@
     <UserControl.Resources>
         <convertersCustom:BitmapToImageSource x:Key="BitmapToImageSource"/>
     </UserControl.Resources>
-    <StackPanel x:Name="Main">
-        <StackPanel Orientation="Horizontal">
-            <TextBox Text="{Binding HeightMapsFolderPath, Mode=OneWay}" 
-                     MinWidth="300"  Margin="0 0 10 0"/>
-            <Button Content="Select folder" Command="{Binding OpenFolderCommand}"/>
-        </StackPanel>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
-            <ListBox x:Name="LstHeightMaps" ItemsSource="{Binding HeightMaps}" MaxHeight="360"
+    <Grid x:Name="Main"  Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="750"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Margin="5" Grid.Column="0">
+
+            <StackPanel Orientation="Horizontal" Height="50" HorizontalAlignment="Stretch">
+                <Button Content="Select folder" Command="{Binding OpenFolderCommand}" />
+                <TextBox Text="{Binding HeightMapsFolderPath, Mode=OneWay}" IsEnabled="False"
+                       Width="615" Margin="10,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <Border BorderBrush="Black" BorderThickness="2">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                    <ListBox x:Name="LstHeightMaps" ItemsSource="{Binding HeightMaps}" Height="320"
                      Style="{StaticResource MaterialDesignGridList}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="8">
-                            <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="64" Height="64">
-                                <TextBlock DockPanel.Dock="Bottom" FontSize="12" Text="{Binding Path=Tag, Mode=OneTime}"
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="8">
+                                    <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="100" Height="100">
+                                        <TextBlock DockPanel.Dock="Bottom" FontSize="12" Text="{Binding Path=Tag, Mode=OneTime}"
                                            Margin="0,8,0,0" HorizontalAlignment="Center" />
 
-                                <Image Stretch="Uniform"
+                                        <Image Stretch="Uniform"
                                        DataContext="{Binding .}"
                                        Source="{Binding .,
                                         Converter={StaticResource BitmapToImageSource},
                                         NotifyOnSourceUpdated=True}" Margin="3"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <Popup x:Name="PopupBox" Placement="Bottom" StaysOpen="True">
-                                    <StackPanel Background="AliceBlue">
-                                        <Button Content="Set as height-map" Margin="5">
-                                            <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName="Click">
-                                                    <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
+                                        <Popup x:Name="PopupBox" Placement="Bottom" StaysOpen="True">
+                                            <StackPanel Background="AliceBlue">
+                                                <Button Content="Set as height-map" Margin="5">
+                                                    <i:Interaction.Triggers>
+                                                        <i:EventTrigger EventName="Click">
+                                                            <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
                                                                                 Path=Children[1].DataContext}"
                                                                             Command="{Binding DataContext.SetHeightMapCommand, ElementName=Main}"/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
-                                        </Button>
-                                        <Button Content="Set as color-map" Margin="5" Background="Green">
-                                            <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName="Click">
-                                                    <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
+                                                        </i:EventTrigger>
+                                                    </i:Interaction.Triggers>
+                                                </Button>
+                                                <Button Content="Set as color-map" Margin="5" Background="Green">
+                                                    <i:Interaction.Triggers>
+                                                        <i:EventTrigger EventName="Click">
+                                                            <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
                                                                                 Path=Children[1].DataContext}"
                                                                             Command="{Binding DataContext.SetColorMapCommand, ElementName=Main}"/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
-                                        </Button>
-                                    </StackPanel>
-                                    <Popup.Style>
-                                        <Style>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
+                                                        </i:EventTrigger>
+                                                    </i:Interaction.Triggers>
+                                                </Button>
+                                            </StackPanel>
+                                            <Popup.Style>
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
                                                     Path=IsMouseOver}" Value="True">
-                                                    <Setter Property="Popup.IsOpen" Value="True"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Popup.Style>
-                                </Popup>
-                            </DockPanel>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            </ScrollViewer>
-            <StackPanel Orientation="Horizontal"  Grid.Column="0"  Grid.Row="1" HorizontalAlignment="Center">
+                                                            <Setter Property="Popup.IsOpen" Value="True"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Popup.Style>
+                                        </Popup>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <Border BorderBrush="Blue" BorderThickness="2" CornerRadius="10" Margin="5">
                     <StackPanel>
                         <Image 
-                            Height="100"
+                            Height="80"
                             Stretch="Uniform"
                             Source="{Binding DataContext.SelectedHeightMap,
                                         Converter={StaticResource BitmapToImageSource},
@@ -96,27 +98,32 @@
                     </StackPanel>
                 </Border>
                 <Border BorderBrush="Green" BorderThickness="2" CornerRadius="10" Margin="5">
-                <StackPanel>
-                    <Image 
-                        Height="100"
+                    <StackPanel>
+                        <Image 
+                        Height="80"
                         Stretch="Uniform"
                         Source="{Binding DataContext.SelectedColorMap,
                                         Converter={StaticResource BitmapToImageSource},
                                         NotifyOnSourceUpdated=True,
                                         ElementName=Main}" Margin="3"
                         HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    <Label Content="Selected color-map"></Label>
-                </StackPanel>
+                        <Label Content="Selected color-map"></Label>
+                    </StackPanel>
                 </Border>
             </StackPanel>
-            <Image Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
-                   MaxHeight="400"
-                   Stretch="UniformToFill"
-                   Source="{Binding SelectedItem,ElementName=LstHeightMaps,
+
+        </StackPanel>
+
+        <Grid Grid.Column="1" Margin="5">
+            <Border BorderBrush="Black" BorderThickness="2">
+                <Image 
+                MaxHeight="400"
+                Stretch="UniformToFill"
+                Source="{Binding SelectedItem,ElementName=LstHeightMaps,
                                         Converter={StaticResource BitmapToImageSource},
                                         NotifyOnSourceUpdated=True}" Margin="3"
-                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
         </Grid>
-        
-    </StackPanel>
+    </Grid>
 </UserControl>

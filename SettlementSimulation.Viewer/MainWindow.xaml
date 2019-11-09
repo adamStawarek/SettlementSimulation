@@ -1,4 +1,4 @@
-﻿<Window x:Class="SettlementSimulation.Viewer.MainWindow"
+﻿<controls:MaterialWindow x:Class="SettlementSimulation.Viewer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,26 +11,48 @@
         mc:Ignorable="d"
         DataContext="{Binding Source={StaticResource Locator}, Path=Main}"
         Title="Engineer's thesis project" WindowStartupLocation="CenterScreen" 
-        MinHeight="800" MinWidth="1400">
+        ResizeMode="CanMinimize"
+        Height="800" Width="1400">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModel:StepperOneViewModel}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
                     <RowDefinition Height="60"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="55"/>
                 </Grid.RowDefinitions>
-                <views:StepperOne Grid.Row="0"/>
-                <controls:StepButtonBar Grid.Row="1" Continue="CONTINUE" />
+                <Label FontSize="24" Content="Select height-map and color map" 
+                       HorizontalAlignment="Center" FontWeight="Bold"/>
+                <views:StepperOne Grid.Row="1"/>
+                <controls:StepButtonBar Grid.Row="2" Continue="CONTINUE"  VerticalAlignment="Top" 
+                                        IsContinueEnabled="{Binding CanContinue}"/>
             </Grid>
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModel:StepperTwoViewModel}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
                     <RowDefinition Height="60"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="55"/>
                 </Grid.RowDefinitions>
-                <views:StepperTwo Grid.Row="0"/>
-                <controls:StepButtonBar Grid.Row="1" Back="BACK" />
+                <Label FontSize="24" Content="Find settlement area" 
+                       HorizontalAlignment="Center" FontWeight="Bold"/>
+                <views:StepperTwo Grid.Row="1"/>
+                <controls:StepButtonBar Grid.Row="2" Continue="CONTINUE" Back="BACK" VerticalAlignment="Top"
+                                        IsContinueEnabled="{Binding CanContinue}"/>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModel:StepperThreeViewModel}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="55"/>
+                </Grid.RowDefinitions>
+                <Label FontSize="24" Content="Start simulation" 
+                       HorizontalAlignment="Center" FontWeight="Bold"/>
+                <views:StepperThree Grid.Row="1"/>
+                <controls:StepButtonBar Grid.Row="2" Back="BACK" />
             </Grid>
         </DataTemplate>
     </Window.Resources>
@@ -40,19 +62,28 @@
                 <controls:Stepper IsLinear="False" Layout="Horizontal" Margin="10">
                     <model:Step>
                         <model:Step.Header>
-                            <model:StepTitleHeader FirstLevelTitle="Select height map" />
+                            <model:StepTitleHeader/>
                         </model:Step.Header>
                         <model:Step.Content>
-                            <ContentControl Content="{Binding StepperOneViewModel}" />
+                            <ContentControl Content="{Binding StepperOneViewModel}"  />
                         </model:Step.Content>
                     </model:Step>
 
                     <model:Step>
                         <model:Step.Header>
-                            <model:StepTitleHeader FirstLevelTitle="Generate map" />
+                            <model:StepTitleHeader />
                         </model:Step.Header>
                         <model:Step.Content>
                             <ContentControl Content="{Binding StepperTwoViewModel}" />
+                        </model:Step.Content>
+                    </model:Step>
+
+                    <model:Step>
+                        <model:Step.Header>
+                            <model:StepTitleHeader />
+                        </model:Step.Header>
+                        <model:Step.Content>
+                            <ContentControl Content="{Binding StepperThreeViewModel}" />
                         </model:Step.Content>
                     </model:Step>
                 </controls:Stepper>
@@ -60,4 +91,4 @@
         </Grid>
 
     </DockPanel>
-</Window>
+</controls:MaterialWindow>

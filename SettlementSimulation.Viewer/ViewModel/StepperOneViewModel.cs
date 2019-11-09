@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using System.Windows.Media.Imaging;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -17,6 +15,8 @@ namespace SettlementSimulation.Viewer.ViewModel
         public static StepperOneViewModel Instance { get; set; }
 
         #region properties
+        public bool CanContinue => SelectedColorMap != null && SelectedHeightMap != null;
+
         private Bitmap _selectedHeightMap;
         public Bitmap SelectedHeightMap
         {
@@ -25,6 +25,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 _selectedHeightMap = value;
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CanContinue));
                 Messenger.Default.Send(new SetHeightMapCommand() { HeightMap = _selectedHeightMap });
             }
         }
@@ -37,6 +38,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 _selectedColorMap = value;
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CanContinue));
                 //Messenger.Default.Send(new SetHeightMapCommand() { HeightMap = _selectedHeightMap });
             }
         }

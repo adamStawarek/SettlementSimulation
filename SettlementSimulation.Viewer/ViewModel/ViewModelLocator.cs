@@ -11,6 +11,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<StepperOneViewModel>();
             SimpleIoc.Default.Register<StepperTwoViewModel>();
+            SimpleIoc.Default.Register<StepperThreeViewModel>();
         }
 
         public MainViewModel Main
@@ -34,6 +35,14 @@ namespace SettlementSimulation.Viewer.ViewModel
             get
             {
                 return ServiceLocator.Current.GetInstance<StepperTwoViewModel>();
+            }
+        }
+
+        public StepperThreeViewModel StepperThree
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<StepperThreeViewModel>();
             }
         }
 
