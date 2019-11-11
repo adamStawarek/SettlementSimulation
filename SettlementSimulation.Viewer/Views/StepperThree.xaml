@@ -32,9 +32,10 @@
         <StackPanel Margin="5" Grid.Column="1">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" Margin="5">
                 <Label Content="Maximum number of generations:" FontSize="16"
-                       Margin="5"/>
-                <Slider Value="{Binding MaxGeneration,Mode=TwoWay}"  Width="400" VerticalAlignment="Center"
-                        Minimum="0" Maximum="5000"/>
+                       Margin="0,0,5,0" VerticalAlignment="Bottom"/>
+                <Slider Value="{Binding MaxGeneration,Mode=TwoWay}"  Width="400"  Margin="0,0,0,5"
+                        Minimum="0" Maximum="5000" Style="{StaticResource MaterialDesignDiscreteSlider}"
+                        ToolTip="MaterialDesignDiscreteSlider"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" Margin="5">
                 <Label Content="Timeout(min):" FontSize="16"
@@ -57,7 +58,7 @@
                             </i:Interaction.Triggers>
                         </Button>
                     </StackPanel>
-                    <ListBox  ItemsSource="{Binding SelectedBreakpoints}" Height="280"
+                    <ListBox  ItemsSource="{Binding SelectedBreakpoints}" Height="260"
                          Style="{StaticResource MaterialDesignGridList}" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>

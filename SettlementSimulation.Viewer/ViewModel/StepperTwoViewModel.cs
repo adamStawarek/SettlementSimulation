@@ -57,6 +57,17 @@ namespace SettlementSimulation.Viewer.ViewModel
             }
         }
 
+        private Bitmap _colorMap;
+        public Bitmap ColorMap
+        {
+            get => _colorMap;
+            set
+            {
+                _colorMap = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private Visibility _spinnerVisibility;
         public Visibility SpinnerVisibility
         {
@@ -91,17 +102,31 @@ namespace SettlementSimulation.Viewer.ViewModel
                 RaisePropertyChanged();
             }
         }
+
+        private double _colorMapOpacity;
+        public double ColorMapOpacity
+        {
+            get => _colorMapOpacity;
+            set
+            {
+                _colorMapOpacity = value; 
+                RaisePropertyChanged();
+            }
+        }
         #endregion
 
         #region commands
         public RelayCommand FindAreaCommand { get; }
         public RelayCommand<object> OpenPopupCommand { get; }
+        public RelayCommand ResetCommand { get; }
         #endregion
 
         public StepperTwoViewModel()
         {
             Messenger.Default.Register<SetHeightMapCommand>(this, this.SetHeightMap);
+            Messenger.Default.Register<SetColorMapCommand>(this, this.SetColorMap);
 
+            _colorMapOpacity = 0.9;
             _minHeight = 0;
             _maxHeight = 70;
             _spinnerVisibility = Visibility.Hidden;
@@ -113,6 +138,13 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             FindAreaCommand = new RelayCommand(FindPotentialArea);
             OpenPopupCommand = new RelayCommand<object>(SetCurrentPixelValuesToRgbBox);
+            ResetCommand=new RelayCommand(Reset);
+        }
+
+        private void Reset()
+        {
+            this.HeightMap=new Bitmap(_originalHeightMap);
+            RaisePropertyChanged(nameof(HeightMap));
         }
 
         private void SetHeightMap(SetHeightMapCommand command)
@@ -121,6 +153,12 @@ namespace SettlementSimulation.Viewer.ViewModel
             HeightMap = new Bitmap(command.HeightMap);
             _originalHeightMap = new Bitmap(command.HeightMap);
             SetGraphs();
+        }
+
+        private void SetColorMap(SetColorMapCommand command)
+        {
+            CanContinue = false;
+            ColorMap = new Bitmap(command.ColorMap);
         }
 
         public void SetGraphs()
@@ -160,6 +198,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             SpinnerVisibility = Visibility.Visible;
             HeightMap = new Bitmap(_originalHeightMap);
             var (points, bitmap) = await new SettlementBuilder()
+                .WithColorMap(_colorMap)
                 .WithHeightMap(_heightMap)
                 .WithHeightRange(_minHeight, _maxHeight)
                 .BuildAsync();

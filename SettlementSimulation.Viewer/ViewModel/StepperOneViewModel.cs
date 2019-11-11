@@ -39,7 +39,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                 _selectedColorMap = value;
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(CanContinue));
-                //Messenger.Default.Send(new SetHeightMapCommand() { HeightMap = _selectedHeightMap });
+                Messenger.Default.Send(new SetColorMapCommand() { ColorMap = _selectedColorMap });
             }
         }
 
@@ -79,7 +79,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             SetHeightMapCommand = new RelayCommand<object>(SetHeightMap);
             SetColorMapCommand = new RelayCommand<object>(SetColorMap);
             HeightMaps = new List<Bitmap>();
-            SetHeightMaps(@"C:\Users\adams\Desktop\memes");
+            SetHeightMaps(@"C:\Users\adams\Desktop\SS.Data");
         }
 
         private void SetHeightMap(object o)

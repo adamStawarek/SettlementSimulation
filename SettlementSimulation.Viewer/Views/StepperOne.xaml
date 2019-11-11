@@ -118,7 +118,7 @@
             <Border BorderBrush="Black" BorderThickness="2">
                 <Image 
                 MaxHeight="400"
-                Stretch="UniformToFill"
+                Stretch="Uniform"
                 Source="{Binding SelectedItem,ElementName=LstHeightMaps,
                                         Converter={StaticResource BitmapToImageSource},
                                         NotifyOnSourceUpdated=True}" Margin="3"

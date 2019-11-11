@@ -11,7 +11,7 @@
         mc:Ignorable="d"
         DataContext="{Binding Source={StaticResource Locator}, Path=Main}"
         Title="Engineer's thesis project" WindowStartupLocation="CenterScreen" 
-        ResizeMode="CanMinimize"
+        ResizeMode="CanResizeWithGrip"
         Height="800" Width="1400">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModel:StepperOneViewModel}">
