@@ -14,6 +14,7 @@ namespace SettlementSimulation.AreaGenerator
         private Bitmap _colorMap;
         private int _maxHeight;
         private int _minHeight;
+
         public SettlementBuilder WithHeightMap(Bitmap bitmap)
         {
             _heightMap = bitmap;
@@ -35,77 +36,94 @@ namespace SettlementSimulation.AreaGenerator
 
         public async Task<(IEnumerable<Field>, Bitmap)> BuildAsync()
         {
+            #region find water aquens
             var colorMap = new Bitmap(_colorMap);
+            var waterAreasBoundaryFunc = new Func<Color, bool>(color => color.B >= byte.MaxValue - 5 &&
+                                                                       color.R <= byte.MinValue + 5 &&
+                                                                       color.G >= 50 && color.G <= 120);
             var waterAreas = new List<IEnumerable<Point>>();
-            var potentialWaterPointsWithPixels = 
-                GetPixels(colorMap, color => color.B>=byte.MaxValue-5&&color.R<=byte.MinValue+5
-                                                                      &&color.G>=50 && color.G<=120)
-                    .OrderBy(p => GetIntensity(p.pixel))
+            var potentialWaterPoints =
+                GetPixels(colorMap, waterAreasBoundaryFunc)
                     .ToList();
 
-            var potentialWaterPoints = potentialWaterPointsWithPixels
-                .Select(p => p.point)
-                .ToList();
-
-          
             while (potentialWaterPoints.Count > 0)
             {
                 var area = await ApplyFloodFillAsync(
                     colorMap,
                     potentialWaterPoints.First(),
-                    color => color.B >= byte.MaxValue - 5 && color.R <= byte.MinValue + 5
-                                                                   && color.G >= 50 && color.G <= 120);
-
+                    waterAreasBoundaryFunc);
                 potentialWaterPoints.RemoveAll(p => area.Contains(p));
-
                 waterAreas.Add(area);
             }
-
             var maxWaterArea = waterAreas.Max(w => w.Count());
             waterAreas.RemoveAll(w => w.Count() < 0.4 * maxWaterArea);
+            #endregion
 
-            var bitmap = new Bitmap(_heightMap);
+            #region find settlement areas
+            var heightMap = new Bitmap(_heightMap);
+            var settlementAreaBoundaryFunc = new Func<Color, bool>(color => color.G >= _minHeight && color.G <= _maxHeight);
             var areas = new List<IEnumerable<Point>>();
-            var potentialAreaPoints = GetPixels(_heightMap, color => color.G >= _minHeight && color.G <= _maxHeight)
-                .Select(p=>p.point)
+            var potentialAreaPoints = GetPixels(heightMap, settlementAreaBoundaryFunc)
                 .ToList();
 
-            while ( potentialAreaPoints.Count > 0 )
+            while (potentialAreaPoints.Count > 0)
             {
                 var area = await ApplyFloodFillAsync(
-                    bitmap,
+                    heightMap,
                     potentialAreaPoints.First(),
-                    color => color.G >=_minHeight && color.G<=_maxHeight);
+                    settlementAreaBoundaryFunc);
 
                 potentialAreaPoints.RemoveAll(p => area.Contains(p));
-
                 areas.Add(area);
             }
+            var maxSettlementArea = areas.Max(w => w.Count());
+            areas.RemoveAll(w => w.Count() < 0.75 * maxSettlementArea);
+            #endregion
 
-            var selectedArea = areas.OrderByDescending(a => a.Count()).First().ToList();//TODO
-           
-            selectedArea.ForEach(p =>
-                bitmap.SetPixel(p.X, p.Y,
-                    Color.Red));
+            #region find selected area
+            var centerPoints = waterAreas
+                    .Select(w => new Point((int)w.Average(w2 => w2.X), (int)w.Average(w2 => w2.Y)));
 
-            waterAreas.ForEach(w=>w.ToList().ForEach(p => bitmap.SetPixel(p.X, p.Y,
-                Color.Blue)));
+            IEnumerable<Point> selectedArea = null;
+            var minDistance = double.MaxValue;
+            foreach (var area in areas)
+            {
+                foreach (var centerPoint in centerPoints)
+                {
+                    var point = new Point((int)area.Average(w2 => w2.X), (int)area.Average(w2 => w2.Y));
+                    if (minDistance > point.DistanceTo(centerPoint))
+                    {
+                        minDistance = point.DistanceTo(centerPoint);
+                        selectedArea = area;
+                    }
+                }
+            }
+            #endregion
 
-            return (selectedArea.Select(p => new Field(p)), bitmap);
+            #region mark settlement area and water aquens on bitmap
+            selectedArea.ToList().ForEach(p =>
+                   heightMap.SetPixel(p.X, p.Y,
+                       Color.Red));
+
+            waterAreas.ForEach(w => w.ToList().ForEach(p => heightMap.SetPixel(p.X, p.Y,
+                  Color.Blue)));
+            #endregion
+
+            return (selectedArea.Select(p => new Field(p)), heightMap);
         }
 
-        private IEnumerable<(Point point, Color pixel)> GetPixels(Bitmap bitmap, Func<Color, bool> func, int offset=10)
+        private IEnumerable<Point> GetPixels(Bitmap bitmap, Func<Color, bool> func, int offset = 10)
         {
-            var fastBitmap=new FastBitmap(bitmap);
+            var fastBitmap = new FastBitmap(bitmap);
             fastBitmap.Lock();
-            var pixels = new List<(Point,Color)>();
+            var pixels = new List<Point>();
             for (int y = offset; y < bitmap.Height - offset; y++)
             {
                 for (int x = offset; x < bitmap.Width - offset; x++)
                 {
                     var pixel = fastBitmap.GetPixel(x, y);
                     if (func(pixel))
-                        pixels.Add((new Point(x, y),pixel));
+                        pixels.Add(new Point(x, y));
                 }
             }
             fastBitmap.Unlock();
@@ -130,7 +148,6 @@ namespace SettlementSimulation.AreaGenerator
                     {
                         fastBitmap.Lock();
                         var pixel = fastBitmap.GetPixel(a.X, a.Y);
-                        //when pixel intensity is different that target intensity, set this pixel to black
                         if (boundaryFunc(pixel) && !marked.ContainsKey(a))
                         {
                             marked.Add(a, pixel.G);
@@ -151,11 +168,6 @@ namespace SettlementSimulation.AreaGenerator
 
                 return marked.Keys;
             });
-        }
-
-        private int GetIntensity(Color color)
-        {
-            return color.R + color.G + color.B;
         }
     }
 }
