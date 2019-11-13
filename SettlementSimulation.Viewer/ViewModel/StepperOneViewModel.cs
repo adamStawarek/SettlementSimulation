@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using SettlementSimulation.Viewer.Helpers;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
     public class StepperOneViewModel : ViewModelBase
     {
-        public static StepperOneViewModel Instance { get; set; }
 
         #region properties
         public bool CanContinue => SelectedColorMap != null && SelectedHeightMap != null;
@@ -43,24 +43,28 @@ namespace SettlementSimulation.Viewer.ViewModel
             }
         }
 
-        private string _heightMapsFolderPath;
-        public string HeightMapsFolderPath
+        private string _mapDirectory;
+        public string MapDirectory
         {
-            get => _heightMapsFolderPath;
+            get => _mapDirectory;
             set
             {
-                _heightMapsFolderPath = value;
+                _mapDirectory = value;
+                if (!string.IsNullOrEmpty(_mapDirectory))
+                {
+                    ConfigurationManagerHelper.SetSettings("MapDirectory",_mapDirectory);
+                }
                 RaisePropertyChanged();
             }
         }
 
-        private List<Bitmap> _heightMaps;
-        public List<Bitmap> HeightMaps
+        private List<Bitmap> _maps;
+        public List<Bitmap> Maps
         {
-            get => _heightMaps;
+            get => _maps;
             set
             {
-                _heightMaps = value;
+                _maps = value;
                 RaisePropertyChanged();
             }
         }
@@ -74,12 +78,14 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         public StepperOneViewModel()
         {
-            Instance = this;
             OpenFolderCommand = new RelayCommand(OpenFolder);
             SetHeightMapCommand = new RelayCommand<object>(SetHeightMap);
             SetColorMapCommand = new RelayCommand<object>(SetColorMap);
-            HeightMaps = new List<Bitmap>();
-            SetHeightMaps(@"C:\Users\adams\Desktop\SS.Data");
+            Maps = new List<Bitmap>();
+
+            var mapDirectory = ConfigurationManagerHelper.GetSettings("MapDirectory");
+            if(!string.IsNullOrEmpty(mapDirectory))
+                SetHeightMaps(mapDirectory);
         }
 
         private void SetHeightMap(object o)
@@ -105,12 +111,12 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         private void SetHeightMaps(string directory)
         {
-            HeightMapsFolderPath = directory;
+            MapDirectory = directory;
             string[] allowedExtensions = new[] { ".png", ".jpg" };
             var files = Directory.GetFiles(directory)
                 .Where(file => allowedExtensions.Any(file.ToLower().EndsWith))
                 .Select(file => new Bitmap(file) { Tag = file.Split('\\').Last() });
-            HeightMaps = new List<Bitmap>(files);
+            Maps = new List<Bitmap>(files);
         }
     }
 }

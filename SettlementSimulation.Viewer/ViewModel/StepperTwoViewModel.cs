@@ -1,3 +1,4 @@
+using System;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -11,6 +12,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using SettlementSimulation.Viewer.Helpers;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -29,7 +31,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 _minHeight = value;
                 RaisePropertyChanged();
-                //FindPotentialArea();
+                ConfigurationManagerHelper.SetSettings("MinHeight", _minHeight.ToString());
             }
         }
 
@@ -41,7 +43,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 _maxHeight = value;
                 RaisePropertyChanged();
-                //FindPotentialArea();
+                ConfigurationManagerHelper.SetSettings("MaxHeight", _maxHeight.ToString());
             }
         }
 
@@ -127,8 +129,8 @@ namespace SettlementSimulation.Viewer.ViewModel
             Messenger.Default.Register<SetColorMapCommand>(this, this.SetColorMap);
 
             _colorMapOpacity = 0.9;
-            _minHeight = 100;
-            _maxHeight = 150;
+            int.TryParse(ConfigurationManagerHelper.GetSettings("MinHeight"), out _minHeight);
+            int.TryParse(ConfigurationManagerHelper.GetSettings("MaxHeight"), out _maxHeight);
             _spinnerVisibility = Visibility.Hidden;
 
             HistogramValues = new SeriesCollection

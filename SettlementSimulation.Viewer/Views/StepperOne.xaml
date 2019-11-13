@@ -22,13 +22,13 @@
 
             <StackPanel Orientation="Horizontal" Height="50" HorizontalAlignment="Stretch">
                 <Button Content="Select folder" Command="{Binding OpenFolderCommand}" />
-                <TextBox Text="{Binding HeightMapsFolderPath, Mode=OneWay}" IsEnabled="False"
+                <TextBox Text="{Binding MapDirectory, Mode=OneWay}" IsEnabled="False"
                        Width="615" Margin="10,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
 
             <Border BorderBrush="Black" BorderThickness="2">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                    <ListBox x:Name="LstHeightMaps" ItemsSource="{Binding HeightMaps}" Height="320"
+                    <ListBox x:Name="LstHeightMaps" ItemsSource="{Binding Maps}" Height="320"
                      Style="{StaticResource MaterialDesignGridList}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
