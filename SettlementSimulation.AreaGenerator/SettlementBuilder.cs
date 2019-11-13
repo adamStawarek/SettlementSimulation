@@ -1,4 +1,5 @@
-﻿using FastBitmapLib;
+﻿using System;
+using FastBitmapLib;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -13,8 +14,6 @@ namespace SettlementSimulation.AreaGenerator
         private Bitmap _colorMap;
         private int _maxHeight;
         private int _minHeight;
-        private Dictionary<Point, byte> _areaPoints;
-
         public SettlementBuilder WithHeightMap(Bitmap bitmap)
         {
             _heightMap = bitmap;
@@ -36,66 +35,105 @@ namespace SettlementSimulation.AreaGenerator
 
         public async Task<(IEnumerable<Field>, Bitmap)> BuildAsync()
         {
-            _areaPoints = new Dictionary<Point, byte>();
-            var potentialAreaPoints = GetPotentialAreaPoints();
-            var bitmap = new Bitmap(_heightMap);
-            while (potentialAreaPoints.Count > 0 &&
-                   potentialAreaPoints.Count > _areaPoints.Count)
+            var colorMap = new Bitmap(_colorMap);
+            var waterAreas = new List<IEnumerable<Point>>();
+            var potentialWaterPointsWithPixels = 
+                GetPixels(colorMap, color => color.B>=byte.MaxValue-5&&color.R<=byte.MinValue+5
+                                                                      &&color.G>=50 && color.G<=120)
+                    .OrderBy(p => GetIntensity(p.pixel))
+                    .ToList();
+
+            var potentialWaterPoints = potentialWaterPointsWithPixels
+                .Select(p => p.point)
+                .ToList();
+
+          
+            while (potentialWaterPoints.Count > 0)
             {
-                bitmap = await ApplyFloodFillAsync(
+                var area = await ApplyFloodFillAsync(
+                    colorMap,
+                    potentialWaterPoints.First(),
+                    color => color.B >= byte.MaxValue - 5 && color.R <= byte.MinValue + 5
+                                                                   && color.G >= 50 && color.G <= 120);
+
+                potentialWaterPoints.RemoveAll(p => area.Contains(p));
+
+                waterAreas.Add(area);
+            }
+
+            var maxWaterArea = waterAreas.Max(w => w.Count());
+            waterAreas.RemoveAll(w => w.Count() < 0.4 * maxWaterArea);
+
+            var bitmap = new Bitmap(_heightMap);
+            var areas = new List<IEnumerable<Point>>();
+            var potentialAreaPoints = GetPixels(_heightMap, color => color.G >= _minHeight && color.G <= _maxHeight)
+                .Select(p=>p.point)
+                .ToList();
+
+            while ( potentialAreaPoints.Count > 0 )
+            {
+                var area = await ApplyFloodFillAsync(
                     bitmap,
                     potentialAreaPoints.First(),
-                    potentialAreaPoints);
+                    color => color.G >=_minHeight && color.G<=_maxHeight);
+
+                potentialAreaPoints.RemoveAll(p => area.Contains(p));
+
+                areas.Add(area);
             }
 
-            return (_areaPoints.Select(p => new Field(p.Key)), bitmap);
+            var selectedArea = areas.OrderByDescending(a => a.Count()).First().ToList();//TODO
+           
+            selectedArea.ForEach(p =>
+                bitmap.SetPixel(p.X, p.Y,
+                    Color.Red));
+
+            waterAreas.ForEach(w=>w.ToList().ForEach(p => bitmap.SetPixel(p.X, p.Y,
+                Color.Blue)));
+
+            return (selectedArea.Select(p => new Field(p)), bitmap);
         }
 
-        private List<Point> GetPotentialAreaPoints()
+        private IEnumerable<(Point point, Color pixel)> GetPixels(Bitmap bitmap, Func<Color, bool> func, int offset=10)
         {
-            int offsetWidth = 10;
-            int offsetHeight = 10;
-            var potentialArePoints = new List<Point>();
-            for (int y = offsetHeight; y < _heightMap.Height - offsetHeight; y++)
+            var fastBitmap=new FastBitmap(bitmap);
+            fastBitmap.Lock();
+            var pixels = new List<(Point,Color)>();
+            for (int y = offset; y < bitmap.Height - offset; y++)
             {
-                for (int x = offsetWidth; x < _heightMap.Width - offsetWidth; x++)
+                for (int x = offset; x < bitmap.Width - offset; x++)
                 {
-                    var pixel = _heightMap.GetPixel(x, y);
-                    byte intensity = pixel.G;
-                    if (intensity >= _minHeight && intensity <= _maxHeight)
-                        potentialArePoints.Add(new Point(x, y));
+                    var pixel = fastBitmap.GetPixel(x, y);
+                    if (func(pixel))
+                        pixels.Add((new Point(x, y),pixel));
                 }
             }
-
-            return potentialArePoints;
+            fastBitmap.Unlock();
+            return pixels;
         }
 
-        private async Task<Bitmap> ApplyFloodFillAsync(
+        private async Task<IEnumerable<Point>> ApplyFloodFillAsync(
             Bitmap bitmap,
             Point startPoint,
-            List<Point> potentialAreaPoints)
+            Func<Color, bool> boundaryFunc)
         {
             var fastBitmap = new FastBitmap(bitmap);
             return await Task.Run(delegate
             {
                 Stack<Point> pixels = new Stack<Point>();
-                fastBitmap.Lock();
-                fastBitmap.Unlock();
                 pixels.Push(startPoint);
                 var marked = new Dictionary<Point, byte>();
                 while (pixels.Count > 0)
                 {
                     Point a = pixels.Pop();
-                    if (a.X < fastBitmap.Width && a.X > -1 && a.Y < fastBitmap.Height && a.Y > -1)
+                    if (a.X < bitmap.Width && a.X > -1 && a.Y < bitmap.Height && a.Y > -1)
                     {
                         fastBitmap.Lock();
-                        var pixelColor = fastBitmap.GetPixel(a.X, a.Y);
-                        byte intensity = pixelColor.G;
-                        //when pixel intensity is significantly different that target intensity, set this pixel to black
-                        if (intensity >= _minHeight && intensity <= _maxHeight && !marked.ContainsKey(a))
+                        var pixel = fastBitmap.GetPixel(a.X, a.Y);
+                        //when pixel intensity is different that target intensity, set this pixel to black
+                        if (boundaryFunc(pixel) && !marked.ContainsKey(a))
                         {
-                            fastBitmap.SetPixel(a.X, a.Y, Color.FromArgb(255, 0, 0));
-                            marked.Add(a, intensity);
+                            marked.Add(a, pixel.G);
                             pixels.Push(new Point(a.X - 1, a.Y));
                             pixels.Push(new Point(a.X + 1, a.Y));
                             pixels.Push(new Point(a.X, a.Y - 1));
@@ -105,26 +143,19 @@ namespace SettlementSimulation.AreaGenerator
                     }
                 }
 
-                potentialAreaPoints.RemoveAll(p => marked.ContainsKey(p));
-                //remove pixels that are contained in area from potential area pixels
-
                 fastBitmap.Lock();
-                ////when marked size is less than previous picked area we change its color back
-                if (marked.Count < _areaPoints.Count)
-                    marked.ToList().ForEach(p =>
-                        fastBitmap.SetPixel(p.Key.X, p.Key.Y,
-                            Color.FromArgb(p.Value, p.Value, p.Value)));
-                else
-                {
-                    _areaPoints.ToList().ForEach(p =>
-                        fastBitmap.SetPixel(p.Key.X, p.Key.Y,
-                            Color.FromArgb(p.Value, p.Value, p.Value)));
-                    _areaPoints.Clear();
-                    _areaPoints = marked;
-                }
+                marked.ToList().ForEach(p =>
+                    fastBitmap.SetPixel(p.Key.X, p.Key.Y,
+                        Color.FromArgb(p.Value, p.Value, p.Value)));
                 fastBitmap.Unlock();
-                return bitmap;
+
+                return marked.Keys;
             });
+        }
+
+        private int GetIntensity(Color color)
+        {
+            return color.R + color.G + color.B;
         }
     }
 }

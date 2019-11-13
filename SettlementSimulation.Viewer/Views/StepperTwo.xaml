@@ -62,7 +62,12 @@
                 <Slider Value="{Binding ColorMapOpacity,Mode=TwoWay}" Width="450" VerticalAlignment="Center" 
                         Minimum="0" Maximum="1" TickFrequency="0.05"/>
             </StackPanel>
-            
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseWheel">
+                    <command:EventToCommand PassEventArgsToCommand="True" Command="{Binding ChangeColorMapOpacityCommand}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
         </Grid>
         <StackPanel Margin="5" VerticalAlignment="Stretch" Grid.Column="1">
             <StackPanel>

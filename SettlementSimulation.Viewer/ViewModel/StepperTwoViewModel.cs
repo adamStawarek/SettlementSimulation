@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using Color = System.Drawing.Color;
 
 namespace SettlementSimulation.Viewer.ViewModel
@@ -119,6 +120,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         public RelayCommand FindAreaCommand { get; }
         public RelayCommand<object> OpenPopupCommand { get; }
         public RelayCommand ResetCommand { get; }
+        public RelayCommand<object> ChangeColorMapOpacityCommand { get; set; }
         #endregion
 
         public StepperTwoViewModel()
@@ -127,8 +129,8 @@ namespace SettlementSimulation.Viewer.ViewModel
             Messenger.Default.Register<SetColorMapCommand>(this, this.SetColorMap);
 
             _colorMapOpacity = 0.9;
-            _minHeight = 0;
-            _maxHeight = 70;
+            _minHeight = 100;
+            _maxHeight = 150;
             _spinnerVisibility = Visibility.Hidden;
 
             HistogramValues = new SeriesCollection
@@ -139,6 +141,14 @@ namespace SettlementSimulation.Viewer.ViewModel
             FindAreaCommand = new RelayCommand(FindPotentialArea);
             OpenPopupCommand = new RelayCommand<object>(SetCurrentPixelValuesToRgbBox);
             ResetCommand=new RelayCommand(Reset);
+            ChangeColorMapOpacityCommand=new RelayCommand<object>(ChangeColorMapOpacity);
+        }
+
+        private void ChangeColorMapOpacity(object obj)
+        {
+            var args = obj as MouseWheelEventArgs;
+            ColorMapOpacity += args.Delta < 0 ? -0.05 : 0.05;
+            SetCurrentPixelValuesToRgbBox(obj);
         }
 
         private void Reset()
@@ -208,19 +218,12 @@ namespace SettlementSimulation.Viewer.ViewModel
             CanContinue = true;
         }
 
-        #region helper functions
         private void SetCurrentPixelValuesToRgbBox(object obj)
         {
             var color = ColorUnderCursor.Get();
             POINT p;
             ColorUnderCursor.GetCursorPos(out p);
-            RgbVal = $"Intensity: {GetGreyscale(color)}";
+            RgbVal = $"rgb({color.R},{color.G},{color.B})";
         }
-
-        private byte GetGreyscale(Color color)
-        {
-            return (byte)((color.R + color.B + color.G) / 3);
-        }
-        #endregion
     }
 }
