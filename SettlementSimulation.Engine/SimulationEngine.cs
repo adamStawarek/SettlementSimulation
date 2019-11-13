@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SettlementSimulation.Engine.Models;
+﻿using SettlementSimulation.Engine.Models;
+using System.Collections.Generic;
 using static SettlementSimulation.Engine.ReflectionHelper;
 
 namespace SettlementSimulation.Engine
@@ -12,7 +12,7 @@ namespace SettlementSimulation.Engine
         public SimulationEngine(int populationSize, int dnaSize, float mutationRate = 0.01F) : base(populationSize,
             dnaSize, mutationRate)
         {
-            _allEpochs=new Stack<Epoch>();
+            _allEpochs = new Stack<Epoch>();
             _allEpochs.Push(Epoch.Third);
             _allEpochs.Push(Epoch.Second);
             _allEpochs.Push(Epoch.First);
@@ -31,23 +31,23 @@ namespace SettlementSimulation.Engine
             switch (_currentEpoch)
             {
                 case Epoch.First:
-                {
-                    buildings.AddRange(GetAllObjectsByType<FirstTypeBuilding>());
-                    break;
-                }
+                    {
+                        buildings.AddRange(GetAllObjectsByType<FirstTypeBuilding>());
+                        break;
+                    }
                 case Epoch.Second:
-                {
-                    buildings.AddRange(GetAllObjectsByType<FirstTypeBuilding>());
-                    buildings.AddRange(GetAllObjectsByType<SecondTypeBuilding>());
-                    break;
-                }
+                    {
+                        buildings.AddRange(GetAllObjectsByType<FirstTypeBuilding>());
+                        buildings.AddRange(GetAllObjectsByType<SecondTypeBuilding>());
+                        break;
+                    }
                 case Epoch.Third:
-                {
-                    buildings.AddRange(GetAllObjectsByType<FirstTypeBuilding>());
-                    buildings.AddRange(GetAllObjectsByType<SecondTypeBuilding>());
-                    buildings.AddRange(GetAllObjectsByType<ThirdTypeBuilding>());
-                    break;
-                }
+                    {
+                        buildings.AddRange(GetAllObjectsByType<FirstTypeBuilding>());
+                        buildings.AddRange(GetAllObjectsByType<SecondTypeBuilding>());
+                        buildings.AddRange(GetAllObjectsByType<ThirdTypeBuilding>());
+                        break;
+                    }
             }
 
             var diceRoll = RandomProvider.NextDouble();

@@ -1,12 +1,12 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using SettlementSimulation.Engine;
+using SettlementSimulation.Engine.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
-using SettlementSimulation.Engine;
-using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {

@@ -11,7 +11,7 @@ namespace SettlementSimulation.Engine
         {
             var result = Assembly.GetAssembly(typeof(SimulationEngine)).GetTypes()
                 .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(T)))
-                .Select(t => (T) Activator.CreateInstance(t));
+                .Select(t => (T)Activator.CreateInstance(t));
             return result;
         }
     }

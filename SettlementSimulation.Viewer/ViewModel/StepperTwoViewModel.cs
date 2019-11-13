@@ -7,12 +7,10 @@ using SettlementSimulation.AreaGenerator;
 using SettlementSimulation.Viewer.Commands;
 using SettlementSimulation.Viewer.ViewModel.Helpers;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Color = System.Drawing.Color;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -110,7 +108,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             get => _colorMapOpacity;
             set
             {
-                _colorMapOpacity = value; 
+                _colorMapOpacity = value;
                 RaisePropertyChanged();
             }
         }
@@ -140,8 +138,8 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             FindAreaCommand = new RelayCommand(FindPotentialArea);
             OpenPopupCommand = new RelayCommand<object>(SetCurrentPixelValuesToRgbBox);
-            ResetCommand=new RelayCommand(Reset);
-            ChangeColorMapOpacityCommand=new RelayCommand<object>(ChangeColorMapOpacity);
+            ResetCommand = new RelayCommand(Reset);
+            ChangeColorMapOpacityCommand = new RelayCommand<object>(ChangeColorMapOpacity);
         }
 
         private void ChangeColorMapOpacity(object obj)
@@ -153,7 +151,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         private void Reset()
         {
-            this.HeightMap=new Bitmap(_originalHeightMap);
+            this.HeightMap = new Bitmap(_originalHeightMap);
             RaisePropertyChanged(nameof(HeightMap));
         }
 
