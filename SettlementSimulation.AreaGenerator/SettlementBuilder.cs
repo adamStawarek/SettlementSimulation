@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using static SettlementSimulation.AreaGenerator.BuilderHelper;
 
 namespace SettlementSimulation.AreaGenerator
 {
@@ -76,40 +77,57 @@ namespace SettlementSimulation.AreaGenerator
                 potentialAreaPoints.RemoveAll(p => area.Contains(p));
                 areas.Add(area);
             }
-            var maxSettlementArea = areas.Max(w => w.Count());
-            areas.RemoveAll(w => w.Count() < 0.75 * maxSettlementArea);
+
+            var selectedArea = areas.OrderByDescending(a => a.Count()).First().ToList();
             #endregion
 
-            #region find selected area
-            var centerPoints = waterAreas
-                    .Select(w => new Point((int)w.Average(w2 => w2.X), (int)w.Average(w2 => w2.Y)));
-
-            IEnumerable<Point> selectedArea = null;
-            var minDistance = double.MaxValue;
-            foreach (var area in areas)
+            var builderHelper = new BuilderHelper();
+            var waterMatrix = new int[colorMap.Height, colorMap.Width];
+            foreach (var point in waterAreas.SelectMany(w=>w))
             {
-                foreach (var centerPoint in centerPoints)
-                {
-                    var point = new Point((int)area.Average(w2 => w2.X), (int)area.Average(w2 => w2.Y));
-                    if (minDistance > point.DistanceTo(centerPoint))
-                    {
-                        minDistance = point.DistanceTo(centerPoint);
-                        selectedArea = area;
-                    }
-                }
+                waterMatrix[point.Y, point.X] = 1;
             }
-            #endregion
+
+            var boundaryPoints = builderHelper.GetBoundaryPoints(waterMatrix).OrderBy(p=>p.X).ThenBy(p=>p.Y).ToList();
+            var nStep = boundaryPoints.Count() / (15*waterAreas.Count);
+            var waterAreaBoundaryPoints = boundaryPoints.Where((x, i) => i % nStep == 0).ToList();
+
+            var fields = selectedArea.Select(a => new Field(a)
+            {
+                DistanceToWater = waterAreaBoundaryPoints.Min(w => builderHelper.DistanceTo(w, a))
+            }).OrderBy(f=>f.DistanceToWater).ToList();
 
             #region mark settlement area and water aquens on bitmap
-            selectedArea.ToList().ForEach(p =>
-                   heightMap.SetPixel(p.X, p.Y,
-                       Color.Red));
+            fields.Take((int) (fields.Count*0.2)).ToList().ForEach(p =>
+                heightMap.SetPixel(p.X, p.Y,
+                    Color.FromArgb(255,0,0)));
+            fields.Skip((int)(fields.Count * 0.2)).Take((int)(fields.Count * 0.3)).ToList().ForEach(p =>
+                heightMap.SetPixel(p.X, p.Y,
+                    Color.FromArgb(200, 0, 0)));
+            fields.Skip((int)(fields.Count * 0.5)).ToList().ForEach(p =>
+                heightMap.SetPixel(p.X, p.Y,
+                    Color.FromArgb(150, 0, 0)));
 
             waterAreas.ForEach(w => w.ToList().ForEach(p => heightMap.SetPixel(p.X, p.Y,
-                  Color.Blue)));
+                Color.Blue)));  
+            
+            waterAreaBoundaryPoints.ForEach(p =>
+                {
+                    for (int i = -5; i < 5; i++)
+                    {
+                        for (int j = -5; j < 5; j++)
+                        {
+                            heightMap.SetPixel(p.X + i, p.Y + j,
+                                Color.FromArgb(0, 255, 0));
+                        }
+
+                    }
+                }
+            );
             #endregion
 
-            return (selectedArea.Select(p => new Field(p)), heightMap);
+
+            return (fields, heightMap);
         }
 
         private IEnumerable<Point> GetPixels(Bitmap bitmap, Func<Color, bool> func, int offset = 10)
