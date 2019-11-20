@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace SettlementSimulation.Engine
+namespace SettlementSimulation.Engine.Helpers
 {
     public static class ReflectionHelper
     {

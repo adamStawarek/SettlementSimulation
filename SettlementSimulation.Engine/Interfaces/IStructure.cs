@@ -1,4 +1,4 @@
-﻿namespace SettlementSimulation.Engine.Models
+﻿namespace SettlementSimulation.Engine.Interfaces
 {
     public interface IStructure
     {

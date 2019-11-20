@@ -1,8 +1,29 @@
-﻿namespace SettlementSimulation.Engine.Models
+﻿using System;
+
+namespace SettlementSimulation.Engine.Models
 {
     public class Location
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public Location(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+        private int X { get; }
+        private int Y { get; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Location l)
+            {
+                return l.X == X && l.Y == Y;
+            }
+            return false;
+        }
+
+        public double DistanceTo(Location other)
+        {
+            return Math.Sqrt(Math.Pow(X - other.X, 2) + Math.Pow(Y - other.Y, 2));
+        }
     }
 }

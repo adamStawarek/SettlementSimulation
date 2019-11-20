@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace SettlementSimulation.AreaGenerator
 {
@@ -26,13 +25,13 @@ namespace SettlementSimulation.AreaGenerator
 
         public IEnumerable<Point> GetBoundaryPoints(int[,] points)
         {
-            var boundaryPoints=new List<Point>();
+            var boundaryPoints = new List<Point>();
             for (int i = 0; i < points.GetLength(0); i++)
             {
                 for (int j = 0; j < points.GetLength(1); j++)
                 {
                     if (points[i, j] != 1) continue;
-                    if (i==0||j==0||i==points.GetLength(0)-1||j==points.GetLength(1)-1||
+                    if (i == 0 || j == 0 || i == points.GetLength(0) - 1 || j == points.GetLength(1) - 1 ||
                         !(points[i - 1, j - 1] == 1 &&
                         points[i - 1, j] == 1 &&
                         points[i - 1, j + 1] == 1 &&
@@ -42,7 +41,7 @@ namespace SettlementSimulation.AreaGenerator
                         points[i + 1, j] == 1 &&
                         points[i + 1, j + 1] == 1))
                     {
-                        boundaryPoints.Add(new Point(j,i));
+                        boundaryPoints.Add(new Point(j, i));
                     }
                 }
             }

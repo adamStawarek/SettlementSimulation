@@ -3,11 +3,11 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using SettlementSimulation.Viewer.Commands;
+using SettlementSimulation.Viewer.Helpers;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using SettlementSimulation.Viewer.Helpers;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -52,7 +52,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                 _mapDirectory = value;
                 if (!string.IsNullOrEmpty(_mapDirectory))
                 {
-                    ConfigurationManagerHelper.SetSettings("MapDirectory",_mapDirectory);
+                    ConfigurationManagerHelper.SetSettings("MapDirectory", _mapDirectory);
                 }
                 RaisePropertyChanged();
             }
@@ -84,7 +84,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             Maps = new List<Bitmap>();
 
             var mapDirectory = ConfigurationManagerHelper.GetSettings("MapDirectory");
-            if(!string.IsNullOrEmpty(mapDirectory))
+            if (!string.IsNullOrEmpty(mapDirectory))
                 SetHeightMaps(mapDirectory);
         }
 

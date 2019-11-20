@@ -1,4 +1,3 @@
-using System;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -6,13 +5,13 @@ using LiveCharts;
 using LiveCharts.Wpf;
 using SettlementSimulation.AreaGenerator;
 using SettlementSimulation.Viewer.Commands;
+using SettlementSimulation.Viewer.Helpers;
 using SettlementSimulation.Viewer.ViewModel.Helpers;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using SettlementSimulation.Viewer.Helpers;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {

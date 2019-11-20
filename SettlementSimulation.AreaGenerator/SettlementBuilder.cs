@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using static SettlementSimulation.AreaGenerator.BuilderHelper;
 
 namespace SettlementSimulation.AreaGenerator
 {
@@ -83,24 +82,24 @@ namespace SettlementSimulation.AreaGenerator
 
             var builderHelper = new BuilderHelper();
             var waterMatrix = new int[colorMap.Height, colorMap.Width];
-            foreach (var point in waterAreas.SelectMany(w=>w))
+            foreach (var point in waterAreas.SelectMany(w => w))
             {
                 waterMatrix[point.Y, point.X] = 1;
             }
 
-            var boundaryPoints = builderHelper.GetBoundaryPoints(waterMatrix).OrderBy(p=>p.X).ThenBy(p=>p.Y).ToList();
-            var nStep = boundaryPoints.Count() / (15*waterAreas.Count);
+            var boundaryPoints = builderHelper.GetBoundaryPoints(waterMatrix).OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
+            var nStep = boundaryPoints.Count() / (15 * waterAreas.Count);
             var waterAreaBoundaryPoints = boundaryPoints.Where((x, i) => i % nStep == 0).ToList();
 
             var fields = selectedArea.Select(a => new Field(a)
             {
                 DistanceToWater = waterAreaBoundaryPoints.Min(w => builderHelper.DistanceTo(w, a))
-            }).OrderBy(f=>f.DistanceToWater).ToList();
+            }).OrderBy(f => f.DistanceToWater).ToList();
 
             #region mark settlement area and water aquens on bitmap
-            fields.Take((int) (fields.Count*0.2)).ToList().ForEach(p =>
-                heightMap.SetPixel(p.X, p.Y,
-                    Color.FromArgb(255,0,0)));
+            fields.Take((int)(fields.Count * 0.2)).ToList().ForEach(p =>
+                 heightMap.SetPixel(p.X, p.Y,
+                     Color.FromArgb(255, 0, 0)));
             fields.Skip((int)(fields.Count * 0.2)).Take((int)(fields.Count * 0.3)).ToList().ForEach(p =>
                 heightMap.SetPixel(p.X, p.Y,
                     Color.FromArgb(200, 0, 0)));
@@ -109,8 +108,8 @@ namespace SettlementSimulation.AreaGenerator
                     Color.FromArgb(150, 0, 0)));
 
             waterAreas.ForEach(w => w.ToList().ForEach(p => heightMap.SetPixel(p.X, p.Y,
-                Color.Blue)));  
-            
+                Color.Blue)));
+
             waterAreaBoundaryPoints.ForEach(p =>
                 {
                     for (int i = -5; i < 5; i++)

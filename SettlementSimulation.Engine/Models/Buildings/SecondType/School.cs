@@ -1,4 +1,4 @@
-﻿namespace SettlementSimulation.Engine.Models
+﻿namespace SettlementSimulation.Engine.Models.Buildings.SecondType
 {
     public class School : SecondTypeBuilding
     {

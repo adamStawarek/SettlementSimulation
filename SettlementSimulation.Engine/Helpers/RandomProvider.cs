@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SettlementSimulation.Engine
+namespace SettlementSimulation.Engine.Helpers
 {
     public static class RandomProvider
     {

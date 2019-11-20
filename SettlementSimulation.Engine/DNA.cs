@@ -1,12 +1,12 @@
 ﻿using System;
-using rnd = SettlementSimulation.Engine.RandomProvider;
+using rnd = SettlementSimulation.Engine.Helpers.RandomProvider;
 
 namespace SettlementSimulation.Engine
 {
     public class Dna<T>
     {
-        public T[] Genes { get; }
-        public float Fitness { get; set; }
+        public T[] Genes { get; set; }
+        public float Fitness { get; private set; }
         private readonly Func<T> _getRandomGene;
         private readonly Func<int, float> _fitnessFunction;
 

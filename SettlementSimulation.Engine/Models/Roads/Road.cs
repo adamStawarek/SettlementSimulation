@@ -1,4 +1,6 @@
-﻿namespace SettlementSimulation.Engine.Models
+﻿using SettlementSimulation.Engine.Interfaces;
+
+namespace SettlementSimulation.Engine.Models.Roads
 {
     public abstract class Road : IStructure
     {
