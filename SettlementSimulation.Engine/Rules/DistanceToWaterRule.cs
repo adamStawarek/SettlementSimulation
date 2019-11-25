@@ -1,8 +1,8 @@
-﻿using SettlementSimulation.Engine.Models;
+﻿using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using System.Collections.Generic;
 using System.Linq;
-using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Rules
 {
@@ -28,7 +28,7 @@ namespace SettlementSimulation.Engine.Rules
                         var residencesLocations = genes.Where(g => g is Residence).Cast<Residence>().Select(r => r.Location).ToList();
                         var fields = settlementFields.Where(f => residencesLocations.Contains(f.Location)).ToList();
                         var closestToWater = fields.OrderByDescending(f => f.DistanceToWater).Take((100));
-                        return closestToWater.Average(f => f.DistanceToWater) < _maxDistanceToWater;
+                        return closestToWater.Average(f => f.DistanceToWater) <= _maxDistanceToWater;
                     }
                 case Epoch.Second:
                     {

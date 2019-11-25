@@ -1,8 +1,8 @@
-﻿using SettlementSimulation.Engine.Models;
+﻿using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using System.Collections.Generic;
 using System.Linq;
-using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Rules
 {

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SettlementSimulation.Engine.Models;
+﻿using SettlementSimulation.Engine.Models;
+using System.Collections.Generic;
 
 namespace SettlementSimulation.Engine.Interfaces
 {

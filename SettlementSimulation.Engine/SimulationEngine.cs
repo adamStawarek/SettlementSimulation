@@ -1,10 +1,10 @@
-﻿using SettlementSimulation.Engine.Models;
+﻿using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using SettlementSimulation.Engine.Rules;
 using System.Collections.Generic;
 using System.Linq;
-using SettlementSimulation.Engine.Interfaces;
 using static SettlementSimulation.Engine.Helpers.ReflectionHelper;
 using rnd = SettlementSimulation.Engine.Helpers.RandomProvider;
 
