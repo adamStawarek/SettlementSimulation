@@ -206,12 +206,12 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             SpinnerVisibility = Visibility.Visible;
             HeightMap = new Bitmap(_originalHeightMap);
-            var (points, bitmap) = await new SettlementBuilder()
+            var settlementInfo = await new SettlementBuilder()
                 .WithColorMap(_colorMap)
                 .WithHeightMap(_heightMap)
                 .WithHeightRange(_minHeight, _maxHeight)
                 .BuildAsync();
-            _heightMap = new Bitmap(bitmap);
+            _heightMap = new Bitmap(settlementInfo.PreviewBitmap);
             RaisePropertyChanged(nameof(HeightMap));
             SpinnerVisibility = Visibility.Hidden;
             CanContinue = true;

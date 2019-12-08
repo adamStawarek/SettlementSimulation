@@ -51,53 +51,53 @@ namespace SettlementSimulation.Engine.Tests.Unit
             });
             _engine.Population[0].Genes = new IStructure[]
             {
-                new EmptyArea() {Location = new Location(0, 0)},
-                new EmptyArea() {Location = new Location(1, 0)},
-                new EmptyArea() {Location = new Location(2, 0)},
-                new EmptyArea() {Location = new Location(3, 0)},
-                new EmptyArea() {Location = new Location(0, 1)},
-                new EmptyArea() {Location = new Location(1, 1)},
-                new EmptyArea() {Location = new Location(2, 1)},
-                new EmptyArea() {Location = new Location(3, 1)},
-                new EmptyArea() {Location = new Location(0, 2)},
-                new EmptyArea() {Location = new Location(1, 2)}
+                new Tavern() {Location = new Location(0, 0)},
+                new Tavern() {Location = new Location(1, 0)},
+                new Tavern() {Location = new Location(2, 0)},
+                new Tavern() {Location = new Location(3, 0)},
+                new Tavern() {Location = new Location(0, 1)},
+                new Tavern() {Location = new Location(1, 1)},
+                new Tavern() {Location = new Location(2, 1)},
+                new Tavern() {Location = new Location(3, 1)},
+                new Tavern() {Location = new Location(0, 2)},
+                new Tavern() {Location = new Location(1, 2)}
             };
             _engine.Population[1].Genes = new IStructure[]
             {
                 new Residence() {Location = new Location(0, 0)},
-                new EmptyArea() {Location = new Location(1, 0)},
-                new EmptyArea() {Location = new Location(2, 0)},
-                new EmptyArea() {Location = new Location(3, 0)},
-                new EmptyArea() {Location = new Location(0, 1)},
-                new EmptyArea() {Location = new Location(1, 1)},
-                new EmptyArea() {Location = new Location(2, 1)},
-                new EmptyArea() {Location = new Location(3, 1)},
-                new EmptyArea() {Location = new Location(0, 2)},
+                new Tavern() {Location = new Location(1, 0)},
+                new Tavern() {Location = new Location(2, 0)},
+                new Tavern() {Location = new Location(3, 0)},
+                new Tavern() {Location = new Location(0, 1)},
+                new Tavern() {Location = new Location(1, 1)},
+                new Tavern() {Location = new Location(2, 1)},
+                new Tavern() {Location = new Location(3, 1)},
+                new Tavern() {Location = new Location(0, 2)},
                 new Residence() {Location = new Location(0, 4)}
             };
             _engine.Population[2].Genes = new IStructure[]
             {
                 new Residence() {Location = new Location(0, 0)},
-                new EmptyArea() {Location = new Location(1, 0)},
-                new EmptyArea() {Location = new Location(2, 0)},
+                new Tavern() {Location = new Location(1, 0)},
+                new Tavern() {Location = new Location(2, 0)},
                 new Residence() {Location = new Location(3, 0)},
-                new EmptyArea() {Location = new Location(0, 1)},
-                new EmptyArea() {Location = new Location(1, 1)},
-                new EmptyArea() {Location = new Location(2, 1)},
-                new EmptyArea() {Location = new Location(3, 1)},
-                new EmptyArea() {Location = new Location(0, 2)},
-                new EmptyArea() {Location = new Location(0, 4)}
+                new Tavern() {Location = new Location(0, 1)},
+                new Tavern() {Location = new Location(1, 1)},
+                new Tavern() {Location = new Location(2, 1)},
+                new Tavern() {Location = new Location(3, 1)},
+                new Tavern() {Location = new Location(0, 2)},
+                new Tavern() {Location = new Location(0, 4)}
             };
             _engine.Population[3].Genes = new IStructure[]
             {
-                new EmptyArea() {Location = new Location(0, 0)},
-                new EmptyArea() {Location = new Location(1, 0)},
-                new EmptyArea() {Location = new Location(2, 0)},
-                new EmptyArea() {Location = new Location(3, 0)},
-                new EmptyArea() {Location = new Location(0, 1)},
-                new EmptyArea() {Location = new Location(1, 1)},
-                new EmptyArea() {Location = new Location(2, 1)},
-                new EmptyArea() {Location = new Location(3, 1)},
+                new Tavern() {Location = new Location(0, 0)},
+                new Tavern() {Location = new Location(1, 0)},
+                new Tavern() {Location = new Location(2, 0)},
+                new Tavern() {Location = new Location(3, 0)},
+                new Tavern() {Location = new Location(0, 1)},
+                new Tavern() {Location = new Location(1, 1)},
+                new Tavern() {Location = new Location(2, 1)},
+                new Tavern() {Location = new Location(3, 1)},
                 new Residence() {Location = new Location(0, 4)},
                 new Residence() {Location = new Location(1, 4)}
             };
@@ -105,14 +105,14 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 new Residence() {Location = new Location(0, 0)},
                 new Residence() {Location = new Location(1, 0)},
-                new EmptyArea() {Location = new Location(2, 0)},
-                new EmptyArea() {Location = new Location(3, 0)},
-                new EmptyArea() {Location = new Location(0, 1)},
-                new EmptyArea() {Location = new Location(1, 1)},
-                new EmptyArea() {Location = new Location(2, 1)},
-                new EmptyArea() {Location = new Location(3, 1)},
-                new EmptyArea() {Location = new Location(0, 2)},
-                new EmptyArea() {Location = new Location(0, 4)}
+                new Tavern() {Location = new Location(2, 0)},
+                new Tavern() {Location = new Location(3, 0)},
+                new Tavern() {Location = new Location(0, 1)},
+                new Tavern() {Location = new Location(1, 1)},
+                new Tavern() {Location = new Location(2, 1)},
+                new Tavern() {Location = new Location(3, 1)},
+                new Tavern() {Location = new Location(0, 2)},
+                new Tavern() {Location = new Location(0, 4)}
             };
         }
 

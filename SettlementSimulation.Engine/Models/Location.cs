@@ -9,8 +9,8 @@ namespace SettlementSimulation.Engine.Models
             X = x;
             Y = y;
         }
-        private int X { get; }
-        private int Y { get; }
+        public int X { get; }
+        public int Y { get; }
 
         public override bool Equals(object obj)
         {

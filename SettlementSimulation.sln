@@ -7,11 +7,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettlementSimulation.Engine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettlementSimulation.Engine.Tests.Unit", "SettlementSimulation.Engine.Tests.Unit\SettlementSimulation.Engine.Tests.Unit.csproj", "{34EAE9CF-5D3E-4BAF-84DE-0F4DF7559701}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettlementSimulation.Viewer", "SettlementSimulation.Viewer\SettlementSimulation.Viewer.csproj", "{0B37D87E-31BF-413C-9183-5DF77AD18D7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettlementSimulation.Viewer", "SettlementSimulation.Viewer\SettlementSimulation.Viewer.csproj", "{0B37D87E-31BF-413C-9183-5DF77AD18D7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettlementSimulation.AreaGenerator", "SettlementSimulation.AreaGenerator\SettlementSimulation.AreaGenerator.csproj", "{56DE249B-7BC9-4ED8-95D3-A71088B6E8A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettlementSimulation.AreaGenerator", "SettlementSimulation.AreaGenerator\SettlementSimulation.AreaGenerator.csproj", "{56DE249B-7BC9-4ED8-95D3-A71088B6E8A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettlementSimulation.AreaGenerator.Tests.Unit", "SettlementSimulation.AreaGenerator.Tests.Unit\SettlementSimulation.AreaGenerator.Tests.Unit.csproj", "{379A736F-C19B-4A49-A7EB-6478E605C5A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettlementSimulation.AreaGenerator.Tests.Unit", "SettlementSimulation.AreaGenerator.Tests.Unit\SettlementSimulation.AreaGenerator.Tests.Unit.csproj", "{379A736F-C19B-4A49-A7EB-6478E605C5A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1E144E7-A510-4A3B-9301-1D626D7A850C}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Desktop\SS.Data\colourmap.png = ..\..\..\Desktop\SS.Data\colourmap.png
+		..\..\..\Desktop\SS.Data\heightmap.png = ..\..\..\Desktop\SS.Data\heightmap.png
+		Readme.md = Readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,12 @@
+﻿using System.Collections.Generic;
+using System.Drawing;
+
+namespace SettlementSimulation.AreaGenerator.Models
+{
+    public class SettlementInfo
+    {
+        public Field[,] Fields { get; set; }
+        public List<Point> MainRoad { get; set; }
+        public Bitmap PreviewBitmap { get; set; }
+    }
+}

@@ -2,6 +2,6 @@
 {
     public class Residence : FirstTypeBuilding
     {
-        public override double Probability => 0.4;
+        public override double Probability => 0.8;
     }
 }

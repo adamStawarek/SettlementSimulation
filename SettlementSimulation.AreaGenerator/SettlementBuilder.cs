@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using RoyT.AStar;
 
 namespace SettlementSimulation.AreaGenerator
 {
@@ -34,7 +35,7 @@ namespace SettlementSimulation.AreaGenerator
             return this;
         }
 
-        public async Task<(IEnumerable<Field>, Bitmap)> BuildAsync()
+        public async Task<SettlementInfo> BuildAsync()
         {
             #region find water aquens
             var colorMap = new Bitmap(_colorMap);
@@ -60,16 +61,16 @@ namespace SettlementSimulation.AreaGenerator
             #endregion
 
             #region find settlement areas
-            var heightMap = new Bitmap(_heightMap);
+            var previewBitmap = new Bitmap(_heightMap);
             var settlementAreaBoundaryFunc = new Func<Color, bool>(color => color.G >= _minHeight && color.G <= _maxHeight);
             var areas = new List<IEnumerable<Point>>();
-            var potentialAreaPoints = GetPixels(heightMap, settlementAreaBoundaryFunc)
+            var potentialAreaPoints = GetPixels(previewBitmap, settlementAreaBoundaryFunc)
                 .ToList();
 
             while (potentialAreaPoints.Count > 0)
             {
                 var area = await ApplyFloodFillAsync(
-                    heightMap,
+                    previewBitmap,
                     potentialAreaPoints.First(),
                     settlementAreaBoundaryFunc);
 
@@ -91,42 +92,84 @@ namespace SettlementSimulation.AreaGenerator
             var nStep = boundaryPoints.Count() / (15 * waterAreas.Count);
             var waterAreaBoundaryPoints = boundaryPoints.Where((x, i) => i % nStep == 0).ToList();
 
-            var fields = selectedArea.Select(a => new Field(a)
+            var fields = selectedArea.Select(a => new
             {
+                Point = a,
                 DistanceToWater = waterAreaBoundaryPoints.Min(w => builderHelper.DistanceTo(w, a))
             }).OrderBy(f => f.DistanceToWater).ToList();
 
             #region mark settlement area and water aquens on bitmap
-            fields.Take((int)(fields.Count * 0.2)).ToList().ForEach(p =>
-                 heightMap.SetPixel(p.X, p.Y,
-                     Color.FromArgb(255, 0, 0)));
-            fields.Skip((int)(fields.Count * 0.2)).Take((int)(fields.Count * 0.3)).ToList().ForEach(p =>
-                heightMap.SetPixel(p.X, p.Y,
-                    Color.FromArgb(200, 0, 0)));
-            fields.Skip((int)(fields.Count * 0.5)).ToList().ForEach(p =>
-                heightMap.SetPixel(p.X, p.Y,
-                    Color.FromArgb(150, 0, 0)));
 
-            waterAreas.ForEach(w => w.ToList().ForEach(p => heightMap.SetPixel(p.X, p.Y,
-                Color.Blue)));
+            fields.Take((int) (fields.Count * 0.2)).ToList()
+                .ForEach(p => MarkPoint(p.Point, previewBitmap, Color.FromArgb(255, 0, 0), 1));
+            fields.Skip((int)(fields.Count * 0.2)).Take((int)(fields.Count * 0.3)).ToList()
+                .ForEach(p => MarkPoint(p.Point, previewBitmap, Color.FromArgb(200, 0, 0), 1));
+            fields.Skip((int)(fields.Count * 0.5)).ToList()
+                .ForEach(p => MarkPoint(p.Point, previewBitmap, Color.FromArgb(155, 0, 0), 1));
 
-            waterAreaBoundaryPoints.ForEach(p =>
+            waterAreas.ForEach(w => w.ToList().ForEach(p => MarkPoint(p,previewBitmap, Color.FromArgb(0,0,255),1)));
+
+            waterAreaBoundaryPoints.ForEach(p => { MarkPoint(p, previewBitmap, Color.FromArgb(0, 255, 0)); });
+
+            var fieldGrid = new Field[_heightMap.Width, _heightMap.Height];
+            for (int i = 0; i < _heightMap.Width; i++)
+            {
+                for (int j = 0; j < _heightMap.Height; j++)
                 {
-                    for (int i = -5; i < 5; i++)
-                    {
-                        for (int j = -5; j < 5; j++)
-                        {
-                            heightMap.SetPixel(p.X + i, p.Y + j,
-                                Color.FromArgb(0, 255, 0));
-                        }
-
-                    }
+                    fieldGrid[i, j] = new Field();
                 }
-            );
+            }
+            foreach (var field in fields)
+            {
+                fieldGrid[field.Point.X, field.Point.Y].InSettlement = true;
+                fieldGrid[field.Point.X, field.Point.Y].DistanceToWater = field.DistanceToWater;
+            }
+
+            var rand = new Random();
+            var verticalRoad = rand.NextDouble() >= 0.5;
+            var min = verticalRoad ? fields.Min(f => f.Point.Y) : fields.Min(f => f.Point.X);
+            var max = verticalRoad ? fields.Max(f => f.Point.Y) : fields.Max(f => f.Point.X);
+            var startFields = verticalRoad ? fields.Where(f => f.Point.Y == min).ToArray() : fields.Where(f => f.Point.X == min).ToArray();
+            var start = startFields[rand.Next(0, startFields.Count())];
+            var endFields = verticalRoad ? fields.Where(f => f.Point.Y == max).ToArray() : fields.Where(f => f.Point.X == max).ToArray();
+            var end = endFields[rand.Next(0, endFields.Count())];
+            var mainRoadPoints = (await FindMainRoad(fieldGrid, start.Point, end.Point)).ToList();
+            mainRoadPoints.ForEach(p => { MarkPoint(new Point(p.X, p.Y), previewBitmap, Color.FromArgb(0, 0, 0)); });
             #endregion
 
+            var mStep = mainRoadPoints.Count() / 15;
+            var selectedRoadPoints = mainRoadPoints.OrderBy(p=>p.X).ThenBy(p=>p.Y).Where((x, i) => i % mStep == 0).ToList();
+            foreach (var field in fields)
+            {
+                fieldGrid[field.Point.X, field.Point.Y].DistanceToWater =
+                    selectedRoadPoints.Min(p => builderHelper.DistanceTo(field.Point, p));
+            }
+            selectedRoadPoints.ForEach(p => { MarkPoint(p, previewBitmap, Color.Purple); });
+            var settlementInfo = new SettlementInfo()
+            {
 
-            return (fields, heightMap);
+                PreviewBitmap = previewBitmap,
+                MainRoad = mainRoadPoints,
+                Fields = fieldGrid
+
+            };
+            return settlementInfo;
+        }
+
+        private void MarkPoint(Point point, Bitmap bitmap, Color color, int offset = 5)
+        {
+            using (var fastBitmap = bitmap.FastLock())
+            {
+                for (int i = -offset; i < offset; i++)
+                {
+                    for (int j = -offset; j < offset; j++)
+                    {
+                        if (point.X + i < 0 || point.X + i >= bitmap.Width || point.Y + j < 0 || point.Y + j >= bitmap.Height)
+                            continue;
+                        fastBitmap.SetPixel(point.X + i, point.Y + j, color);
+                    }
+                } 
+            }
         }
 
         private IEnumerable<Point> GetPixels(Bitmap bitmap, Func<Color, bool> func, int offset = 10)
@@ -185,6 +228,26 @@ namespace SettlementSimulation.AreaGenerator
 
                 return marked.Keys;
             });
+        }
+
+        private async Task<IEnumerable<Point>> FindMainRoad(Field[,] fieldGrid, Point start, Point end)
+        {
+            var grid = new Grid(_heightMap.Width, _heightMap.Height, 1.0f);
+
+            for (int i = 0; i < _heightMap.Width; i++)
+            {
+                for (int j = 0; j < _heightMap.Height; j++)
+                {
+                    if (!fieldGrid[i, j].InSettlement)
+                    {
+                        grid.BlockCell(new Position(i, j));
+                    }
+                }
+            }
+
+            var positions = await Task.Run(() => grid.GetPath(new Position(start.X, start.Y), new Position(end.X, end.Y)));
+
+            return positions.Select(p => new Point(p.X, p.Y));
         }
     }
 }

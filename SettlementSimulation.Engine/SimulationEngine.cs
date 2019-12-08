@@ -16,7 +16,7 @@ namespace SettlementSimulation.Engine
         private float _fitnessSum;
         private Epoch _currentEpoch;
         private readonly Stack<Epoch> _allEpochs;
-        private IEnumerable<Field> _bitmapFields;
+        private readonly IEnumerable<Field> _bitmapFields;
         #endregion
 
         #region properties
@@ -97,7 +97,7 @@ namespace SettlementSimulation.Engine
                 }
             }
 
-            return new EmptyArea();
+            return new Residence();
         }
 
         public void NewGeneration()
