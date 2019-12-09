@@ -1,4 +1,5 @@
-﻿using SettlementSimulation.Engine.Interfaces;
+﻿using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace SettlementSimulation.Engine.Rules
             IEnumerable<IStructure> genes,
             int generation,
             Epoch epoch,
-            IEnumerable<Field> settlementFields)
+            Field[,] fields)
         {
             switch (epoch)
             {

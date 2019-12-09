@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace SettlementSimulation.Engine.Models
 {
@@ -11,6 +12,8 @@ namespace SettlementSimulation.Engine.Models
         }
         public int X { get; }
         public int Y { get; }
+
+        public Point Point => new Point(X, Y);
 
         public override bool Equals(object obj)
         {

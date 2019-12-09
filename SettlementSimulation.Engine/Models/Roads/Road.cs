@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SettlementSimulation.Engine.Interfaces;
+using System.Collections.Generic;
 using System.Drawing;
-using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Models.Roads
 {

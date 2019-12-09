@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SettlementSimulation.AreaGenerator\SettlementSimulation.AreaGenerator.csproj" />
+    <ProjectReference Include="..\SettlementSimulation.Engine\SettlementSimulation.Engine.csproj" />
   </ItemGroup>
 
 </Project>

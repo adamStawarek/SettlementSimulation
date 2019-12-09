@@ -53,7 +53,7 @@
                 <Button Command="{Binding ClearBreakpointsCommand}" Margin="5"
                         DataContext="{Binding Source={StaticResource Locator}, Path=Designer}"
                         HorizontalAlignment="Center" BorderBrush="OrangeRed" Background="OrangeRed" Content="Clear"/>
-                    <Button Content="Start simulation" Command="{Binding StartSimulationCommand}"
+                <Button Content="Start simulation" Command="{Binding StartSimulationCommand}"
                         FontSize="16" HorizontalAlignment="Center" Margin="5"/>
             </StackPanel>
         </StackPanel>

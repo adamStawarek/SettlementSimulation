@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
@@ -15,34 +16,34 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [SetUp]
         public void Setup()
         {
-            var fields = new[]
-            {
-                new Field(0,0){DistanceToWater = 10},
-                new Field(1,0){DistanceToWater = 10},
-                new Field(2,0){DistanceToWater = 10},
-                new Field(3,0){DistanceToWater = 10},
+            var fields = new Field[4, 5];
 
-                new Field(0,1){DistanceToWater = 20},
-                new Field(1,1){DistanceToWater = 20},
-                new Field(2,1){DistanceToWater = 20},
-                new Field(3,1){DistanceToWater = 20},
+            fields[0, 0] = new Field() { DistanceToWater = 10 };
+            fields[1, 0] = new Field() { DistanceToWater = 10 };
+            fields[2, 0] = new Field() { DistanceToWater = 10 };
+            fields[3, 0] = new Field() { DistanceToWater = 10 };
 
-                new Field(0,2){DistanceToWater = 30},
-                new Field(1,2){DistanceToWater = 30},
-                new Field(2,2){DistanceToWater = 30},
-                new Field(3,2){DistanceToWater = 30},
+            fields[0, 1] = new Field() { DistanceToWater = 20 };
+            fields[1, 1] = new Field() { DistanceToWater = 20 };
+            fields[2, 1] = new Field() { DistanceToWater = 20 };
+            fields[3, 1] = new Field() { DistanceToWater = 20 };
 
-                new Field(0,3){DistanceToWater = 40},
-                new Field(1,3){DistanceToWater = 40},
-                new Field(2,3){DistanceToWater = 40},
-                new Field(3,3){DistanceToWater = 40},
+            fields[0, 2] = new Field() { DistanceToWater = 30 };
+            fields[1, 2] = new Field() { DistanceToWater = 30 };
+            fields[2, 2] = new Field() { DistanceToWater = 30 };
+            fields[3, 2] = new Field() { DistanceToWater = 30 };
 
-                new Field(0,4){DistanceToWater = 50},
-                new Field(1,4){DistanceToWater = 50},
-                new Field(2,4){DistanceToWater = 50},
-                new Field(3,4){DistanceToWater = 50}
-            };
-            _engine = new SimulationEngine(10, 10, fields);
+            fields[0, 3] = new Field() { DistanceToWater = 40 };
+            fields[1, 3] = new Field() { DistanceToWater = 40 };
+            fields[2, 3] = new Field() { DistanceToWater = 40 };
+            fields[3, 3] = new Field() { DistanceToWater = 40 };
+
+            fields[0, 4] = new Field() { DistanceToWater = 50 };
+            fields[1, 4] = new Field() { DistanceToWater = 50 };
+            fields[2, 4] = new Field() { DistanceToWater = 50 };
+            fields[3, 4] = new Field() { DistanceToWater = 50 };
+
+            _engine = new SimulationEngine(10, 10, fields, null);
             _engine.AddRules(new IRule[]
             {
                 new BuildingsCountRule(1,2),

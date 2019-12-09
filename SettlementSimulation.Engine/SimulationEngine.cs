@@ -1,9 +1,11 @@
-﻿using SettlementSimulation.Engine.Interfaces;
+﻿using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using SettlementSimulation.Engine.Rules;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using static SettlementSimulation.Engine.Helpers.ReflectionHelper;
 using rnd = SettlementSimulation.Engine.Helpers.RandomProvider;
@@ -16,7 +18,6 @@ namespace SettlementSimulation.Engine
         private float _fitnessSum;
         private Epoch _currentEpoch;
         private readonly Stack<Epoch> _allEpochs;
-        private readonly IEnumerable<Field> _bitmapFields;
         #endregion
 
         #region properties
@@ -26,11 +27,14 @@ namespace SettlementSimulation.Engine
         public float BestFitness { get; set; }
         public IStructure[] BestGenes { get; }
         public List<IRule> Rules { get; set; }
+        public Field[,] Fields { get; set; }
+        public List<Point> MainRoad { get; set; }
         #endregion
 
-        public SimulationEngine(int populationSize, int dnaSize, IEnumerable<Field> bitmapFields)
+        public SimulationEngine(int populationSize, int dnaSize, Field[,] fields, List<Point> mainRoad)
         {
-            _bitmapFields = bitmapFields;
+            Fields = fields;
+            MainRoad = mainRoad;
             Generation = 1;
             MutationRate = 0.01F;
             Population = new List<Dna<IStructure>>(populationSize);
@@ -148,16 +152,16 @@ namespace SettlementSimulation.Engine
                 case Epoch.First:
                     {
                         if (Rules.Find(r => r is BuildingsCountRule)
-                            .IsSatisfied(BestGenes, dna.Genes, Generation, Epoch.First, _bitmapFields))
+                            .IsSatisfied(BestGenes, dna.Genes, Generation, Epoch.First, Fields))
                         {
                             score++;
                             if (Rules.Find(r => r is SettlementDensityRule)
-                                .IsSatisfied(BestGenes, dna.Genes, Generation, Epoch.First, _bitmapFields))
+                                .IsSatisfied(BestGenes, dna.Genes, Generation, Epoch.First, Fields))
                             {
                                 score++;
                             }
                             if (Rules.Find(r => r is DistanceToWaterRule)
-                                .IsSatisfied(BestGenes, dna.Genes, Generation, Epoch.First, _bitmapFields))
+                                .IsSatisfied(BestGenes, dna.Genes, Generation, Epoch.First, Fields))
                             {
                                 score++;
                             }

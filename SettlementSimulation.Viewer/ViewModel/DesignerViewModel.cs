@@ -2,6 +2,7 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -28,6 +29,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         }
         public PlotModel Plot { get; }
         public LineSeries S1 { get; }
+        public List<int> Breakpoints { get; set; }
         #endregion
 
         #region commands
@@ -36,6 +38,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         public DesignerViewModel()
         {
+            Breakpoints = new List<int>();
             Plot = new PlotModel { Title = "Select breakpoints" };
             S1 = new LineSeries
             {
@@ -60,6 +63,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                     var y = (_endY / (double)MaxGenerations) * point.X;
                     S1.Points.Add(new DataPoint(x, y));
                     S1.Points.Sort((p, p2) => p.X.CompareTo(p2.X));
+                    Breakpoints.Add((int)y);
                 }
 
                 Plot.InvalidatePlot(true);
@@ -73,6 +77,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             int numberOfPointsToRemove = S1.Points.Count - 2;
             S1.Points.RemoveRange(1, numberOfPointsToRemove);
             Plot.InvalidatePlot(true);
+            Breakpoints.Clear();
         }
 
         public void SetTailPoint(int val)

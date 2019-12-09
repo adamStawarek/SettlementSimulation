@@ -15,4 +15,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SettlementSimulation.AreaGenerator\SettlementSimulation.AreaGenerator.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,11 +1,11 @@
 ﻿using FastBitmapLib;
+using RoyT.AStar;
 using SettlementSimulation.AreaGenerator.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using RoyT.AStar;
 
 namespace SettlementSimulation.AreaGenerator
 {
@@ -100,14 +100,14 @@ namespace SettlementSimulation.AreaGenerator
 
             #region mark settlement area and water aquens on bitmap
 
-            fields.Take((int) (fields.Count * 0.2)).ToList()
+            fields.Take((int)(fields.Count * 0.2)).ToList()
                 .ForEach(p => MarkPoint(p.Point, previewBitmap, Color.FromArgb(255, 0, 0), 1));
             fields.Skip((int)(fields.Count * 0.2)).Take((int)(fields.Count * 0.3)).ToList()
                 .ForEach(p => MarkPoint(p.Point, previewBitmap, Color.FromArgb(200, 0, 0), 1));
             fields.Skip((int)(fields.Count * 0.5)).ToList()
                 .ForEach(p => MarkPoint(p.Point, previewBitmap, Color.FromArgb(155, 0, 0), 1));
 
-            waterAreas.ForEach(w => w.ToList().ForEach(p => MarkPoint(p,previewBitmap, Color.FromArgb(0,0,255),1)));
+            waterAreas.ForEach(w => w.ToList().ForEach(p => MarkPoint(p, previewBitmap, Color.FromArgb(0, 0, 255), 1)));
 
             waterAreaBoundaryPoints.ForEach(p => { MarkPoint(p, previewBitmap, Color.FromArgb(0, 255, 0)); });
 
@@ -138,10 +138,10 @@ namespace SettlementSimulation.AreaGenerator
             #endregion
 
             var mStep = mainRoadPoints.Count() / 15;
-            var selectedRoadPoints = mainRoadPoints.OrderBy(p=>p.X).ThenBy(p=>p.Y).Where((x, i) => i % mStep == 0).ToList();
+            var selectedRoadPoints = mainRoadPoints.OrderBy(p => p.X).ThenBy(p => p.Y).Where((x, i) => i % mStep == 0).ToList();
             foreach (var field in fields)
             {
-                fieldGrid[field.Point.X, field.Point.Y].DistanceToWater =
+                fieldGrid[field.Point.X, field.Point.Y].DistanceToMainRoad =
                     selectedRoadPoints.Min(p => builderHelper.DistanceTo(field.Point, p));
             }
             selectedRoadPoints.ForEach(p => { MarkPoint(p, previewBitmap, Color.Purple); });
@@ -168,7 +168,7 @@ namespace SettlementSimulation.AreaGenerator
                             continue;
                         fastBitmap.SetPixel(point.X + i, point.Y + j, color);
                     }
-                } 
+                }
             }
         }
 
