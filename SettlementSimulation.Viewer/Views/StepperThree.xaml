@@ -6,11 +6,13 @@
              xmlns:converters="clr-namespace:SettlementSimulation.Viewer.Converters"
              xmlns:oxy="http://oxyplot.org/wpf"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:fa="http://schemas.fontawesome.io/icons/"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              DataContext="{Binding Source={StaticResource Locator}, Path=StepperThree}">
     <UserControl.Resources>
         <converters:ColorToBrushesConverter x:Key="ColorToBrushesConverter"/>
+        <converters:BitmapToImageSource x:Key="BitmapToImageSource"/>
     </UserControl.Resources>
     <Grid x:Name="Main" Background="White">
         <Grid.ColumnDefinitions>
@@ -19,12 +21,26 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <DockPanel Grid.Column="0" VerticalAlignment="Stretch" Margin="5">
-            <Image DockPanel.Dock="Top"/>
-            <Label DockPanel.Dock="Bottom" ContentStringFormat="Current generation: #{0}" 
-                   Content="{Binding CurrentGeneration,Mode=OneWay}" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
-        </DockPanel>
+        <Grid Grid.Column="0" VerticalAlignment="Stretch" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="120"/>
+            </Grid.RowDefinitions>
+         
+            <Image Grid.Row="0" Source="{Binding SettlementBitmap, Converter={StaticResource BitmapToImageSource}}" Stretch="Uniform"/>   <fa:ImageAwesome Grid.Row="0"
+                            Icon="Spinner" Visibility="{Binding SpinnerVisibility}" Foreground="{DynamicResource PrimaryHueDarkBrush}"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" Spin="True" Height="80" Width="80" />
+            <StackPanel Grid.Row="1">
+                <Label ContentStringFormat="Current epoch: #{0}" 
+                       Content="{Binding SettlementState.CurrentEpoch,Mode=OneWay}"
+                       FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                <Label ContentStringFormat="Current generation: #{0}" 
+                       Content="{Binding SettlementState.CurrentGeneration,Mode=OneWay}"
+                       FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
 
         <StackPanel Margin="5" Grid.Column="1">
             <Border BorderThickness="2" BorderBrush="Black">
@@ -50,11 +66,15 @@
                 </StackPanel>
             </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Command="{Binding ClearBreakpointsCommand}" Margin="5"
-                        DataContext="{Binding Source={StaticResource Locator}, Path=Designer}"
-                        HorizontalAlignment="Center" BorderBrush="OrangeRed" Background="OrangeRed" Content="Clear"/>
+                <Button Content="Stop simulation" Command="{Binding StopSimulationCommand}"
+                        FontSize="16" HorizontalAlignment="Center" Margin="5"/>
                 <Button Content="Start simulation" Command="{Binding StartSimulationCommand}"
                         FontSize="16" HorizontalAlignment="Center" Margin="5"/>
+                <Button Command="{Binding ClearBreakpointsCommand}" Margin="5"
+                        DataContext="{Binding Source={StaticResource Locator}, Path=Designer}"
+                        HorizontalAlignment="Center" BorderBrush="OrangeRed" Background="OrangeRed"
+                        Content="Clear breakpoints"/>
+               
             </StackPanel>
         </StackPanel>
 
@@ -66,8 +86,9 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Rectangle Width="30" Height="30" Fill="{Binding Value, Converter={StaticResource ColorToBrushesConverter}}" Margin="5"/>
-                                    <Label Content="{Binding Key}" FontSize="14" VerticalAlignment="Center"/>
+                                    <Rectangle Width="30" Height="30"  Margin="5"
+                                               Fill="{Binding Value.Item1, Converter={StaticResource ColorToBrushesConverter}}" />
+                                    <Label Content="{Binding Value.Item2}" FontSize="14" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

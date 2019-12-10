@@ -1,13 +1,13 @@
 ﻿using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Helpers;
+using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.Engine.Models;
+using SettlementSimulation.Engine.Models.Buildings;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Timers;
-using SettlementSimulation.Engine.Helpers;
-using SettlementSimulation.Engine.Interfaces;
-using SettlementSimulation.Engine.Models;
-using SettlementSimulation.Engine.Models.Buildings;
 
 namespace SettlementSimulation.Engine
 {
@@ -62,30 +62,6 @@ namespace SettlementSimulation.Engine
                 _timer.Stop();
             }
         }
-       
-        private void SetUpSettlementState()
-        {
-            var previousSettlementState = SettlementState;
-            SettlementState = new SettlementState()
-            {
-                CurrentGeneration = _tick,
-                Time = (int) (_timer.Interval / 1000) * _tick,
-                CurrentEpoch = (Epoch) (_tick / (_maxIterations / 3)),
-                Structures = new List<IStructure>()
-            };
-
-            var rand = new Random();
-            var initialLocation = ((Building) previousSettlementState?.Structures.First())?.Location.Point ??
-                                  new Point(rand.Next(_engine.Fields.GetLength(0), _engine.Fields.GetLength(1)));
-
-            for (int i = 0; i < _tick; i++)
-            {
-                var structure = _engine.GetRandomGene();
-                ((Building) structure).Location = 
-                    new Location(initialLocation.X+3*i,initialLocation.Y+3*i);
-                SettlementState.Structures.Add(structure);
-            }
-        }
 
         public void Start()
         {
@@ -114,5 +90,40 @@ namespace SettlementSimulation.Engine
             var handler = NextEpoch;
             handler?.Invoke(this, EventArgs.Empty);
         }
+
+        private void SetUpSettlementState()
+        {
+            var previousSettlementState = SettlementState;
+            SettlementState = new SettlementState()
+            {
+                CurrentGeneration = _tick,
+                Time = (int)(_timer.Interval / 1000) * _tick,
+                CurrentEpoch = (Epoch)(_tick / (_maxIterations / 3)),
+                Structures = new List<IStructure>()
+            };
+
+            if (previousSettlementState != null)
+            {
+                SettlementState.Structures.AddRange(previousSettlementState.Structures);
+            }
+
+            var rand = new Random();
+            var takenPositions = previousSettlementState?.Structures.Cast<Building>()
+                .Select(s => s.Location.Point).ToArray();
+            var positions = _engine.Fields.ToList()
+                .Where(f => f.InSettlement &&
+                            (takenPositions == null || !takenPositions.Contains(f.Position)) &&
+                            f.DistanceToMainRoad + f.DistanceToWater < 400)
+                .Select(p => p.Position)
+                .ToArray();
+
+            for (int i = 0; i < Math.Log(_tick - previousSettlementState?.Structures?.Count() ?? 0); i++)
+            {
+                Building field = (Building)_engine.GetRandomGene();
+                field.Location = new Location(positions[rand.Next(positions.Count())]);
+                SettlementState.Structures.Add(field);
+            }
+        }
+
     }
 }

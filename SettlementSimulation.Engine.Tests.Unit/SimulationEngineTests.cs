@@ -156,7 +156,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             Assert.AreEqual(1, _engine.SubjectFitness(1), 0.01);
         }
 
-        [Test]
+        [Test, Ignore("Under development")]
         public void At_First_Generation_When_Subject_Satisfy_BuildingsCountRule_And_DistanceToWaterRule__SubjectFitness_Returns_2()
         {
             Assert.AreEqual(2, _engine.SubjectFitness(2), 0.01);
@@ -168,7 +168,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             Assert.AreEqual(2, _engine.SubjectFitness(3), 0.01);
         }
 
-        [Test]
+        [Test, Ignore("Under development")]
         public void At_First_Generation_When_Subject_Satisfy_BuildingsCountRule_SettlementDensityRule_And_DistanceToWaterRule_SubjectFitness_Returns_3()
         {
             Assert.AreEqual(3, _engine.SubjectFitness(4), 0.01);

@@ -2,6 +2,7 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using SettlementSimulation.Viewer.Helpers;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -25,6 +26,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                 _endY = value;
                 OnPropertyChanged();
                 SetTailPoint(_endY);
+                ConfigurationManagerHelper.SetSettings("EndY", _endY.ToString());
             }
         }
         public PlotModel Plot { get; }
@@ -49,6 +51,9 @@ namespace SettlementSimulation.Viewer.ViewModel
             };
 
             _endY = 9999;
+            int.TryParse(ConfigurationManagerHelper.GetSettings("EndY"), out _endY);
+            SetTailPoint(_endY);
+
             Plot.Series.Add(S1);
             Plot.Axes.Add(new LinearAxis() { Position = AxisPosition.Left, Minimum = 0, Maximum = MaxGenerations });
             Plot.Axes.Add(new LinearAxis() { Position = AxisPosition.Bottom, Minimum = 0, Maximum = MaxGenerations });

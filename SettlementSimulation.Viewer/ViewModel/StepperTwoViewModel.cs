@@ -216,7 +216,12 @@ namespace SettlementSimulation.Viewer.ViewModel
             SpinnerVisibility = Visibility.Hidden;
             CanContinue = true;
 
-            Messenger.Default.Send(new SetSettlementInfoCommand() { SettlementInfo = settlementInfo });
+            Messenger.Default.Send(new SetSettlementInfoCommand()
+            {
+                SettlementInfo = settlementInfo,
+                HeightMap = new Bitmap(_originalHeightMap),
+                ColorMap = new Bitmap(_colorMap)
+            });
         }
 
         private void SetCurrentPixelValuesToRgbBox(object obj)

@@ -116,7 +116,7 @@ namespace SettlementSimulation.AreaGenerator
             {
                 for (int j = 0; j < _heightMap.Height; j++)
                 {
-                    fieldGrid[i, j] = new Field();
+                    fieldGrid[i, j] = new Field() { Position = new Point(i, j) };
                 }
             }
             foreach (var field in fields)

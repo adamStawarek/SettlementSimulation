@@ -10,6 +10,13 @@ namespace SettlementSimulation.Engine.Models
             X = x;
             Y = y;
         }
+
+        public Location(Point point)
+        {
+            X = point.X;
+            Y = point.Y;
+        }
+
         public int X { get; }
         public int Y { get; }
 
