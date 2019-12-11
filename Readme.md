@@ -27,11 +27,17 @@ Example of heightmap and colormap that can be used:
 ![heightmap](resources/heightmap.png)
 ```csharp
 using SettlementSimulation.AreaGenerator;
+using System.Drawing;
 ...
+var colorMap = new Bitmap("path to colormap");
+var heightMap = new Bitmap("path to heightmap");
+var minHeight = 100;
+var maxHeight = 180;
+
 var settlementInfo = await new SettlementBuilder()
-                .WithColorMap(_colorMap)
-                .WithHeightMap(_heightMap)
-                .WithHeightRange(_minHeight, _maxHeight)
+                .WithColorMap(colorMap)
+                .WithHeightMap(heightMap)
+                .WithHeightRange(minHeight, maxHeight)
                 .BuildAsync();
 ```  
 settlementInfo will contain 1024x1024 matrix with fields,  
