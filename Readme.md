@@ -76,7 +76,7 @@ generator.Start();
 private void OnBreakpoint(object sender, EventArgs e)
 {
     var settlementState = generator.SettlementState;
-    foreach (var building in SettlementState.Structures.Where(s=>s is Building).Cast<Building>())
+    foreach (var building in settlementState.Structures.Where(s=>s is Building).Cast<Building>())
     {
         var buildingLocation = building.Location.Point;
         var buildingType = building.GetType().Name;
