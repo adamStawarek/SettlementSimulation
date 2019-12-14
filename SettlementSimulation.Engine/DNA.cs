@@ -1,50 +1,104 @@
 ﻿using System;
-using rnd = SettlementSimulation.Engine.Helpers.RandomProvider;
+using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.Engine.Models;
+using SettlementSimulation.Engine.Models.Buildings;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Helpers;
 
 namespace SettlementSimulation.Engine
 {
-    public class Dna<T>
+    public class Dna
     {
-        public T[] Genes { get; set; }
-        public float Fitness { get; private set; }
-        private readonly Func<T> _getRandomGene;
-        private readonly Func<int, float> _fitnessFunction;
+        #region
+        private readonly Field[,] _fields;
+        private readonly List<Point> _mainRoad;
+        #endregion
 
-        public Dna(int size, Func<T> getRandomGene, Func<int, float> fitnessFunction, bool shouldInitGenes = true)
+        #region properties
+        public IStructure[] Genes { get; set; }
+        public float Fitness { get; private set; }
+        #endregion
+
+        public Dna(int size,
+            Field[,] fields,
+            List<Point> mainRoad,
+            bool shouldInitGenes = true)
         {
-            _getRandomGene = getRandomGene;
-            _fitnessFunction = fitnessFunction;
-            Genes = new T[size];
+            _fields = fields;
+            _mainRoad = mainRoad;
+            Genes = new IStructure[size];
+
             if (!shouldInitGenes) return;
-            for (int i = 0; i < Genes.Length; i++)
+            for (var i = 0; i < Genes.Length; i++)
             {
-                Genes[i] = _getRandomGene();
+                Genes[i] = GetRandomGene(Epoch.First);
             }
         }
 
-        public float CalculateFitness(int index)
+        public IStructure GetRandomGene(Epoch epoch)
         {
-            return Fitness = _fitnessFunction(index);
+            //TODO check whether to generate building or road
+
+            var building = Building.GetRandom(epoch);
+
+            var takenPositions = Genes
+                .Where(g => g is Building)
+                .Cast<Building>()
+                .Select(s => s.Location.Point)
+                .ToArray();
+
+            var randomGeneBuilding = (Building)Genes
+                .OrderBy(g => Guid.NewGuid())
+                .FirstOrDefault(g => g is Building);
+
+            var positions = _fields.ToList()
+                .Where(f => f.InSettlement &&
+                            !takenPositions.Contains(f.Position) &&
+                            (randomGeneBuilding==null || f.Position.DistanceTo(randomGeneBuilding.Location.Point) < 10) &&
+                            f.DistanceToMainRoad + f.DistanceToWater < 400)
+                .Select(p => p.Position)
+                .ToArray();
+
+            building.Location = new Location(positions[RandomProvider.Next(positions.Count())]);
+
+            return building;
         }
 
-        public Dna<T> Crossover(Dna<T> otherParent)
+        public float CalculateFitness(Epoch epoch)
         {
-            var child = new Dna<T>(Genes.Length, _getRandomGene, _fitnessFunction, false);
+            int score = 0;
+            switch (epoch)
+            {
+                case Epoch.First:
+                    {
+                        break;
+                    }
+            }
+
+            return Fitness = score;
+        }
+
+        public Dna Crossover(Dna otherParent)
+        {
+            var child = new Dna(Genes.Length, _fields, _mainRoad, false);
             for (int i = 0; i < Genes.Length; i++)
             {
-                child.Genes[i] = rnd.NextDouble() < 0.5 ? Genes[i] : otherParent.Genes[i];
+                child.Genes[i] = RandomProvider.NextDouble() < 0.5 ? Genes[i] : otherParent.Genes[i];
             }
 
             return child;
         }
 
-        public void Mutate(float mutationRate)
+        public void Mutate(Epoch epoch, float mutationRate = 0.01F)
         {
             for (int i = 0; i < Genes.Length; i++)
             {
-                if (rnd.NextDouble() < mutationRate)
+                if (RandomProvider.NextDouble() < mutationRate)
                 {
-                    Genes[i] = _getRandomGene();
+                    Genes[i] = GetRandomGene(epoch);
                 }
             }
         }

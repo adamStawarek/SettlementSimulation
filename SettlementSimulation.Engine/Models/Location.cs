@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using SettlementSimulation.Engine.Helpers;
 
 namespace SettlementSimulation.Engine.Models
 {
@@ -22,6 +23,11 @@ namespace SettlementSimulation.Engine.Models
 
         public Point Point => new Point(X, Y);
 
+        public double DistanceTo(Location other)
+        {
+            return this.Point.DistanceTo(other.Point);
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is Location l)
@@ -29,11 +35,6 @@ namespace SettlementSimulation.Engine.Models
                 return l.X == X && l.Y == Y;
             }
             return false;
-        }
-
-        public double DistanceTo(Location other)
-        {
-            return Math.Sqrt(Math.Pow(X - other.X, 2) + Math.Pow(Y - other.Y, 2));
         }
     }
 }

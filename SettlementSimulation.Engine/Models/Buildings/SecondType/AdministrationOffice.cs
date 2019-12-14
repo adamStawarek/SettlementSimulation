@@ -3,7 +3,7 @@
 namespace SettlementSimulation.Engine.Models.Buildings.SecondType
 {
     [Epoch(Epoch.Second)]
-    public class School : Building
+    public class AdministrationOffice : Building
     {
         public override double Probability => 0.03;
     }

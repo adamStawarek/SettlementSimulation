@@ -1,6 +1,9 @@
-﻿namespace SettlementSimulation.Engine.Models.Buildings.SecondType
+﻿using SettlementSimulation.Engine.Helpers;
+
+namespace SettlementSimulation.Engine.Models.Buildings.SecondType
 {
-    public class Market : SecondTypeBuilding
+    [Epoch(Epoch.Second)]
+    public class Market : Building
     {
         public override double Probability => 0.03;
     }

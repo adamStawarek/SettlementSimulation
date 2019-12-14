@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using Point = System.Drawing.Point;
 
@@ -159,10 +160,14 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         private void SetUpStructureLegend()
         {
-            var structures = ReflectionHelper.GetAllObjectsByType<Building>().ToList();
+            var structures = Assembly.Load("SettlementSimulation.Engine")
+                .GetTypes()
+                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(Building)))
+                .ToList();
+
             for (int i = 0; i < structures.Count(); i++)
             {
-                StructuresLegend.Add(structures[i].GetType(), new Tuple<Color, string>(GetRandColor(i), structures[i].GetType().Name));
+                StructuresLegend.Add(structures[i], new Tuple<Color, string>(GetRandColor(i), structures[i].Name));
             }
         }
 

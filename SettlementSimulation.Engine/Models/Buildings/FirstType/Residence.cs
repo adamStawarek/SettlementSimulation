@@ -1,6 +1,9 @@
-﻿namespace SettlementSimulation.Engine.Models.Buildings.FirstType
+﻿using SettlementSimulation.Engine.Helpers;
+
+namespace SettlementSimulation.Engine.Models.Buildings.FirstType
 {
-    public class Residence : FirstTypeBuilding
+    [Epoch(Epoch.First)]
+    public class Residence : Building
     {
         public override double Probability => 0.8;
     }

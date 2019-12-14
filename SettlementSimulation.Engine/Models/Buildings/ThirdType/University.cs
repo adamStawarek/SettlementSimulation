@@ -1,6 +1,9 @@
-﻿namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
+﻿using SettlementSimulation.Engine.Helpers;
+
+namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
 {
-    public class University : ThirdTypeBuilding
+    [Epoch(Epoch.Third)]
+    public class University : Building
     {
         public override double Probability => 0.005;
     }

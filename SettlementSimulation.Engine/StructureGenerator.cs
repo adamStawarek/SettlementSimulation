@@ -13,19 +13,24 @@ namespace SettlementSimulation.Engine
 {
     public class StructureGenerator
     {
-        private readonly SimulationEngine _engine;
-        private readonly Timer _timer;
-        private int _tick;
-
+        #region fields
         private readonly List<int> _breakpoints;
         private readonly int _maxIterations;
         private readonly int _timeout;
+        private readonly SimulationEngine _engine;
+        private readonly Timer _timer;
+        private int _tick;
+        #endregion
 
-        public SettlementState SettlementState { get; set; }
-
+        #region events
         public event EventHandler Finished;
         public event EventHandler Breakpoint;
         public event EventHandler NextEpoch;
+        #endregion
+
+        #region properties
+        public SettlementState SettlementState { get; private set; } 
+        #endregion
 
         public StructureGenerator(Field[,] fields, List<Point> mainRoad,
             List<int> breakpoints, int maxIterations, int timeout)
@@ -119,11 +124,10 @@ namespace SettlementSimulation.Engine
 
             for (int i = 0; i < Math.Log(_tick - previousSettlementState?.Structures?.Count() ?? 0); i++)
             {
-                Building field = (Building)_engine.GetRandomGene();
-                field.Location = new Location(positions[rand.Next(positions.Count())]);
-                SettlementState.Structures.Add(field);
+                var building = Building.GetRandom(SettlementState.CurrentEpoch);
+                building.Location = new Location(positions[rand.Next(positions.Count())]);
+                SettlementState.Structures.Add(building);
             }
         }
-
     }
 }
