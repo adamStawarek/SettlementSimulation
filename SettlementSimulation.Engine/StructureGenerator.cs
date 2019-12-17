@@ -5,7 +5,6 @@ using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Timers;
 

@@ -1,7 +1,7 @@
 ﻿namespace SettlementSimulation.Engine.Models
 {
-    public enum Epoch
+    public static class EpochInfo
     {
-        First = 1, Second = 2, Third = 3
+
     }
 }

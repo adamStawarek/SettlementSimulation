@@ -12,6 +12,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using FastBitmapLib;
+using SettlementSimulation.AreaGenerator.Models;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -207,11 +209,11 @@ namespace SettlementSimulation.Viewer.ViewModel
             SpinnerVisibility = Visibility.Visible;
             HeightMap = new Bitmap(_originalHeightMap);
             var settlementInfo = await new SettlementBuilder()
-                .WithColorMap(_colorMap)
-                .WithHeightMap(_heightMap)
+                .WithColorMap(this.GetPixelMatrix(_colorMap))
+                .WithHeightMap(this.GetPixelMatrix(_heightMap))
                 .WithHeightRange(_minHeight, _maxHeight)
                 .BuildAsync();
-            _heightMap = new Bitmap(settlementInfo.PreviewBitmap);
+            _heightMap = this.GetBitmap(settlementInfo.PreviewBitmap);
             RaisePropertyChanged(nameof(HeightMap));
             SpinnerVisibility = Visibility.Hidden;
             CanContinue = true;
@@ -222,6 +224,40 @@ namespace SettlementSimulation.Viewer.ViewModel
                 HeightMap = new Bitmap(_originalHeightMap),
                 ColorMap = new Bitmap(_colorMap)
             });
+        }
+
+        private Bitmap GetBitmap(Pixel[,] pixels)
+        {
+            var bitmap = new Bitmap(pixels.GetLength(0), pixels.GetLength(1));
+
+            for (int i = 0; i < pixels.GetLength(0); i++)
+            {
+                for (int j = 0; j < pixels.GetLength(1); j++)
+                {
+                    var pixel = pixels[i, j];
+                    bitmap.SetPixel(i, j, Color.FromArgb(pixel.R, pixel.G, pixel.B));
+                }
+            }
+
+            return bitmap;
+
+        }
+
+        private Pixel[,] GetPixelMatrix(Bitmap bitmap)
+        {
+            var pixels = new Pixel[bitmap.Width, bitmap.Height];
+            using (var fastBitmap = bitmap.FastLock())
+            {
+                for (int i = 0; i < fastBitmap.Width; i++)
+                {
+                    for (int j = 0; j < fastBitmap.Height; j++)
+                    {
+                        var pixel = fastBitmap.GetPixel(i, j);
+                        pixels[i, j] = new Pixel(pixel.R, pixel.G, pixel.B);
+                    }
+                }
+            }
+            return pixels;
         }
 
         private void SetCurrentPixelValuesToRgbBox(object obj)

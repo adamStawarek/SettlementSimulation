@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Drawing;
+using SettlementSimulation.AreaGenerator.Models;
 
 namespace SettlementSimulation.Engine.Helpers
 {

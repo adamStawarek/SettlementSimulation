@@ -7,6 +7,6 @@ namespace SettlementSimulation.AreaGenerator.Models
     {
         public Field[,] Fields { get; set; }
         public List<Point> MainRoad { get; set; }
-        public Bitmap PreviewBitmap { get; set; }
+        public Pixel[,] PreviewBitmap { get; set; }
     }
 }

@@ -3,7 +3,6 @@ using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Helpers;

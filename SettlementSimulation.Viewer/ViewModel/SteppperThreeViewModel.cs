@@ -14,7 +14,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
-using Point = System.Drawing.Point;
+using Point = SettlementSimulation.AreaGenerator.Models.Point;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
