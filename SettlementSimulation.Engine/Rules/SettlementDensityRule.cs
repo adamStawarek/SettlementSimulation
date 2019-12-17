@@ -1,8 +1,6 @@
-﻿using SettlementSimulation.AreaGenerator.Models;
-using SettlementSimulation.Engine.Interfaces;
+﻿using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace SettlementSimulation.Engine.Rules
@@ -16,17 +14,13 @@ namespace SettlementSimulation.Engine.Rules
             _maxAverageDistanceBetweenBuildings = maxAverageDistanceBetweenBuildings;
         }
 
-        public bool IsSatisfied(IEnumerable<IStructure> prevBestGenes,
-            IEnumerable<IStructure> genes,
-            int generation,
-            Epoch epoch,
-            Field[,] fields)
+        public bool IsSatisfied(RuleExecutionInfo executionInfo)
         {
-            switch (epoch)
+            switch (executionInfo.Epoch)
             {
                 case Epoch.First:
                     {
-                        var residences = genes.Where(g => g is Residence).Cast<Residence>().ToList();
+                        var residences = executionInfo.Genes.Where(g => g is Residence).Cast<Residence>().ToList();
                         var distances = residences.Select(r => residences.Where(g => g != r).Min(g => g.Location.DistanceTo(r.Location)));
 
                         return distances.Average() < _maxAverageDistanceBetweenBuildings;

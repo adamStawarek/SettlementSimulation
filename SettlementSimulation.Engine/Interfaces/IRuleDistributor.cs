@@ -4,6 +4,6 @@ namespace SettlementSimulation.Engine.Helpers
 {
     public interface IRuleDistributor
     {
-        IRule GetRule<T>() where T : IRule;
+        IRule GetRule<T>(params object[] parameters) where T : IRule;
     }
 }
