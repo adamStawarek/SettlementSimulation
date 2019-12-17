@@ -4,7 +4,6 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine;
-using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Viewer.Commands;

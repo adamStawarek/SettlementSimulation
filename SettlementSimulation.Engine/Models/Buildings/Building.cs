@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SettlementSimulation.Engine.Helpers;
+using SettlementSimulation.Engine.Interfaces;
+using System;
 using System.Linq;
 using System.Reflection;
-using SettlementSimulation.Engine.Helpers;
-using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Models.Buildings
 {
@@ -18,7 +18,7 @@ namespace SettlementSimulation.Engine.Models.Buildings
                             t.GetCustomAttributes(typeof(EpochAttribute), false)
                                 .Cast<EpochAttribute>()
                                 .Any(a => a.Epoch == epoch))
-                .Select(t=>(Building)Activator.CreateInstance(t))
+                .Select(t => (Building)Activator.CreateInstance(t))
                 .ToList();
 
             var diceRoll = RandomProvider.NextDouble();

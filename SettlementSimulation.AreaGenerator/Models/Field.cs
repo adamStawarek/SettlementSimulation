@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace SettlementSimulation.AreaGenerator.Models
+﻿namespace SettlementSimulation.AreaGenerator.Models
 {
     public class Field
     {

@@ -1,9 +1,9 @@
 ﻿using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using System.Collections.Generic;
 using System.Linq;
-using SettlementSimulation.Engine.Helpers;
 
 namespace SettlementSimulation.Engine
 {

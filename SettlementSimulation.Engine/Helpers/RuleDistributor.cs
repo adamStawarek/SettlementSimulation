@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using SettlementSimulation.Engine.Interfaces;
+using System;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Helpers
 {

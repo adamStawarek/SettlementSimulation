@@ -1,6 +1,6 @@
 using NUnit.Framework;
-using System.Collections.Generic;
 using SettlementSimulation.AreaGenerator.Models;
+using System.Collections.Generic;
 
 namespace SettlementSimulation.AreaGenerator.Tests.Unit
 {

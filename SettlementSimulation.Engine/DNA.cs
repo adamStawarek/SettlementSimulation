@@ -1,11 +1,11 @@
-﻿using System;
+﻿using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using SettlementSimulation.AreaGenerator.Models;
-using SettlementSimulation.Engine.Helpers;
 
 namespace SettlementSimulation.Engine
 {
@@ -56,7 +56,7 @@ namespace SettlementSimulation.Engine
             var positions = _fields.ToList()
                 .Where(f => f.InSettlement &&
                             !takenPositions.Contains(f.Position) &&
-                            (randomGeneBuilding==null || f.Position.DistanceTo(randomGeneBuilding.Location.Point) < 10) &&
+                            (randomGeneBuilding == null || f.Position.DistanceTo(randomGeneBuilding.Location.Point) < 10) &&
                             f.DistanceToMainRoad + f.DistanceToWater < 400)
                 .Select(p => p.Position)
                 .ToArray();

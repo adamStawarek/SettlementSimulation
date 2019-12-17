@@ -28,7 +28,7 @@ namespace SettlementSimulation.Engine
         #endregion
 
         #region properties
-        public SettlementState SettlementState { get; private set; } 
+        public SettlementState SettlementState { get; private set; }
         #endregion
 
         public StructureGenerator(Field[,] fields, List<Point> mainRoad,
@@ -117,7 +117,7 @@ namespace SettlementSimulation.Engine
             var positions = _engine.Fields.ToList()
                 .Where(f => f.InSettlement &&
                             (takenPositions == null || !takenPositions.Contains(f.Position)) &&
-                            f.DistanceToMainRoad + f.DistanceToWater < 400)
+                            f.DistanceToMainRoad + f.DistanceToWater < 300)
                 .Select(p => p.Position)
                 .ToArray();
 

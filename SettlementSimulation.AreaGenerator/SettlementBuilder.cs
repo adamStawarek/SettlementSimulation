@@ -36,18 +36,18 @@ namespace SettlementSimulation.AreaGenerator
         public async Task<SettlementInfo> BuildAsync()
         {
             #region find water aquens
-            var colorMap = (Pixel[,])_colorMap.Clone();
-            var waterAreasBoundaryFunc = new Func<Pixel, bool>(color => color.B >= byte.MaxValue - 5 &&
-                                                                       color.R <= byte.MinValue + 5 &&
-                                                                       color.G >= 50 && color.G <= 120);
+
+            const byte waterUpperBound = 70;
+            var map = (Pixel[,])_heightMap.Clone();
+            var waterAreasBoundaryFunc = new Func<Pixel, bool>(p => p.Intensity <= waterUpperBound);
             var waterAreas = new List<IEnumerable<Point>>();
             var potentialWaterPoints =
-                GetPixels(colorMap, waterAreasBoundaryFunc).ToList();
+                GetPixels(map, waterAreasBoundaryFunc).ToList();
 
             while (potentialWaterPoints.Count > 0)
             {
                 var area = await ApplyFloodFillAsync(
-                    colorMap,
+                    map,
                     potentialWaterPoints.First(),
                     waterAreasBoundaryFunc);
                 potentialWaterPoints.RemoveAll(p => area.Contains(p));
@@ -79,7 +79,7 @@ namespace SettlementSimulation.AreaGenerator
             #endregion
 
             var builderHelper = new BuilderHelper();
-            var waterMatrix = new int[colorMap.GetLength(1), colorMap.GetLength(1)];
+            var waterMatrix = new int[map.GetLength(1), map.GetLength(1)];
             foreach (var point in waterAreas.SelectMany(w => w))
             {
                 waterMatrix[point.Y, point.X] = 1;
@@ -141,7 +141,7 @@ namespace SettlementSimulation.AreaGenerator
                 fieldGrid[field.Point.X, field.Point.Y].DistanceToMainRoad =
                     selectedRoadPoints.Min(p => builderHelper.DistanceTo(field.Point, p));
             }
-           
+
             var settlementInfo = new SettlementInfo()
             {
 

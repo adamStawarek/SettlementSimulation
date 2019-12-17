@@ -1,9 +1,11 @@
+using FastBitmapLib;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using LiveCharts;
 using LiveCharts.Wpf;
 using SettlementSimulation.AreaGenerator;
+using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Viewer.Commands;
 using SettlementSimulation.Viewer.Helpers;
 using SettlementSimulation.Viewer.ViewModel.Helpers;
@@ -12,8 +14,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using FastBitmapLib;
-using SettlementSimulation.AreaGenerator.Models;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -209,11 +209,11 @@ namespace SettlementSimulation.Viewer.ViewModel
             SpinnerVisibility = Visibility.Visible;
             HeightMap = new Bitmap(_originalHeightMap);
             var settlementInfo = await new SettlementBuilder()
-                .WithColorMap(this.GetPixelMatrix(_colorMap))
-                .WithHeightMap(this.GetPixelMatrix(_heightMap))
+                .WithColorMap(this.CreatePixelMatrix(_colorMap))
+                .WithHeightMap(this.CreatePixelMatrix(_heightMap))
                 .WithHeightRange(_minHeight, _maxHeight)
                 .BuildAsync();
-            _heightMap = this.GetBitmap(settlementInfo.PreviewBitmap);
+            _heightMap = this.CreateBitmap(settlementInfo.PreviewBitmap);
             RaisePropertyChanged(nameof(HeightMap));
             SpinnerVisibility = Visibility.Hidden;
             CanContinue = true;
@@ -226,16 +226,19 @@ namespace SettlementSimulation.Viewer.ViewModel
             });
         }
 
-        private Bitmap GetBitmap(Pixel[,] pixels)
+        private Bitmap CreateBitmap(Pixel[,] pixels)
         {
             var bitmap = new Bitmap(pixels.GetLength(0), pixels.GetLength(1));
 
-            for (int i = 0; i < pixels.GetLength(0); i++)
+            using (var fastBitmap = bitmap.FastLock())
             {
-                for (int j = 0; j < pixels.GetLength(1); j++)
+                for (int i = 0; i < pixels.GetLength(0); i++)
                 {
-                    var pixel = pixels[i, j];
-                    bitmap.SetPixel(i, j, Color.FromArgb(pixel.R, pixel.G, pixel.B));
+                    for (int j = 0; j < pixels.GetLength(1); j++)
+                    {
+                        var pixel = pixels[i, j];
+                        fastBitmap.SetPixel(i, j, Color.FromArgb(pixel.R, pixel.G, pixel.B));
+                    }
                 }
             }
 
@@ -243,7 +246,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         }
 
-        private Pixel[,] GetPixelMatrix(Bitmap bitmap)
+        private Pixel[,] CreatePixelMatrix(Bitmap bitmap)
         {
             var pixels = new Pixel[bitmap.Width, bitmap.Height];
             using (var fastBitmap = bitmap.FastLock())
