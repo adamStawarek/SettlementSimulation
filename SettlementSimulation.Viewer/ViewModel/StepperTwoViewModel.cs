@@ -268,7 +268,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             var color = ColorUnderCursor.Get();
             POINT p;
             ColorUnderCursor.GetCursorPos(out p);
-            RgbVal = $"rgb({color.R},{color.G},{color.B})";
+            RgbVal = $"rgb({color.B},{color.G},{color.R})";
         }
     }
 }

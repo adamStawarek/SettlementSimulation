@@ -19,14 +19,13 @@ namespace SettlementSimulation.Engine
         public List<Dna> Population { get; set; }
         public int Generation { get; set; }
         public float BestFitness { get; set; }
-        public IStructure[] BestGenes { get; }
+        public IStructure[] BestGenes { get; set; }
         public Field[,] Fields { get; set; }
         public List<Point> MainRoad { get; set; }
         #endregion
 
         public SimulationEngine(
             int populationSize,
-            int dnaSize,
             Field[,] fields,
             List<Point> mainRoad)
         {
@@ -34,10 +33,9 @@ namespace SettlementSimulation.Engine
             MainRoad = mainRoad;
             Generation = 1;
             Population = new List<Dna>(populationSize);
-            BestGenes = new IStructure[dnaSize];
             for (int i = 0; i < populationSize; i++)
             {
-                Population.Add(new Dna(dnaSize, fields, mainRoad));
+                Population.Add(new Dna(fields, mainRoad));
             }
 
             _allEpochs = new Stack<Epoch>();
@@ -66,7 +64,7 @@ namespace SettlementSimulation.Engine
                 Dna parent1 = ChooseParent();
                 Dna parent2 = ChooseParent();
 
-                Dna child = parent1.Crossover(parent2);
+                Dna child = parent1.Crossover(parent2, _currentEpoch);
 
                 child.Mutate(_currentEpoch);
 
@@ -84,11 +82,13 @@ namespace SettlementSimulation.Engine
             var best = Population[0];
             Population.ForEach(p =>
             {
-                _fitnessSum += p.CalculateFitness(_currentEpoch);
+                _fitnessSum += p.CalculateFitness(_currentEpoch, Generation);
                 best = best.Fitness < p.Fitness ? p : best;
             });
 
             BestFitness = best.Fitness;
+            
+            BestGenes = new IStructure[best.Genes.Count()];
             best.Genes.CopyTo(BestGenes, 0);
         }
 

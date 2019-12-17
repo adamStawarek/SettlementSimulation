@@ -37,7 +37,7 @@ namespace SettlementSimulation.Engine
             _breakpoints = breakpoints;
             _maxIterations = maxIterations;
             _timeout = timeout;
-            _engine = new SimulationEngine(100, 1, fields, mainRoad);
+            _engine = new SimulationEngine(100, fields, mainRoad);
             _timer = new Timer { Interval = 100 };
             _timer.Elapsed += OnTick;
         }
