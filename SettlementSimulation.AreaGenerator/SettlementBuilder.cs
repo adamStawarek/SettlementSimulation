@@ -38,19 +38,17 @@ namespace SettlementSimulation.AreaGenerator
         public async Task<SettlementInfo> BuildAsync()
         {
             #region find water aquens
-            var colorMap = new Bitmap(_colorMap);
-            var waterAreasBoundaryFunc = new Func<Color, bool>(color => color.B >= byte.MaxValue - 5 &&
-                                                                       color.R <= byte.MinValue + 5 &&
-                                                                       color.G >= 50 && color.G <= 120);
+            var map = new Bitmap(_heightMap);
+            var waterAreasBoundaryFunc = new Func<Color, bool>(color => color.G <= 70);
             var waterAreas = new List<IEnumerable<Point>>();
             var potentialWaterPoints =
-                GetPixels(colorMap, waterAreasBoundaryFunc)
+                GetPixels(map, waterAreasBoundaryFunc)
                     .ToList();
 
             while (potentialWaterPoints.Count > 0)
             {
                 var area = await ApplyFloodFillAsync(
-                    colorMap,
+                    map,
                     potentialWaterPoints.First(),
                     waterAreasBoundaryFunc);
                 potentialWaterPoints.RemoveAll(p => area.Contains(p));
@@ -82,7 +80,7 @@ namespace SettlementSimulation.AreaGenerator
             #endregion
 
             var builderHelper = new BuilderHelper();
-            var waterMatrix = new int[colorMap.Height, colorMap.Width];
+            var waterMatrix = new int[map.Height, map.Width];
             foreach (var point in waterAreas.SelectMany(w => w))
             {
                 waterMatrix[point.Y, point.X] = 1;
