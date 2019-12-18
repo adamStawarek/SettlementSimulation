@@ -13,7 +13,6 @@ namespace SettlementSimulation.Engine
     public class Dna
     {
         #region
-
         private readonly int _startDnaSize = 10;
         private readonly Field[,] _fields;
         private readonly List<Point> _mainRoad;

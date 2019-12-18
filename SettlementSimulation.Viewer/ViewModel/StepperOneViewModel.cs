@@ -11,6 +11,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using FastBitmapLib;
+using SettlementSimulation.AreaGenerator;
+using SettlementSimulation.AreaGenerator.Helpers;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -112,16 +114,11 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             if (_selectedHeightMap == null) return;
 
-            var colorMapDictionary = new Dictionary<byte, Color>()
-            { 
-                {45, Color.FromArgb(0, 55, 255)},
-                {75, Color.FromArgb(0, 115, 255)},
-                {100, Color.FromArgb(215, 215, 115)},
-                {165, Color.FromArgb(60, 135, 60)},
-                {200, Color.FromArgb(140, 140, 70)},
-                {230, Color.FromArgb(115, 65, 45)},
-                {255, Color.FromArgb(255, 255, 255)},
-            };
+            var terrainHelper = new TerrainHelper();
+
+            var colorMapDictionary = terrainHelper.GetAllTerrains()
+                .OrderBy(t=>t.UpperBound)
+                .ToDictionary(t => t.UpperBound, t => Color.FromArgb(t.Color.R, t.Color.G, t.Color.B));
 
             var bitmap = new Bitmap(this._selectedHeightMap);
             using (var fastBitmap = bitmap.FastLock())

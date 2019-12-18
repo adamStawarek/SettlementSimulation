@@ -26,8 +26,9 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="120"/>
             </Grid.RowDefinitions>
-         
-            <Image Grid.Row="0" Source="{Binding SettlementBitmap, Converter={StaticResource BitmapToImageSource}}" Stretch="Uniform"/>   <fa:ImageAwesome Grid.Row="0"
+
+            <Image Grid.Row="0" Source="{Binding SettlementBitmap, Converter={StaticResource BitmapToImageSource}}" Stretch="Uniform"/>
+            <fa:ImageAwesome Grid.Row="0"
                             Icon="Spinner" Visibility="{Binding SpinnerVisibility}" Foreground="{DynamicResource PrimaryHueDarkBrush}"
                              HorizontalAlignment="Center" VerticalAlignment="Center" Spin="True" Height="80" Width="80" />
             <StackPanel Grid.Row="1">
@@ -44,11 +45,12 @@
 
         <StackPanel Margin="5" Grid.Column="1">
             <Border BorderThickness="2" BorderBrush="Black">
-
-                <StackPanel DataContext="{Binding Source={StaticResource Locator}, Path=Designer}">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                        <oxy:PlotView  Model="{Binding Plot}"  Height="400" Width="400"  />
-                        <Slider
+                <TabControl Style="{StaticResource MaterialDesignTabControl}">
+                    <TabItem Header="Breakpoints">
+                        <StackPanel DataContext="{Binding Source={StaticResource Locator}, Path=Designer}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                <oxy:PlotView  Model="{Binding Plot}"  Height="380" Width="380"  />
+                                <Slider
                                     TickFrequency="1"
                                     TickPlacement="BottomRight"
                                     Orientation="Vertical"
@@ -61,9 +63,13 @@
                                     ToolTip="MaterialDesignDiscreteSlider"
                                     Style="{StaticResource MaterialDesignDiscreteSlider}"
                             />
-                    </StackPanel>
-
-                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </TabItem>
+                    <TabItem Header="Logs">
+                        <ListView ItemsSource="{Binding Logs, NotifyOnSourceUpdated=True}"  Height="400"/>
+                    </TabItem>
+                </TabControl>
             </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="Stop simulation" Command="{Binding StopSimulationCommand}"
@@ -74,7 +80,7 @@
                         DataContext="{Binding Source={StaticResource Locator}, Path=Designer}"
                         HorizontalAlignment="Center" BorderBrush="OrangeRed" Background="OrangeRed"
                         Content="Clear breakpoints"/>
-               
+
             </StackPanel>
         </StackPanel>
 

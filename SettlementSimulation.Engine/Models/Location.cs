@@ -35,5 +35,11 @@ namespace SettlementSimulation.Engine.Models
             }
             return false;
         }
+
+        public override string ToString()
+        {
+            return $"({nameof(X)}: {X}, " +
+                   $"{nameof(Y)}: {Y})";
+        }
     }
 }

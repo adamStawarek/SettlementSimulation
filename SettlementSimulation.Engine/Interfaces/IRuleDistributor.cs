@@ -1,6 +1,4 @@
-﻿using SettlementSimulation.Engine.Interfaces;
-
-namespace SettlementSimulation.Engine.Helpers
+﻿namespace SettlementSimulation.Engine.Interfaces
 {
     public interface IRuleDistributor
     {

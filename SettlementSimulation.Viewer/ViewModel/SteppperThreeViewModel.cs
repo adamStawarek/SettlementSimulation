@@ -9,6 +9,7 @@ using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Viewer.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -28,6 +29,17 @@ namespace SettlementSimulation.Viewer.ViewModel
         #endregion
 
         #region properties
+        private List<string> _logs;
+        public List<string> Logs
+        {
+            get => _logs;
+            set
+            {
+                _logs = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public Dictionary<Type, Tuple<Color, string>> StructuresLegend { get; set; }
 
         private Bitmap _settlementBitmap;
@@ -75,6 +87,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             Messenger.Default.Register<SetSettlementInfoCommand>(this, this.SetSettlementInfo);
 
+            Logs = new List<string>();
             StructuresLegend = new Dictionary<Type, Tuple<Color, string>>();
             SpinnerVisibility = Visibility.Hidden;
 
@@ -115,6 +128,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             _generator.Start();
 
+            Logs.Clear();
             SpinnerVisibility = Visibility.Visible;
         }
 
@@ -147,13 +161,16 @@ namespace SettlementSimulation.Viewer.ViewModel
         private void UpdateSettlementBitmap()
         {
             SettlementState = _generator.SettlementState;
-            foreach (var building in SettlementState.Structures.Where(s => s is Building).Cast<Building>())
+            var buildings = SettlementState.Structures
+                .Where(s => s is Building).Cast<Building>().ToList();
+            _logs = new List<string>(buildings.Select(s=>s.ToString()));
+            foreach (var building in buildings)
             {
                 var point = building.Location.Point;
-                var buildingType = building.GetType().Name;
                 MarkPoint(point, SettlementBitmap, StructuresLegend[building.GetType()].Item1, 2);
             }
 
+            RaisePropertyChanged(nameof(Logs));
             RaisePropertyChanged(nameof(SettlementBitmap));
         }
 

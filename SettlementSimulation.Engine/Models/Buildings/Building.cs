@@ -13,7 +13,8 @@ namespace SettlementSimulation.Engine.Models.Buildings
 
         public static Building GetRandom(Epoch epoch)
         {
-            var buildings = Assembly.GetAssembly(typeof(SimulationEngine)).GetTypes()
+            var buildings = Assembly.GetAssembly(typeof(SimulationEngine))
+                .GetTypes()
                 .Where(t => t.IsSubclassOf(typeof(Building)) &&
                             t.GetCustomAttributes(typeof(EpochAttribute), false)
                                 .Cast<EpochAttribute>()
@@ -33,6 +34,12 @@ namespace SettlementSimulation.Engine.Models.Buildings
             }
 
             return buildings.OrderByDescending(b => b.Probability).First();
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(Type)}: {this.GetType().Name} " +
+                   $"{nameof(Location)}: {Location}";
         }
     }
 }

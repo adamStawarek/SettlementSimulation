@@ -37,7 +37,7 @@ namespace SettlementSimulation.Engine
             _breakpoints = breakpoints;
             _maxIterations = maxIterations;
             _timeout = timeout;
-            _engine = new SimulationEngine(100, fields, mainRoad);
+            _engine = new SimulationEngine(1, fields, mainRoad);
             _timer = new Timer { Interval = 100 };
             _timer.Elapsed += OnTick;
         }
@@ -102,7 +102,7 @@ namespace SettlementSimulation.Engine
             {
                 CurrentGeneration = _tick,
                 Time = (int)(_timer.Interval / 1000) * _tick,
-                CurrentEpoch = (Epoch)(_tick / (_maxIterations / 3)),
+                CurrentEpoch = Epoch.First,//TODO
                 Structures = new List<IStructure>()
             };
 

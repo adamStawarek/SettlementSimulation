@@ -34,10 +34,10 @@ namespace SettlementSimulation.Engine.Tests.Unit
 
         [Test]
         [Retry(100)]
-        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_Market_In_100_Tries()
+        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_Church_In_100_Tries()
         {
             var gene = Building.GetRandom(Models.Epoch.Second);
-            Assert.IsInstanceOf<Market>(gene);
+            Assert.IsInstanceOf<Church>(gene);
         }
 
         [Test]
@@ -45,7 +45,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_AdministrationOffice_In_100_Tries()
         {
             var gene = Building.GetRandom(Models.Epoch.Second);
-            Assert.IsInstanceOf<AdministrationOffice>(gene);
+            Assert.IsInstanceOf<Administration>(gene);
         }
 
         [Test]

@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SettlementSimulation.AreaGenerator.Helpers;
+using SettlementSimulation.AreaGenerator.Models.Terrains;
 
 namespace SettlementSimulation.AreaGenerator
 {
@@ -13,6 +15,16 @@ namespace SettlementSimulation.AreaGenerator
         private Pixel[,] _colorMap;
         private int _maxHeight;
         private int _minHeight;
+
+        private readonly TerrainHelper _terrainHelper;
+
+        public SettlementBuilder()
+        {
+            this._terrainHelper = new TerrainHelper();
+            _minHeight = _terrainHelper.GetTerrain<Sand>().UpperBound;
+            _maxHeight = _terrainHelper.GetTerrain<Lowland>().UpperBound;
+        }
+
 
         public SettlementBuilder WithHeightMap(Pixel[,] bitmap)
         {
@@ -37,7 +49,7 @@ namespace SettlementSimulation.AreaGenerator
         {
             #region find water aquens
 
-            const byte waterUpperBound = 70;
+            byte waterUpperBound = _terrainHelper.GetTerrain<Water>().UpperBound;
             var map = (Pixel[,])_heightMap.Clone();
             var waterAreasBoundaryFunc = new Func<Pixel, bool>(p => p.Intensity <= waterUpperBound);
             var waterAreas = new List<IEnumerable<Point>>();
