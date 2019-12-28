@@ -28,6 +28,8 @@
             </Grid.RowDefinitions>
 
             <Image Grid.Row="0" Source="{Binding SettlementBitmap, Converter={StaticResource BitmapToImageSource}}" Stretch="Uniform"/>
+            <Image Grid.Row="0" Width="150" Height="150" HorizontalAlignment="Right" VerticalAlignment="Top"
+                   Source="{Binding PreviewBitmap, Converter={StaticResource BitmapToImageSource}}" />
             <fa:ImageAwesome Grid.Row="0"
                             Icon="Spinner" Visibility="{Binding SpinnerVisibility}" Foreground="{DynamicResource PrimaryHueDarkBrush}"
                              HorizontalAlignment="Center" VerticalAlignment="Center" Spin="True" Height="80" Width="80" />

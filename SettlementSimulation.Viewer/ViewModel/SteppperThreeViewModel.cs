@@ -13,7 +13,9 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using Point = SettlementSimulation.AreaGenerator.Models.Point;
 
 namespace SettlementSimulation.Viewer.ViewModel
@@ -49,6 +51,17 @@ namespace SettlementSimulation.Viewer.ViewModel
             set
             {
                 _settlementBitmap = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private Bitmap _previewBitmap;
+        public Bitmap PreviewBitmap
+        {
+            get => _previewBitmap;
+            set
+            {
+                _previewBitmap = value;
                 RaisePropertyChanged();
             }
         }
@@ -110,7 +123,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         }
 
-        private void StartSimulation()
+        private async void StartSimulation()
         {
             var maxIterations = _viewModelLocator.Designer.EndY;
             var breakpoints = _viewModelLocator.Designer.Breakpoints;
@@ -126,10 +139,10 @@ namespace SettlementSimulation.Viewer.ViewModel
             _generator.NextEpoch += OnNextEpoch;
             _generator.Finished += OnFinished;
 
-            _generator.Start();
-
             Logs.Clear();
             SpinnerVisibility = Visibility.Visible;
+
+            await _generator.Start();
         }
 
         private void StopSimulation()
@@ -161,33 +174,83 @@ namespace SettlementSimulation.Viewer.ViewModel
         private void UpdateSettlementBitmap()
         {
             SettlementState = _generator.SettlementState;
+
+            var originalColorMap = new Bitmap(_colorMap);
+
             var buildings = SettlementState.Structures
-                .Where(s => s is Building).Cast<Building>().ToList();
-            
-            if (!buildings.Any()) return;
+                .SelectMany(s => s.Segments.SelectMany(seg => seg.Buildings)).ToList();
 
-            _logs = new List<string>(buildings.Select(s => s.ToString()));
-            
-            var originalColorMap= new Bitmap(_colorMap);
-            foreach (var building in buildings)
-            {
-                var point = building.Position;
-                MarkPoint(point, originalColorMap, StructuresLegend[building.GetType()].Item1, 1);
-            }
+            var roads = SettlementState.Structures.Select(s => s.Segments.Select(sg => sg.Position)).ToList();
 
-            var newBitmap = GetTrimmedBitmap(buildings, originalColorMap);
-            SettlementBitmap = new Bitmap(newBitmap);
+            MarkBuildingsAndRoads(roads, buildings, originalColorMap);
+
+            var logs = buildings.Select(s => s.ToString()).ToList();
+            logs.AddRange(SettlementState.Structures.Select(r => r.ToString()));
+            _logs = new List<string>(logs);
+
+            var allRoadPoints = roads.SelectMany(s => s).ToList();
+            var upperLeft = new Point(allRoadPoints.Min(s => s.X), allRoadPoints.Min(s => s.Y));
+            var bottomRight = new Point(allRoadPoints.Max(s => s.X), allRoadPoints.Max(s => s.Y));
+
+            var trimmedBitmap = GetTrimmedBitmap(originalColorMap, upperLeft, bottomRight);
+            var previewBitmap = GetPreviewBitmap(_colorMap, upperLeft, bottomRight);
+            
+            SettlementBitmap = new Bitmap(trimmedBitmap);
+            PreviewBitmap = new Bitmap(previewBitmap);
 
             RaisePropertyChanged(nameof(Logs));
             RaisePropertyChanged(nameof(SettlementBitmap));
+            RaisePropertyChanged(nameof(PreviewBitmap));
         }
 
-        private Bitmap GetTrimmedBitmap(List<Building> buildings, Bitmap bitmap)
+        private void MarkBuildingsAndRoads(
+            List<IEnumerable<Point>> roads,
+            List<Building> buildings,
+            Bitmap originalColorMap)
         {
-            var minX = buildings.Min(b => b.Position.X);
-            var minY = buildings.Min(b => b.Position.Y);
-            var maxX = buildings.Max(b => b.Position.X);
-            var maxY = buildings.Max(b => b.Position.Y);
+            foreach (var building in buildings)
+            {
+                var point = building.Position;
+                MarkPoint(point, originalColorMap, StructuresLegend[building.GetType()].Item1);
+            }
+
+            foreach (var road in roads)
+            {
+                var roadPoints = road.ToList();
+                roadPoints.ForEach(p => MarkPoint(p, originalColorMap, Color.Red));
+            }
+        }
+        private Bitmap GetPreviewBitmap(
+            Bitmap colorMap,
+            Point upperLeft,
+            Point bottomRight)
+        {
+            var bitmap = new Bitmap(colorMap);
+
+            using (var fastBitmap = bitmap.FastLock())
+            {
+                for (int i = upperLeft.X; i < bottomRight.X; i++)
+                {
+                    for (int j = upperLeft.Y; j < bottomRight.Y; j++)
+                    {
+                        var color = fastBitmap.GetPixel(i, j);
+                        fastBitmap.SetPixel(i, j, Color.FromArgb(255, color.G, color.B));
+                    }
+                } 
+            }
+
+            return bitmap;
+        }
+
+        private Bitmap GetTrimmedBitmap(
+            Bitmap bitmap,
+            Point upperLeft,
+            Point bottomRight)
+        {
+            var minX = upperLeft.X;
+            var minY = upperLeft.Y;
+            var maxX = bottomRight.X;
+            var maxY = bottomRight.Y;
 
             var offset = 10;
             var width = maxX - minX + 2 * offset;
@@ -220,6 +283,14 @@ namespace SettlementSimulation.Viewer.ViewModel
             for (int i = 0; i < structures.Count(); i++)
             {
                 StructuresLegend.Add(structures[i], new Tuple<Color, string>(GetRandColor(i), structures[i].Name));
+            }
+        }
+
+        private void MarkPoint(Point point, Bitmap bitmap, Color color)
+        {
+            using (var fastBitmap = bitmap.FastLock())
+            {
+                fastBitmap.SetPixel(point.X, point.Y , color);
             }
         }
 

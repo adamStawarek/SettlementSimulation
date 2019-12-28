@@ -19,14 +19,20 @@ namespace SettlementSimulation.Engine.Models
         public Point Start => Segments.First().Position;
         public Point End => Segments.Last().Position;
 
+        public override string ToString()
+        {
+            return $"Road: [{Start};{End}], buildings: {Segments.SelectMany(s=>s.Buildings).Count()}";
+        }
+
         public class RoadSegment
         {
-            public Point Position { get; set; }
-            public List<Building> Buildings { get; set; }
+            public Point Position { get; }
+            public List<Building> Buildings { get; }
 
             public RoadSegment(Point point)
             {
                 Position = point;
+                Buildings = new List<Building>();
             }
         }
     }

@@ -5,6 +5,7 @@ using SettlementSimulation.Engine.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SettlementSimulation.Engine.Models.Buildings.FirstType;
 
 namespace SettlementSimulation.Engine
 {
@@ -44,10 +45,14 @@ namespace SettlementSimulation.Engine
 
             var center = _fields.ToList()
                 .Where(f => f.InSettlement &&
-                            Math.Abs(f.Position.X) > 2 * radius && Math.Abs(f.Position.X) < _fields.GetLength(0) - 2 * radius &&
-                            Math.Abs(f.Position.Y) > 2 * radius && Math.Abs(f.Position.Y) < _fields.GetLength(1) - 2 * radius &&
+                            f.Position.X < _fields.GetLength(0) - 3 * radius &&
+                            f.Position.X > 3 * radius &&
+                            f.Position.Y < _fields.GetLength(1) - 3 * radius &&
+                            f.Position.Y > 3 * radius &&
                             f.DistanceToMainRoad + f.DistanceToWater <= avgDistanceToWaterAndMainRoad &&
                             f.Position.GetCircularPoints(radius, Math.PI / 17.0f)
+                                .All(p => _fields[p.X, p.Y].InSettlement)&&
+                            f.Position.GetCircularPoints(2*radius, Math.PI / 17.0f)
                                 .All(p => _fields[p.X, p.Y].InSettlement))
                 .Select(p => p.Position)
                 .First();
@@ -59,7 +64,7 @@ namespace SettlementSimulation.Engine
                 var randY = RandomProvider.Next(center.Y - 2 * radius, center.Y + 2 * radius);
 
                 var point = new Point(randX, randY);
-                if (randX < 0 || randX >= _fields.GetLength(0) || 
+                if (randX < 0 || randX >= _fields.GetLength(0) ||
                     randY < 0 || randY >= _fields.GetLength(1) ||
                     _fields[point.X, point.Y].InSettlement == false ||
                     (Math.Abs(center.X - point.X) < radius &&
@@ -110,28 +115,38 @@ namespace SettlementSimulation.Engine
             }
         }
 
-        public IBuilding GetRandomGene(Epoch epoch)
-        {
-            //TODO check whether to generate building or road
-
-            throw new NotImplementedException();
-        }
-
         public float CalculateFitness(Epoch epoch, int generation)
         {
-            throw new NotImplementedException();
+            //TODO
+            return 0;
         }
 
         public Dna Crossover(Dna otherParent, Epoch epoch)
         {
             //TODO join this parts of the dna's that don't overlap
+            var road = this.Genes[RandomProvider.Next(this.Genes.Count)];
+            var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
+            if (segment.Buildings.Any()) return this;
 
-            throw new NotImplementedException();
+            var buildingPosition = segment.Position;
+            if (road.Segments.Any(
+                s => s.Position.Equals(new Point(segment.Position.X + 1, segment.Position.Y))))
+            {
+                buildingPosition.Y += 1;
+            }
+            else
+            {
+                buildingPosition.X += 1;
+            }
+
+            segment.Buildings.Add(new Residence() { Position = buildingPosition });
+
+            return this;
         }
 
         public void Mutate(Epoch epoch, float mutationRate = 0.01F)
         {
-            throw new NotImplementedException();
+            //TODO
         }
     }
 }

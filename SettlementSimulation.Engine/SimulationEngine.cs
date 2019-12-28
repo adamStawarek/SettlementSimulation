@@ -19,10 +19,10 @@ namespace SettlementSimulation.Engine
         #region properties
         public List<Dna> Population { get; set; }
         public int Generation { get; set; }
-        public float BestFitness { get; set; }
-        public List<IRoad> BestGenes { get; set; }
-        public Field[,] Fields { get; set; }
-        public List<Point> MainRoad { get; set; }
+        public Field[,] Fields { get; }
+        public List<Point> MainRoad { get; }
+        public List<IRoad> BestGenes => 
+            Population.OrderByDescending(p => p.Fitness).FirstOrDefault()?.Genes;
         #endregion
 
         public SimulationEngine(
@@ -79,12 +79,13 @@ namespace SettlementSimulation.Engine
 
         public void CalculateFitness()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public Dna ChooseParent()
         {
-            throw new NotImplementedException();
+            //TODO
+            return Population.First();
         }
     }
 }
