@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine.Interfaces
 {
-    public interface IRoadGenerator 
+    public interface IRoad
     {
-        IEnumerable<Point> Generate(RoadGenerationInfo roadInfo);
+        List<Road.RoadSegment> Segments { get; }
+        Dictionary<Point, Road> AttachedRoads { get; }
+        Point Start { get; }
+        Point End { get; }
     }
 }

@@ -3,13 +3,14 @@ using SettlementSimulation.Engine.Interfaces;
 using System;
 using System.Linq;
 using System.Reflection;
+using SettlementSimulation.AreaGenerator.Models;
 
 namespace SettlementSimulation.Engine.Models.Buildings
 {
-    public abstract class Building : IStructure
+    public abstract class Building : IBuilding
     {
-        public Location Location { get; set; }
         public abstract double Probability { get; }
+        public Point Position { get; set; }
 
         public static Building GetRandom(Epoch epoch)
         {
@@ -39,7 +40,7 @@ namespace SettlementSimulation.Engine.Models.Buildings
         public override string ToString()
         {
             return $"{nameof(Type)}: {this.GetType().Name} " +
-                   $"{nameof(Location)}: {Location}";
+                   $"{nameof(Position)}: {Position}";
         }
     }
 }

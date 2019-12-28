@@ -103,7 +103,7 @@ namespace SettlementSimulation.Engine
                 CurrentGeneration = _tick,
                 Time = (int)(_timer.Interval / 1000) * _tick,
                 CurrentEpoch = Epoch.First,//TODO
-                Structures = new List<IStructure>()
+                Structures = new List<IBuilding>()
             };
 
             if (previousSettlementState != null)
@@ -113,7 +113,7 @@ namespace SettlementSimulation.Engine
 
             var rand = new Random();
             var takenPositions = previousSettlementState?.Structures.Cast<Building>()
-                .Select(s => s.Location.Point).ToArray();
+                .Select(s => s.Position).ToArray();
             var positions = _engine.Fields.ToList()
                 .Where(f => f.InSettlement &&
                             (takenPositions == null || !takenPositions.Contains(f.Position)) &&
@@ -124,7 +124,7 @@ namespace SettlementSimulation.Engine
             for (int i = 0; i < Math.Log(_tick - previousSettlementState?.Structures?.Count() ?? 0); i++)
             {
                 var building = Building.GetRandom(SettlementState.CurrentEpoch);
-                building.Location = new Location(positions[rand.Next(positions.Count())]);
+                building.Position= positions[rand.Next(positions.Count())];
                 SettlementState.Structures.Add(building);
             }
         }

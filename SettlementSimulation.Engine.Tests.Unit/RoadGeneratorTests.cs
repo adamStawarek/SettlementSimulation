@@ -50,9 +50,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void Generate_Returns_Shortest_Path()
         {
-            var structures = new List<IStructure>()
+            var structures = new List<IBuilding>()
             {
-                new Residence() {Location = new Location(1, 4)}
+                new Residence() {Position = new Point(1, 4)}
             };
 
             var expectedPath = new List<Point>()
@@ -63,6 +63,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3),
                 new Point(3, 3),
                 new Point(3, 2),
+                new Point(3, 1),
                 new Point(3, 0)
             };
 

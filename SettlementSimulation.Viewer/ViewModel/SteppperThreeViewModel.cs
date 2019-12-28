@@ -163,15 +163,51 @@ namespace SettlementSimulation.Viewer.ViewModel
             SettlementState = _generator.SettlementState;
             var buildings = SettlementState.Structures
                 .Where(s => s is Building).Cast<Building>().ToList();
-            _logs = new List<string>(buildings.Select(s=>s.ToString()));
+            
+            if (!buildings.Any()) return;
+
+            _logs = new List<string>(buildings.Select(s => s.ToString()));
+            
+            var originalColorMap= new Bitmap(_colorMap);
             foreach (var building in buildings)
             {
-                var point = building.Location.Point;
-                MarkPoint(point, SettlementBitmap, StructuresLegend[building.GetType()].Item1, 2);
+                var point = building.Position;
+                MarkPoint(point, originalColorMap, StructuresLegend[building.GetType()].Item1, 1);
             }
+
+            var newBitmap = GetTrimmedBitmap(buildings, originalColorMap);
+            SettlementBitmap = new Bitmap(newBitmap);
 
             RaisePropertyChanged(nameof(Logs));
             RaisePropertyChanged(nameof(SettlementBitmap));
+        }
+
+        private Bitmap GetTrimmedBitmap(List<Building> buildings, Bitmap bitmap)
+        {
+            var minX = buildings.Min(b => b.Position.X);
+            var minY = buildings.Min(b => b.Position.Y);
+            var maxX = buildings.Max(b => b.Position.X);
+            var maxY = buildings.Max(b => b.Position.Y);
+
+            var offset = 10;
+            var width = maxX - minX + 2 * offset;
+            var height = maxY - minY + 2 * offset;
+            var tmpBitmap = new Bitmap(width, height);
+
+            using (var fastBitmap = bitmap.FastLock())
+            {
+                for (int i = minX - offset, n = 0; i < maxX + offset; i++, n++)
+                {
+                    for (int j = minY - offset, m = 0; j < maxY + offset; j++, m++)
+                    {
+                        if (i < 0 || j < 0 || i >= fastBitmap.Width || j >= fastBitmap.Height) continue;
+                        var color = fastBitmap.GetPixel(i, j);
+                        tmpBitmap.SetPixel(n, m, color);
+                    }
+                }
+            }
+
+            return tmpBitmap;
         }
 
         private void SetUpStructureLegend()

@@ -1,4 +1,5 @@
-﻿using SettlementSimulation.AreaGenerator.Models;
+﻿using System;
+using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
@@ -19,7 +20,7 @@ namespace SettlementSimulation.Engine
         public List<Dna> Population { get; set; }
         public int Generation { get; set; }
         public float BestFitness { get; set; }
-        public IStructure[] BestGenes { get; set; }
+        public List<IRoad> BestGenes { get; set; }
         public Field[,] Fields { get; set; }
         public List<Point> MainRoad { get; set; }
         #endregion
@@ -78,34 +79,12 @@ namespace SettlementSimulation.Engine
 
         public void CalculateFitness()
         {
-            _fitnessSum = 0;
-            var best = Population[0];
-            Population.ForEach(p =>
-            {
-                _fitnessSum += p.CalculateFitness(_currentEpoch, Generation);
-                best = best.Fitness < p.Fitness ? p : best;
-            });
-
-            BestFitness = best.Fitness;
-            
-            BestGenes = new IStructure[best.Genes.Count()];
-            best.Genes.CopyTo(BestGenes, 0);
+            throw new NotImplementedException();
         }
 
         public Dna ChooseParent()
         {
-            double fitness = RandomProvider.NextDouble() * _fitnessSum;
-            foreach (var subject in Population)
-            {
-                if (fitness < subject.Fitness)
-                {
-                    return subject;
-                }
-
-                fitness -= subject.Fitness;
-            }
-
-            return Population.First();
+            throw new NotImplementedException();
         }
     }
 }

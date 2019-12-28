@@ -76,10 +76,14 @@
                         FontSize="16" HorizontalAlignment="Center" Margin="5"/>
                 <Button Content="Start simulation" Command="{Binding StartSimulationCommand}"
                         FontSize="16" HorizontalAlignment="Center" Margin="5"/>
+                <Button Command="{Binding WithUniformBreakpointsCommand}" Margin="5"
+                        DataContext="{Binding Source={StaticResource Locator}, Path=Designer}"
+                        HorizontalAlignment="Center" BorderBrush="BlueViolet"  Background="BlueViolet"
+                        Content="Uniform"/>
                 <Button Command="{Binding ClearBreakpointsCommand}" Margin="5"
                         DataContext="{Binding Source={StaticResource Locator}, Path=Designer}"
                         HorizontalAlignment="Center" BorderBrush="OrangeRed" Background="OrangeRed"
-                        Content="Clear breakpoints"/>
+                        Content="Clear"/>
 
             </StackPanel>
         </StackPanel>

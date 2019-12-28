@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Diagnostics.CodeAnalysis;
+using NUnit.Framework;
 using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using SettlementSimulation.Engine.Models.Buildings.SecondType;
@@ -62,6 +63,16 @@ namespace SettlementSimulation.Engine.Tests.Unit
         {
             var gene = Building.GetRandom(Models.Epoch.Third);
             Assert.IsInstanceOf<Court>(gene);
+        }
+    }
+
+    [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+    public class DnaTests
+    {
+        [Test]
+        public void InitializeGenes_Does_Not_Throw_Exception()
+        {
+            Assert.DoesNotThrow(()=>new Dna(null, null, shouldInitGenes: true));
         }
     }
 }
