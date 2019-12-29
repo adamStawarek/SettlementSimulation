@@ -28,7 +28,7 @@ namespace SettlementSimulation.Engine.Helpers
             }
 
             var positions = grid.GetPath(
-                new Position(model.Start.X, model.Start.Y), new Position(model.End.X,model.End.Y),
+                new Position(model.Start.X, model.Start.Y), new Position(model.End.X, model.End.Y),
                 MovementPatterns.LateralOnly);
 
             return positions.Select(p => new Point(p.X, p.Y));
@@ -36,27 +36,49 @@ namespace SettlementSimulation.Engine.Helpers
 
         public IEnumerable<Point> GenerateAttached(RoadGenerationAttached model)
         {
-            //var road = model.Road;
+            var possiblePositions = model.Road.GetPossiblePositionsToAttachRoad(model.MinDistanceBetweenRoads);
+            if (!possiblePositions.Any()) return null;
 
-            //var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
+            var roadStart = possiblePositions[RandomProvider.Next(0, possiblePositions.Count)];
+            var minRoadLength = model.Roads.Min(r => r.Length); //TODO - random endPoint between (minRL,maxRL)
+            var maxRoadLength = model.Roads.Max(r => r.Length);
 
-            //var positions = new List<Point>
-            //{
-            //    new Point(segment.Position.X - 1, segment.Position.Y),
-            //    new Point(segment.Position.X + 1, segment.Position.Y),
-            //    new Point(segment.Position.X, segment.Position.Y - 1),
-            //    new Point(segment.Position.X, segment.Position.Y + 1),
-            //};
-            //positions.RemoveAll(p => road.BlockedCells.Contains(p) ||
-            //                         road.AttachedRoads.Any(a => a.DistanceTo(p) <= 2)); //TODO
-            //if (!positions.Any())
-            //    throw new Exception("No places for building available");
+            var segment = model.Road.Segments.Single(s => s.Position.X == roadStart.X ||
+                                                          s.Position.Y == roadStart.Y);
 
-            //var start = positions[RandomProvider.Next(0, positions.Count)];
+            Point roadEnd = new Point(-1, -1);
+            if (segment.Position.X.Equals(roadStart.X))//vertical road
+            {
+                roadEnd = segment.Position.Y > roadStart.Y ?
+                    new Point(segment.Position.X, roadStart.Y - maxRoadLength) :
+                    new Point(segment.Position.X, roadStart.Y + maxRoadLength);
+            }
+            else//horizontal road
+            {
+                roadEnd = segment.Position.X > roadStart.X ?
+                    new Point(segment.Position.X - maxRoadLength, roadStart.Y) :
+                    new Point(segment.Position.X + maxRoadLength, roadStart.Y);
+            }
 
-            //var largestRoadLength = Genes.Max(g => g.Length);
-            //var shortestRoadLength = Genes.Min(g => g.Length);
-            return null;
+            var roadPoints = this.Generate(new RoadGenerationTwoPoints()
+            {
+                Start = roadStart,
+                End = roadEnd,
+                Fields = model.Fields,
+                BlockedCells = model.BlockedCells
+            }).ToList();
+
+            //check whether there is cross with other road - TODO optimize
+
+            Point? intersectPoint = model.Roads //TODO - can be multiple intersect points
+                .SelectMany(r => r.Segments.Select(s => s.Position))
+                .Intersect(roadPoints)
+                .Cast<Point?>()
+                .FirstOrDefault();
+
+            return intersectPoint != null ? 
+                roadPoints.Take(roadPoints.IndexOf((Point)intersectPoint)) : 
+                roadPoints;
         }
     }
 }
