@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Diagnostics.CodeAnalysis;
+using NUnit.Framework;
 using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using SettlementSimulation.Engine.Models.Buildings.SecondType;
@@ -34,10 +35,10 @@ namespace SettlementSimulation.Engine.Tests.Unit
 
         [Test]
         [Retry(100)]
-        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_Market_In_100_Tries()
+        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_Church_In_100_Tries()
         {
             var gene = Building.GetRandom(Models.Epoch.Second);
-            Assert.IsInstanceOf<Market>(gene);
+            Assert.IsInstanceOf<Church>(gene);
         }
 
         [Test]
@@ -45,7 +46,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_AdministrationOffice_In_100_Tries()
         {
             var gene = Building.GetRandom(Models.Epoch.Second);
-            Assert.IsInstanceOf<AdministrationOffice>(gene);
+            Assert.IsInstanceOf<Administration>(gene);
         }
 
         [Test]
@@ -62,6 +63,16 @@ namespace SettlementSimulation.Engine.Tests.Unit
         {
             var gene = Building.GetRandom(Models.Epoch.Third);
             Assert.IsInstanceOf<Court>(gene);
+        }
+    }
+
+    [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+    public class DnaTests
+    {
+        [Test]
+        public void InitializeGenes_Does_Not_Throw_Exception()
+        {
+            Assert.DoesNotThrow(()=>new Dna(null, null, shouldInitGenes: true));
         }
     }
 }

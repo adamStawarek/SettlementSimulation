@@ -35,46 +35,50 @@
                                 <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="8">
                                     <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="100" Height="100">
                                         <TextBlock DockPanel.Dock="Bottom" FontSize="12" Text="{Binding Path=Tag, Mode=OneTime}"
-                                           Margin="0,8,0,0" HorizontalAlignment="Center" />
-
-                                        <Image Stretch="Uniform"
+                                           Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                                        <Grid Background="White">
+                                            <Image Stretch="Uniform"
                                        DataContext="{Binding .}"
                                        Source="{Binding .,
                                         Converter={StaticResource BitmapToImageSource},
                                         NotifyOnSourceUpdated=True}" Margin="3"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        <Popup x:Name="PopupBox" Placement="Bottom" StaysOpen="True">
-                                            <StackPanel Background="AliceBlue">
-                                                <Button Content="Set as height-map" Margin="5">
-                                                    <i:Interaction.Triggers>
-                                                        <i:EventTrigger EventName="Click">
-                                                            <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
+                                            <Popup x:Name="PopupBox" StaysOpen="True" Placement="Bottom">
+                                                <StackPanel Background="AliceBlue">
+                                                    <Button Content="Set as height-map" Margin="5">
+                                                        <i:Interaction.Triggers>
+                                                            <i:EventTrigger EventName="Click">
+                                                                <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
                                                                                 Path=Children[1].DataContext}"
                                                                             Command="{Binding DataContext.SetHeightMapCommand, ElementName=Main}"/>
-                                                        </i:EventTrigger>
-                                                    </i:Interaction.Triggers>
-                                                </Button>
-                                                <Button Content="Set as color-map" Margin="5" Background="Green">
-                                                    <i:Interaction.Triggers>
-                                                        <i:EventTrigger EventName="Click">
-                                                            <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
+                                                            </i:EventTrigger>
+                                                        </i:Interaction.Triggers>
+                                                    </Button>
+                                                    <Button Content="Set as color-map" Margin="5" Background="Green">
+                                                        <i:Interaction.Triggers>
+                                                            <i:EventTrigger EventName="Click">
+                                                                <command:EventToCommand CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
                                                                                 Path=Children[1].DataContext}"
                                                                             Command="{Binding DataContext.SetColorMapCommand, ElementName=Main}"/>
-                                                        </i:EventTrigger>
-                                                    </i:Interaction.Triggers>
-                                                </Button>
-                                            </StackPanel>
-                                            <Popup.Style>
-                                                <Style>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DockPanel}},
+                                                            </i:EventTrigger>
+                                                        </i:Interaction.Triggers>
+                                                    </Button>
+                                                    <Button Content="Generate color map" Margin="5" Background="DarkGoldenrod"
+                                                        BorderBrush="DarkGoldenrod"
+                                                        Command="{Binding DataContext.GenerateColorMapCommand,ElementName=Main}"/>
+                                                </StackPanel>
+                                                <Popup.Style>
+                                                    <Style>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
                                                     Path=IsMouseOver}" Value="True">
-                                                            <Setter Property="Popup.IsOpen" Value="True"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Popup.Style>
-                                        </Popup>
+                                                                <Setter Property="Popup.IsOpen" Value="True"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Popup.Style>
+                                            </Popup>
+                                        </Grid>
                                     </DockPanel>
                                 </Border>
                             </DataTemplate>

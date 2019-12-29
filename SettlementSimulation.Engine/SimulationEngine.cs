@@ -1,10 +1,10 @@
-﻿using SettlementSimulation.AreaGenerator.Models;
+﻿using System;
+using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using SettlementSimulation.Engine.Helpers;
 
 namespace SettlementSimulation.Engine
 {
@@ -19,15 +19,14 @@ namespace SettlementSimulation.Engine
         #region properties
         public List<Dna> Population { get; set; }
         public int Generation { get; set; }
-        public float BestFitness { get; set; }
-        public IStructure[] BestGenes { get; }
-        public Field[,] Fields { get; set; }
-        public List<Point> MainRoad { get; set; }
+        public Field[,] Fields { get; }
+        public List<Point> MainRoad { get; }
+        public List<IRoad> BestGenes => 
+            Population.OrderByDescending(p => p.Fitness).FirstOrDefault()?.Genes;
         #endregion
 
         public SimulationEngine(
             int populationSize,
-            int dnaSize,
             Field[,] fields,
             List<Point> mainRoad)
         {
@@ -35,10 +34,9 @@ namespace SettlementSimulation.Engine
             MainRoad = mainRoad;
             Generation = 1;
             Population = new List<Dna>(populationSize);
-            BestGenes = new IStructure[dnaSize];
             for (int i = 0; i < populationSize; i++)
             {
-                Population.Add(new Dna(dnaSize, fields, mainRoad));
+                Population.Add(new Dna(fields, mainRoad));
             }
 
             _allEpochs = new Stack<Epoch>();
@@ -67,7 +65,7 @@ namespace SettlementSimulation.Engine
                 Dna parent1 = ChooseParent();
                 Dna parent2 = ChooseParent();
 
-                Dna child = parent1.Crossover(parent2);
+                Dna child = parent1.Crossover(parent2, _currentEpoch);
 
                 child.Mutate(_currentEpoch);
 
@@ -81,31 +79,12 @@ namespace SettlementSimulation.Engine
 
         public void CalculateFitness()
         {
-            _fitnessSum = 0;
-            var best = Population[0];
-            Population.ForEach(p =>
-            {
-                _fitnessSum += p.CalculateFitness(_currentEpoch);
-                best = best.Fitness < p.Fitness ? p : best;
-            });
-
-            BestFitness = best.Fitness;
-            best.Genes.CopyTo(BestGenes, 0);
+            //TODO
         }
 
         public Dna ChooseParent()
         {
-            double fitness = RandomProvider.NextDouble() * _fitnessSum;
-            foreach (var subject in Population)
-            {
-                if (fitness < subject.Fitness)
-                {
-                    return subject;
-                }
-
-                fitness -= subject.Fitness;
-            }
-
+            //TODO
             return Population.First();
         }
     }
