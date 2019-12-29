@@ -1,12 +1,11 @@
-﻿using System;
+﻿using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
-using SettlementSimulation.Engine.Models.Buildings;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using SettlementSimulation.AreaGenerator.Models;
-using SettlementSimulation.Engine.Helpers;
+using SettlementSimulation.Engine.Models.Buildings.FirstType;
 
 namespace SettlementSimulation.Engine
 {
@@ -15,92 +14,139 @@ namespace SettlementSimulation.Engine
         #region
         private readonly Field[,] _fields;
         private readonly List<Point> _mainRoad;
+        private readonly IRuleDistributor _ruleDistributor;
         #endregion
 
         #region properties
-        public IStructure[] Genes { get; set; }
+        public List<IRoad> Genes { get; set; }
         public float Fitness { get; private set; }
         #endregion
 
-        public Dna(int size,
+        public Dna(
             Field[,] fields,
             List<Point> mainRoad,
             bool shouldInitGenes = true)
         {
             _fields = fields;
             _mainRoad = mainRoad;
-            Genes = new IStructure[size];
+            Genes = new List<IRoad>();
+            _ruleDistributor = new RuleDistributor();
 
             if (!shouldInitGenes) return;
-            for (var i = 0; i < Genes.Length; i++)
-            {
-                Genes[i] = GetRandomGene(Epoch.First);
-            }
+            InitializeGenes();
         }
 
-        public IStructure GetRandomGene(Epoch epoch)
+        private void InitializeGenes()
         {
-            //TODO check whether to generate building or road
+            var radius = 15;
+            var avgDistanceToWaterAndMainRoad = _fields.ToList()
+                .Where(f => f.InSettlement)
+                .Average(f => f.DistanceToMainRoad + f.DistanceToWater);
 
-            var building = Building.GetRandom(epoch);
-
-            var takenPositions = Genes
-                .Where(g => g is Building)
-                .Cast<Building>()
-                .Select(s => s.Location.Point)
-                .ToArray();
-
-            var randomGeneBuilding = (Building)Genes
-                .OrderBy(g => Guid.NewGuid())
-                .FirstOrDefault(g => g is Building);
-
-            var positions = _fields.ToList()
+            var center = _fields.ToList()
                 .Where(f => f.InSettlement &&
-                            !takenPositions.Contains(f.Position) &&
-                            (randomGeneBuilding==null || f.Position.DistanceTo(randomGeneBuilding.Location.Point) < 10) &&
-                            f.DistanceToMainRoad + f.DistanceToWater < 400)
+                            f.Position.X < _fields.GetLength(0) - 3 * radius &&
+                            f.Position.X > 3 * radius &&
+                            f.Position.Y < _fields.GetLength(1) - 3 * radius &&
+                            f.Position.Y > 3 * radius &&
+                            f.DistanceToMainRoad + f.DistanceToWater <= avgDistanceToWaterAndMainRoad &&
+                            f.Position.GetCircularPoints(radius, Math.PI / 17.0f)
+                                .All(p => _fields[p.X, p.Y].InSettlement)&&
+                            f.Position.GetCircularPoints(2*radius, Math.PI / 17.0f)
+                                .All(p => _fields[p.X, p.Y].InSettlement))
                 .Select(p => p.Position)
-                .ToArray();
+                .First();
 
-            building.Location = new Location(positions[RandomProvider.Next(positions.Count())]);
-
-            return building;
-        }
-
-        public float CalculateFitness(Epoch epoch)
-        {
-            int score = 0;
-            switch (epoch)
+            var edgePoints = new List<Point>();
+            while (edgePoints.Count() != 5)
             {
-                case Epoch.First:
-                    {
-                        break;
-                    }
+                var randX = RandomProvider.Next(center.X - 2 * radius, center.X + 2 * radius);
+                var randY = RandomProvider.Next(center.Y - 2 * radius, center.Y + 2 * radius);
+
+                var point = new Point(randX, randY);
+                if (randX < 0 || randX >= _fields.GetLength(0) ||
+                    randY < 0 || randY >= _fields.GetLength(1) ||
+                    _fields[point.X, point.Y].InSettlement == false ||
+                    (Math.Abs(center.X - point.X) < radius &&
+                    Math.Abs(center.Y - point.Y) < radius))
+                {
+                    continue;
+                }
+
+                if (edgePoints.All(p =>
+                    Math.Abs(p.X - point.X) > 1 &&
+                    Math.Abs(p.Y - point.Y) > 1 &&
+                    p.DistanceTo(point) > 10))
+                {
+                    edgePoints.Add(point);
+                }
             }
 
-            return Fitness = score;
-        }
-
-        public Dna Crossover(Dna otherParent)
-        {
-            var child = new Dna(Genes.Length, _fields, _mainRoad, false);
-            for (int i = 0; i < Genes.Length; i++)
+            var roads = new List<(Point start, Point end)>();
+            var maxX = edgePoints.Max(p => p.X);
+            var minX = edgePoints.Min(p => p.X);
+            var maxY = edgePoints.Max(p => p.Y);
+            var minY = edgePoints.Min(p => p.Y);
+            roads.Add((new Point(minX, minY), new Point(maxX, minY)));
+            roads.Add((new Point(maxX, minY), new Point(maxX, maxY)));
+            roads.Add((new Point(maxX, maxY), new Point(minX, maxY)));
+            roads.Add((new Point(minX, maxY), new Point(minX, minY)));
+            foreach (var point in edgePoints)
             {
-                child.Genes[i] = RandomProvider.NextDouble() < 0.5 ? Genes[i] : otherParent.Genes[i];
+                if (point.X < maxX && point.X > minX)
+                {
+                    //add vertical road
+                    roads.Add((new Point(point.X, minY), new Point(point.X, maxY)));
+                }
+
+                if (point.Y < maxY && point.Y > minY)
+                {
+                    roads.Add((new Point(minX, point.Y), new Point(maxX, point.Y)));
+                    //add horizontal road
+                }
             }
 
-            return child;
+            var roadGenerator = new RoadGenerator();
+            foreach (var r in roads)
+            {
+                var roadPoints = roadGenerator.Generate(new RoadGenerationInfo()
+                { Start = r.start, End = r.end, Fields = _fields, Structures = new IBuilding[] { } });
+                Genes.Add(new Road(roadPoints));
+            }
+        }
+
+        public float CalculateFitness(Epoch epoch, int generation)
+        {
+            //TODO
+            return 0;
+        }
+
+        public Dna Crossover(Dna otherParent, Epoch epoch)
+        {
+            //TODO join this parts of the dna's that don't overlap
+            var road = this.Genes[RandomProvider.Next(this.Genes.Count)];
+            var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
+            if (segment.Buildings.Any()) return this;
+
+            var buildingPosition = segment.Position;
+            if (road.Segments.Any(
+                s => s.Position.Equals(new Point(segment.Position.X + 1, segment.Position.Y))))
+            {
+                buildingPosition.Y += 1;
+            }
+            else
+            {
+                buildingPosition.X += 1;
+            }
+
+            segment.Buildings.Add(new Residence() { Position = buildingPosition });
+
+            return this;
         }
 
         public void Mutate(Epoch epoch, float mutationRate = 0.01F)
         {
-            for (int i = 0; i < Genes.Length; i++)
-            {
-                if (RandomProvider.NextDouble() < mutationRate)
-                {
-                    Genes[i] = GetRandomGene(epoch);
-                }
-            }
+            //TODO
         }
     }
 }

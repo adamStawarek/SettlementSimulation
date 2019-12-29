@@ -36,6 +36,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         #region commands
         public RelayCommand ClearBreakpointsCommand { get; }
+        public RelayCommand WithUniformBreakpointsCommand { get; }
         #endregion
 
         public DesignerViewModel()
@@ -75,6 +76,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             };
 
             ClearBreakpointsCommand = new RelayCommand(ClearBreakpoints);
+            WithUniformBreakpointsCommand = new RelayCommand(WithUniformBreakpoints);
         }
 
         private void ClearBreakpoints()
@@ -83,6 +85,21 @@ namespace SettlementSimulation.Viewer.ViewModel
             S1.Points.RemoveRange(1, numberOfPointsToRemove);
             Plot.InvalidatePlot(true);
             Breakpoints.Clear();
+        }
+
+        private void WithUniformBreakpoints()
+        {
+            ClearBreakpoints();
+
+            var step = _endY / 20;
+            for (int y = 0; y < _endY; y += step)
+            {
+                var x = y / (_endY / (double)MaxGenerations);
+                S1.Points.Add(new DataPoint(x, y));
+                S1.Points.Sort((p, p2) => p.X.CompareTo(p2.X));
+                Breakpoints.Add((int)y);
+            }
+            Plot.InvalidatePlot(true);
         }
 
         public void SetTailPoint(int val)

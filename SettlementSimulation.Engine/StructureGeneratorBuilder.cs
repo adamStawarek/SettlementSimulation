@@ -1,6 +1,5 @@
 ﻿using SettlementSimulation.AreaGenerator.Models;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace SettlementSimulation.Engine
 {

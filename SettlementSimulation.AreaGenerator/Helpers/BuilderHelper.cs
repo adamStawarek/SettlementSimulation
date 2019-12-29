@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
+using SettlementSimulation.AreaGenerator.Models;
 
-namespace SettlementSimulation.AreaGenerator
+namespace SettlementSimulation.AreaGenerator.Helpers
 {
     public class BuilderHelper
     {
@@ -48,6 +48,5 @@ namespace SettlementSimulation.AreaGenerator
 
             return boundaryPoints;
         }
-
     }
 }
