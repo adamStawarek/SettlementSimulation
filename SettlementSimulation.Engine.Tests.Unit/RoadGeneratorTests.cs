@@ -4,7 +4,6 @@ using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
-using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 
 namespace SettlementSimulation.Engine.Tests.Unit
@@ -48,13 +47,8 @@ namespace SettlementSimulation.Engine.Tests.Unit
         }
 
         [Test]
-        public void Generate_Returns_Shortest_Path()
+        public void GenerateRoadPoints_Returns_Shortest_Path()
         {
-            var structures = new List<IBuilding>()
-            {
-                new Residence() {Position = new Point(1, 4)}
-            };
-
             var expectedPath = new List<Point>()
             {
                 new Point(0, 4),
@@ -67,10 +61,10 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 0)
             };
 
-            var path = _roadGenerator.Generate(new RoadGenerationInfo()
+            var path = _roadGenerator.Generate(new RoadGenerationTwoPoints()
             {
                 Fields = _fields,
-                Structures = structures,
+                BlockedCells = new []{ new Point(1, 4) },
                 Start = new Point(0, 4),
                 End = new Point(3, 0)
             });
@@ -78,5 +72,26 @@ namespace SettlementSimulation.Engine.Tests.Unit
             CollectionAssert.AreEquivalent(expectedPath, path);
         }
 
+        [Test]
+        public void GenerateAttached_When_New_Road_Does_Not_Cross_Other_Ones()
+        {
+            var road = new Road(new[]
+            {
+                new Point(3, 0),
+                new Point(3, 1),
+                new Point(3, 2),
+                new Point(3, 3)
+            });
+
+            road.AddBuilding(new Residence() {Position = new Point(2, 3)});
+            var roadPoints = _roadGenerator.GenerateAttached(new RoadGenerationAttached()
+            {
+                Fields = _fields,
+                Road = road,
+                Roads = new List<IRoad> {road}
+            });
+
+            
+        }
     }
 }

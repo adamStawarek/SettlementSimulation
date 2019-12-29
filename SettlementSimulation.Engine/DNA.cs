@@ -5,6 +5,7 @@ using SettlementSimulation.Engine.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 
 namespace SettlementSimulation.Engine
@@ -51,8 +52,8 @@ namespace SettlementSimulation.Engine
                             f.Position.Y > 3 * radius &&
                             f.DistanceToMainRoad + f.DistanceToWater <= avgDistanceToWaterAndMainRoad &&
                             f.Position.GetCircularPoints(radius, Math.PI / 17.0f)
-                                .All(p => _fields[p.X, p.Y].InSettlement)&&
-                            f.Position.GetCircularPoints(2*radius, Math.PI / 17.0f)
+                                .All(p => _fields[p.X, p.Y].InSettlement) &&
+                            f.Position.GetCircularPoints(2 * radius, Math.PI / 17.0f)
                                 .All(p => _fields[p.X, p.Y].InSettlement))
                 .Select(p => p.Position)
                 .First();
@@ -107,11 +108,21 @@ namespace SettlementSimulation.Engine
             }
 
             var roadGenerator = new RoadGenerator();
-            foreach (var r in roads)
+            foreach (var road in roads)
             {
-                var roadPoints = roadGenerator.Generate(new RoadGenerationInfo()
-                { Start = r.start, End = r.end, Fields = _fields, Structures = new IBuilding[] { } });
+                var roadPoints = roadGenerator.Generate(new RoadGenerationTwoPoints()
+                { Start = road.start, End = road.end, Fields = _fields });
                 Genes.Add(new Road(roadPoints));
+            }
+
+            foreach (var g1 in Genes)
+            {
+                foreach (var g2 in Genes)
+                {
+                    if (g1.Equals(g2)) continue;
+                    g1.BlockCell(g2.Start);
+                    g1.BlockCell(g2.End);
+                }
             }
         }
 
@@ -126,20 +137,10 @@ namespace SettlementSimulation.Engine
             //TODO join this parts of the dna's that don't overlap
             var road = this.Genes[RandomProvider.Next(this.Genes.Count)];
             var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
-            if (segment.Buildings.Any()) return this;
+            //if (segment.Buildings.Any()) return this;
 
-            var buildingPosition = segment.Position;
-            if (road.Segments.Any(
-                s => s.Position.Equals(new Point(segment.Position.X + 1, segment.Position.Y))))
-            {
-                buildingPosition.Y += 1;
-            }
-            else
-            {
-                buildingPosition.X += 1;
-            }
-
-            segment.Buildings.Add(new Residence() { Position = buildingPosition });
+            var building = GenerateBuilding(epoch, road);
+            segment.Buildings.Add(building);
 
             return this;
         }
@@ -148,5 +149,54 @@ namespace SettlementSimulation.Engine
         {
             //TODO
         }
+
+        //private Road GenerateRoad(IRoad road)
+        //{
+        //    var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
+        //    var positions = new List<Point>
+        //    {
+        //        new Point(segment.Position.X - 1, segment.Position.Y),
+        //        new Point(segment.Position.X + 1, segment.Position.Y),
+        //        new Point(segment.Position.X, segment.Position.Y - 1),
+        //        new Point(segment.Position.X, segment.Position.Y + 1),
+        //    };
+        //    positions.RemoveAll(p => road.BlockedCells.Contains(p) ||
+        //                                  road.AttachedRoads.Any(a => a.DistanceTo(p) <= 2)); //TODO
+        //    if (!positions.Any())
+        //        throw new Exception("No places for building available");
+
+        //    var start = positions[RandomProvider.Next(0, positions.Count)];
+
+        //    var largestRoadLength = Genes.Max(g => g.Length);
+        //    var shortestRoadLength = Genes.Min(g => g.Length);
+
+        //    #region check if road crosses another one
+            
+        //    #endregion
+        //}
+
+        private Building GenerateBuilding(
+            Epoch epoch,
+            IRoad road)
+        {
+            var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
+            var positions = new List<Point>
+            {
+                new Point(segment.Position.X - 1, segment.Position.Y),
+                new Point(segment.Position.X + 1, segment.Position.Y),
+                new Point(segment.Position.X, segment.Position.Y - 1),
+                new Point(segment.Position.X, segment.Position.Y + 1),
+            };
+            positions.RemoveAll(p => road.BlockedCells.Contains(p));
+            if (!positions.Any())
+                throw new Exception("No places for building available");
+
+            var position = positions[RandomProvider.Next(0, positions.Count)];
+
+            var building = Models.Buildings.Building.GetRandom(epoch);
+            building.Position = position;
+            return building;
+        }
+
     }
 }

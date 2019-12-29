@@ -5,8 +5,9 @@ using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine.Interfaces
 {
-    public interface IRoadGenerator 
+    public interface IRoadGenerator
     {
-        IEnumerable<Point> Generate(RoadGenerationInfo roadInfo);
+        IEnumerable<Point> Generate(RoadGenerationTwoPoints model);
+        IEnumerable<Point> GenerateAttached(RoadGenerationAttached model);
     }
 }

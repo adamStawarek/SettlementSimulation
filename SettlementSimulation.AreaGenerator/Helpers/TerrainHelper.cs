@@ -17,6 +17,12 @@ namespace SettlementSimulation.AreaGenerator.Helpers
                 .FirstOrDefault();
         }
 
+        public ITerrain GetTerrainForHeight(byte height)
+        {
+            var orderedTerrains = this.GetAllTerrains().OrderBy(t => t.UpperBound).ToList();
+            return orderedTerrains.First(f => f.UpperBound >= height);
+        }
+
         public IEnumerable<ITerrain> GetAllTerrains()
         {
             return Assembly.Load("SettlementSimulation.AreaGenerator")

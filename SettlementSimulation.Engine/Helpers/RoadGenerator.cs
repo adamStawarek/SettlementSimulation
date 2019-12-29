@@ -11,16 +11,16 @@ namespace SettlementSimulation.Engine.Helpers
 {
     public class RoadGenerator : IRoadGenerator
     {
-        public IEnumerable<Point> Generate(RoadGenerationInfo roadInfo)
+        public IEnumerable<Point> Generate(RoadGenerationTwoPoints model)
         {
-            var grid = new Grid(roadInfo.Fields.GetLength(0), roadInfo.Fields.GetLength(1), 1.0f);
+            var grid = new Grid(model.Fields.GetLength(0), model.Fields.GetLength(1), 1.0f);
 
-            for (int i = 0; i < roadInfo.Fields.GetLength(0); i++)
+            for (int i = 0; i < model.Fields.GetLength(0); i++)
             {
-                for (int j = 0; j < roadInfo.Fields.GetLength(1); j++)
+                for (int j = 0; j < model.Fields.GetLength(1); j++)
                 {
-                    if (!roadInfo.Fields[i, j].InSettlement ||
-                        roadInfo.Structures.Any(s => (int)s.Position.DistanceTo(new Point(i, j)) == 0))
+                    if (!model.Fields[i, j].InSettlement ||
+                        model.BlockedCells.Any(s => (int)s.DistanceTo(new Point(i, j)) == 0))
                     {
                         grid.BlockCell(new Position(i, j));
                     }
@@ -28,10 +28,35 @@ namespace SettlementSimulation.Engine.Helpers
             }
 
             var positions = grid.GetPath(
-                new Position(roadInfo.Start.X, roadInfo.Start.Y), new Position(roadInfo.End.X,roadInfo.End.Y),
+                new Position(model.Start.X, model.Start.Y), new Position(model.End.X,model.End.Y),
                 MovementPatterns.LateralOnly);
 
             return positions.Select(p => new Point(p.X, p.Y));
+        }
+
+        public IEnumerable<Point> GenerateAttached(RoadGenerationAttached model)
+        {
+            //var road = model.Road;
+
+            //var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
+
+            //var positions = new List<Point>
+            //{
+            //    new Point(segment.Position.X - 1, segment.Position.Y),
+            //    new Point(segment.Position.X + 1, segment.Position.Y),
+            //    new Point(segment.Position.X, segment.Position.Y - 1),
+            //    new Point(segment.Position.X, segment.Position.Y + 1),
+            //};
+            //positions.RemoveAll(p => road.BlockedCells.Contains(p) ||
+            //                         road.AttachedRoads.Any(a => a.DistanceTo(p) <= 2)); //TODO
+            //if (!positions.Any())
+            //    throw new Exception("No places for building available");
+
+            //var start = positions[RandomProvider.Next(0, positions.Count)];
+
+            //var largestRoadLength = Genes.Max(g => g.Length);
+            //var shortestRoadLength = Genes.Min(g => g.Length);
+            return null;
         }
     }
 }

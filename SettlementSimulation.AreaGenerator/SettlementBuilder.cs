@@ -25,7 +25,6 @@ namespace SettlementSimulation.AreaGenerator
             _maxHeight = _terrainHelper.GetTerrain<Lowland>().UpperBound;
         }
 
-
         public SettlementBuilder WithHeightMap(Pixel[,] bitmap)
         {
             _heightMap = bitmap;
@@ -48,7 +47,6 @@ namespace SettlementSimulation.AreaGenerator
         public async Task<SettlementInfo> BuildAsync()
         {
             #region find water aquens
-
             byte waterUpperBound = _terrainHelper.GetTerrain<Water>().UpperBound;
             var map = (Pixel[,])_heightMap.Clone();
             var waterAreasBoundaryFunc = new Func<Pixel, bool>(p => p.Intensity <= waterUpperBound);
@@ -108,7 +106,6 @@ namespace SettlementSimulation.AreaGenerator
             }).OrderBy(f => f.DistanceToWater).ToList();
 
             #region mark settlement area and water aquens on bitmap
-
             fields.Take((int)(fields.Count * 0.2)).ToList()
                 .ForEach(p => MarkPoint(p.Point, previewBitmap, new Pixel(255, 0, 0), 1));
             fields.Skip((int)(fields.Count * 0.2)).Take((int)(fields.Count * 0.3)).ToList()
@@ -125,7 +122,11 @@ namespace SettlementSimulation.AreaGenerator
             {
                 for (int j = 0; j < _heightMap.GetLength(1); j++)
                 {
-                    fieldGrid[i, j] = new Field() { Position = new Point(i, j) };
+                    fieldGrid[i, j] = new Field()
+                    {
+                        Position = new Point(i, j),
+                        Terrain = _terrainHelper.GetTerrainForHeight(_heightMap[i, j].Intensity)
+                    };
                 }
             }
             foreach (var field in fields)
