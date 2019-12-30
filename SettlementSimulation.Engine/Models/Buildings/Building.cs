@@ -7,7 +7,7 @@ using SettlementSimulation.AreaGenerator.Models;
 
 namespace SettlementSimulation.Engine.Models.Buildings
 {
-    public abstract class Building : IBuilding
+    public abstract class Building : IBuilding, ICopyable<Building>
     {
         public abstract double Probability { get; }
         public Point Position { get; set; }
@@ -35,6 +35,13 @@ namespace SettlementSimulation.Engine.Models.Buildings
             }
 
             return buildings.OrderByDescending(b => b.Probability).First();
+        }
+
+        public Building Copy()
+        {
+            var copy = (Building)Activator.CreateInstance(this.GetType());
+            copy.Position = this.Position;
+            return copy;
         }
 
         public override string ToString()

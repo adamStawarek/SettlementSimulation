@@ -105,7 +105,6 @@ namespace SettlementSimulation.Engine
 
         private void SetUpSettlementState()
         {
-            var previousSettlementState = SettlementState;
             SettlementState = new SettlementState()
             {
                 CurrentGeneration = _engine.Generation,
@@ -113,11 +112,6 @@ namespace SettlementSimulation.Engine
                 CurrentEpoch = Epoch.First,//TODO
                 Structures = _engine.BestGenes
             };
-
-            if (previousSettlementState != null)
-            {
-                SettlementState.Structures.AddRange(previousSettlementState.Structures);
-            }
         }
     }
 }

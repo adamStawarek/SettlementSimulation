@@ -194,7 +194,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             var trimmedBitmap = GetTrimmedBitmap(originalColorMap, upperLeft, bottomRight);
             var previewBitmap = GetPreviewBitmap(_colorMap, upperLeft, bottomRight);
-            
+
             SettlementBitmap = new Bitmap(trimmedBitmap);
             PreviewBitmap = new Bitmap(previewBitmap);
 

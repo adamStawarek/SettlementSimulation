@@ -226,5 +226,25 @@ namespace SettlementSimulation.Engine.Tests.Unit
             var actual = road.GetPossiblePositionsToAttachRoad(3);
             CollectionAssert.AreEquivalent(expected, actual);
         }
+
+        [Test]
+        public void Copy_Returns_Road_With_TheSame_Number_Of_Buildings()
+        {
+            var road = new Road(new[]
+            {
+                new Point(1, 0),
+                new Point(1, 1),
+                new Point(1, 2),
+                new Point(1, 3)
+            });
+
+            road.AddBuilding(new Residence() { Position = new Point(0, 0) });
+            road.AddBuilding(new Residence() { Position = new Point(0, 2) });
+            road.AddBuilding(new Residence() { Position = new Point(2, 2) });
+
+            var copy = road.Copy();
+
+            Assert.AreEqual(3, copy.Buildings.Count);
+        }
     }
 }

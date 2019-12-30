@@ -7,7 +7,7 @@ using SettlementSimulation.Engine.Models.Buildings;
 
 namespace SettlementSimulation.Engine.Models
 {
-    public class Road : IRoad
+    public class Road : IRoad, ICopyable<Road>
     {
         public Road(IEnumerable<Point> positions)
         {
@@ -113,6 +113,16 @@ namespace SettlementSimulation.Engine.Models
             return $"Road: [{Start};{End}], " +
                    $"Length: {Length}, " +
                    $"buildings: {Segments.SelectMany(s => s.Buildings).Count()}";
+        }
+
+        public Road Copy()
+        {
+            var segments = this.Segments.Select(p => p.Position);
+            var copy = new Road(segments);
+
+            this.Buildings.ForEach(b => copy.AddBuilding(b.Copy()));
+            this.BlockedCells.ForEach(c => copy.BlockCell(c));
+            return copy;
         }
 
         public class RoadSegment

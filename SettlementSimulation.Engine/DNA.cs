@@ -10,7 +10,7 @@ using SettlementSimulation.Engine.Models.Buildings.FirstType;
 
 namespace SettlementSimulation.Engine
 {
-    public class Dna
+    public class Dna : ICopyable<Dna>
     {
         #region fields
         private readonly Field[,] _fields;
@@ -152,9 +152,12 @@ namespace SettlementSimulation.Engine
         public Dna Crossover(Dna otherParent, Epoch epoch)
         {
             //TODO join this parts of the dna's that don't overlap
-            var road = this.Genes[RandomProvider.Next(this.Genes.Count)];
+            var dna = this.Copy();
+            var road = dna.Genes[RandomProvider.Next(dna.Genes.Count)];
 
-            if (road.Buildings.Count > 5)
+
+
+            if (road.Buildings.Count > 0.1 * road.Length)
             {
                 var roadGenerator = new RoadGenerator();
                 var roadPoints = roadGenerator.GenerateAttached(new RoadGenerationAttached()
@@ -173,19 +176,27 @@ namespace SettlementSimulation.Engine
             else
             {
                 var positions = road.GetPossiblePositionsToAttachBuilding();
-                if (!positions.Any()) return this;
+                if (!positions.Any()) return dna;
 
                 var building = Building.GetRandom(epoch);
                 building.Position = positions[RandomProvider.Next(positions.Count)];
                 road.AddBuilding(building);
             }
 
-            return this;
+            return dna;
         }
 
         public void Mutate(Epoch epoch, float mutationRate = 0.01F)
         {
             //TODO
+        }
+
+        public Dna Copy()
+        {
+            var copy = new Dna(_fields, _mainRoad, false);
+            this.Genes.Cast<ICopyable<Road>>().ToList().ForEach(g => copy.Genes.Add(g.Copy()));
+            copy.Fitness = this.Fitness;
+            return copy;
         }
     }
 }
