@@ -12,7 +12,7 @@ namespace SettlementSimulation.Engine
 {
     public class Dna
     {
-        #region
+        #region fields
         private readonly Field[,] _fields;
         private readonly List<Point> _mainRoad;
         private readonly IRuleDistributor _ruleDistributor;
@@ -25,11 +25,11 @@ namespace SettlementSimulation.Engine
 
         public Dna(
             Field[,] fields,
-            List<Point> mainRoad,
+            IEnumerable<Point> mainRoad,
             bool shouldInitGenes = true)
         {
             _fields = fields;
-            _mainRoad = mainRoad;
+            _mainRoad = mainRoad.ToList();
             Genes = new List<IRoad>();
             _ruleDistributor = new RuleDistributor();
 
@@ -39,45 +39,59 @@ namespace SettlementSimulation.Engine
 
         private void InitializeGenes()
         {
-            var radius = 15;
-            var avgDistanceToWaterAndMainRoad = _fields.ToList()
-                .Where(f => f.InSettlement)
-                .Average(f => f.DistanceToMainRoad + f.DistanceToWater);
-
-            var center = _fields.ToList()
+            var minRadius = _fields.GetLength(0) / 100 < 10 ? 10 : _fields.GetLength(0) / 100;
+            var maxRadius = _fields.GetLength(0) / 10 < 10 ? 10 : _fields.GetLength(0) / 10;
+            var settlementFields = _fields.ToList()
                 .Where(f => f.InSettlement &&
-                            f.Position.X < _fields.GetLength(0) - 3 * radius &&
-                            f.Position.X > 3 * radius &&
-                            f.Position.Y < _fields.GetLength(1) - 3 * radius &&
-                            f.Position.Y > 3 * radius &&
-                            f.DistanceToMainRoad + f.DistanceToWater <= avgDistanceToWaterAndMainRoad &&
-                            f.Position.GetCircularPoints(radius, Math.PI / 17.0f)
-                                .All(p => _fields[p.X, p.Y].InSettlement) &&
-                            f.Position.GetCircularPoints(2 * radius, Math.PI / 17.0f)
-                                .All(p => _fields[p.X, p.Y].InSettlement))
-                .Select(p => p.Position)
-                .First();
+                            f.Position.X > maxRadius &&
+                            f.Position.X < _fields.GetLength(0) - maxRadius &&
+                            f.Position.Y > maxRadius &&
+                            f.Position.Y < _fields.GetLength(1) - maxRadius)
+                .ToList();
+
+            Point center = new Point(-1, -1);
+            int radius = -1;
+            for (int r = maxRadius; r >= minRadius; r--)
+            {
+                Field centerField = settlementFields
+                    .FirstOrDefault(f =>
+                        f.Position.GetCircularPoints(r, Math.PI / 17.0f)
+                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                        f.Position.GetCircularPoints(r / 2.0, Math.PI / 17.0f)
+                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                        f.Position.GetCircularPoints(r / 4.0, Math.PI / 17.0f)
+                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                        f.Position.GetCircularPoints(r / 6.0, Math.PI / 17.0f)
+                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                        f.Position.GetCircularPoints(r / 8.0, Math.PI / 17.0f)
+                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                        f.Position.GetCircularPoints(r / 10.0, Math.PI / 17.0f)
+                            .All(p => _fields[p.X, p.Y].InSettlement));
+
+                if (centerField != null)
+                {
+                    radius = r;
+                    center = centerField.Position;
+                    break;
+                }
+
+                if (r == minRadius)
+                {
+                    throw new Exception("Cannot find center for initial point");
+                }
+            }
 
             var edgePoints = new List<Point>();
             while (edgePoints.Count() != 5)
             {
-                var randX = RandomProvider.Next(center.X - 2 * radius, center.X + 2 * radius);
-                var randY = RandomProvider.Next(center.Y - 2 * radius, center.Y + 2 * radius);
+                var randX = RandomProvider.Next(center.X - radius, center.X + radius);
+                var randY = RandomProvider.Next(center.Y - radius, center.Y + radius);
 
                 var point = new Point(randX, randY);
-                if (randX < 0 || randX >= _fields.GetLength(0) ||
-                    randY < 0 || randY >= _fields.GetLength(1) ||
-                    _fields[point.X, point.Y].InSettlement == false ||
-                    (Math.Abs(center.X - point.X) < radius &&
-                    Math.Abs(center.Y - point.Y) < radius))
-                {
-                    continue;
-                }
-
                 if (edgePoints.All(p =>
                     Math.Abs(p.X - point.X) > 1 &&
                     Math.Abs(p.Y - point.Y) > 1 &&
-                    p.DistanceTo(point) > 10))
+                    p.DistanceTo(point) > radius / 2.0))
                 {
                     edgePoints.Add(point);
                 }
@@ -111,8 +125,11 @@ namespace SettlementSimulation.Engine
             foreach (var road in roads)
             {
                 var roadPoints = roadGenerator.Generate(new RoadGenerationTwoPoints()
-                { Start = road.start, End = road.end, Fields = _fields });
-                Genes.Add(new Road(roadPoints));
+                { Start = road.start, End = road.end, Fields = _fields }).ToList();
+                if (roadPoints.Any())
+                {
+                    Genes.Add(new Road(roadPoints));
+                }
             }
 
             foreach (var g1 in Genes)
@@ -136,11 +153,32 @@ namespace SettlementSimulation.Engine
         {
             //TODO join this parts of the dna's that don't overlap
             var road = this.Genes[RandomProvider.Next(this.Genes.Count)];
-            var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
-            //if (segment.Buildings.Any()) return this;
 
-            var building = GenerateBuilding(epoch, road);
-            segment.Buildings.Add(building);
+            if (road.Buildings.Count > 5)
+            {
+                var roadGenerator = new RoadGenerator();
+                var roadPoints = roadGenerator.GenerateAttached(new RoadGenerationAttached()
+                {
+                    Road = road,
+                    Roads = this.Genes,
+                    Fields = this._fields,
+                    BlockedCells = this.Genes.SelectMany(g => g.BlockedCells).ToList()
+                }).ToList();
+
+                if (roadPoints.Any())
+                {
+                    this.Genes.Add(new Road(roadPoints));
+                }
+            }
+            else
+            {
+                var positions = road.GetPossiblePositionsToAttachBuilding();
+                if (!positions.Any()) return this;
+
+                var building = Building.GetRandom(epoch);
+                building.Position = positions[RandomProvider.Next(positions.Count)];
+                road.AddBuilding(building);
+            }
 
             return this;
         }
@@ -149,54 +187,5 @@ namespace SettlementSimulation.Engine
         {
             //TODO
         }
-
-        //private Road GenerateRoad(IRoad road)
-        //{
-        //    var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
-        //    var positions = new List<Point>
-        //    {
-        //        new Point(segment.Position.X - 1, segment.Position.Y),
-        //        new Point(segment.Position.X + 1, segment.Position.Y),
-        //        new Point(segment.Position.X, segment.Position.Y - 1),
-        //        new Point(segment.Position.X, segment.Position.Y + 1),
-        //    };
-        //    positions.RemoveAll(p => road.BlockedCells.Contains(p) ||
-        //                                  road.AttachedRoads.Any(a => a.DistanceTo(p) <= 2)); //TODO
-        //    if (!positions.Any())
-        //        throw new Exception("No places for building available");
-
-        //    var start = positions[RandomProvider.Next(0, positions.Count)];
-
-        //    var largestRoadLength = Genes.Max(g => g.Length);
-        //    var shortestRoadLength = Genes.Min(g => g.Length);
-
-        //    #region check if road crosses another one
-            
-        //    #endregion
-        //}
-
-        private Building GenerateBuilding(
-            Epoch epoch,
-            IRoad road)
-        {
-            var segment = road.Segments[RandomProvider.Next(0, road.Segments.Count)];
-            var positions = new List<Point>
-            {
-                new Point(segment.Position.X - 1, segment.Position.Y),
-                new Point(segment.Position.X + 1, segment.Position.Y),
-                new Point(segment.Position.X, segment.Position.Y - 1),
-                new Point(segment.Position.X, segment.Position.Y + 1),
-            };
-            positions.RemoveAll(p => road.BlockedCells.Contains(p));
-            if (!positions.Any())
-                throw new Exception("No places for building available");
-
-            var position = positions[RandomProvider.Next(0, positions.Count)];
-
-            var building = Models.Buildings.Building.GetRandom(epoch);
-            building.Position = position;
-            return building;
-        }
-
     }
 }

@@ -25,6 +25,34 @@ namespace SettlementSimulation.Engine.Models
         public List<Point> AttachedRoads => BlockedCells
             .Where(c => !Buildings.Select(b => b.Position).Contains(c)).ToList();
 
+        public List<Point> GetPossiblePositionsToAttachBuilding()
+        {
+            var possiblePositions = new List<Point>();
+
+            foreach (var segment in Segments)
+            {
+                if (segment.IsFull) continue;
+
+                var points = new List<Point>();
+                if (IsVertical)
+                {
+                    points.Add(new Point(segment.Position.X - 1, segment.Position.Y));
+                    points.Add(new Point(segment.Position.X + 1, segment.Position.Y));
+                }
+                else
+                {
+                    points.Add(new Point(segment.Position.X, segment.Position.Y - 1));
+                    points.Add(new Point(segment.Position.X, segment.Position.Y + 1));
+                }
+
+                points.RemoveAll(p => BlockedCells.Any(b => b.Equals(p)));
+
+                possiblePositions.AddRange(points);
+            }
+
+            return possiblePositions;
+        }
+
         public List<Point> GetPossiblePositionsToAttachRoad(int minDistanceBetweenRoads = 15)
         {
             var possiblePositions = new List<Point>();
