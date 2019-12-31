@@ -155,22 +155,20 @@ namespace SettlementSimulation.Engine
             var dna = this.Copy();
             var road = dna.Genes[RandomProvider.Next(dna.Genes.Count)];
 
-
-
-            if (road.Buildings.Count > 0.1 * road.Length)
+            if (road.Buildings.Count > 0.5 * road.Length)
             {
                 var roadGenerator = new RoadGenerator();
                 var roadPoints = roadGenerator.GenerateAttached(new RoadGenerationAttached()
                 {
                     Road = road,
-                    Roads = this.Genes,
-                    Fields = this._fields,
-                    BlockedCells = this.Genes.SelectMany(g => g.BlockedCells).ToList()
+                    Roads = dna.Genes,
+                    Fields = dna._fields,
+                    BlockedCells = dna.Genes.SelectMany(g => g.BlockedCells).ToList()
                 }).ToList();
 
                 if (roadPoints.Any())
                 {
-                    this.Genes.Add(new Road(roadPoints));
+                    dna.Genes.Add(new Road(roadPoints));
                 }
             }
             else

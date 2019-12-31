@@ -217,9 +217,12 @@ namespace SettlementSimulation.Viewer.ViewModel
             foreach (var road in roads)
             {
                 var roadPoints = road.ToList();
-                roadPoints.ForEach(p => MarkPoint(p, originalColorMap, Color.Red));
+                roadPoints.ForEach(p => MarkPoint(p, originalColorMap, Color.Black));
             }
+
+            _settlementInfo.MainRoad.ForEach(p => MarkPoint(p, originalColorMap, Color.Red));
         }
+
         private Bitmap GetPreviewBitmap(
             Bitmap colorMap,
             Point upperLeft,
@@ -294,7 +297,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             }
         }
 
-        private void MarkPoint(Point point, Bitmap bitmap, Color color, int offset = 5)
+        private void MarkPoint(Point point, Bitmap bitmap, Color color, int offset)
         {
             using (var fastBitmap = bitmap.FastLock())
             {

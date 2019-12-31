@@ -1,16 +1,11 @@
 ﻿using SettlementSimulation.AreaGenerator.Models;
-using SettlementSimulation.Engine.Helpers;
-using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
-using SettlementSimulation.Engine.Models.Buildings;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Timer = System.Timers.Timer;
-
 namespace SettlementSimulation.Engine
 {
     public class StructureGenerator
@@ -20,8 +15,7 @@ namespace SettlementSimulation.Engine
         private readonly int _maxIterations;
         private readonly int _timeout;
         private readonly SimulationEngine _engine;
-        private readonly Timer _timer;
-        private int _tick;
+        private readonly Stopwatch _stopWatch;
         private CancellationTokenSource _cancellationTokenSource;
         #endregion
 
@@ -41,19 +35,13 @@ namespace SettlementSimulation.Engine
             _breakpoints = breakpoints;
             _maxIterations = maxIterations;
             _timeout = timeout;
+            _stopWatch = new Stopwatch();
             _engine = new SimulationEngine(1, fields, mainRoad);
-            _timer = new Timer { Interval = 100 };
-            _timer.Elapsed += OnTick;
-        }
-
-        private void OnTick(object sender, ElapsedEventArgs e)
-        {
-            _tick++;
         }
 
         public async Task Start()
         {
-            _timer.Start();
+            _stopWatch.Start();
             _cancellationTokenSource = new CancellationTokenSource();
 
             await Task.Run(() =>
@@ -67,11 +55,12 @@ namespace SettlementSimulation.Engine
                         OnBreakpoint();
                     }
 
-                    if (_tick == _maxIterations || _tick == _timeout)
+                    if (_engine.Generation == _maxIterations || 
+                        _stopWatch.ElapsedMilliseconds == _timeout)
                     {
                         SetUpSettlementState();
                         OnFinished();
-                        _timer.Stop();
+                        _stopWatch.Stop();
                         break;
                     }
                     Thread.Sleep(10);
@@ -81,7 +70,7 @@ namespace SettlementSimulation.Engine
 
         public void Stop()
         {
-            _timer.Stop();
+            _stopWatch.Stop();
             _cancellationTokenSource.Cancel();
         }
 
@@ -108,7 +97,7 @@ namespace SettlementSimulation.Engine
             SettlementState = new SettlementState()
             {
                 CurrentGeneration = _engine.Generation,
-                Time = (int)(_timer.Interval / 1000) * _tick,
+                Time = (int)_stopWatch.ElapsedMilliseconds/1000,
                 CurrentEpoch = Epoch.First,//TODO
                 Structures = _engine.BestGenes
             };

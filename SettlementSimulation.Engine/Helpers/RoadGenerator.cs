@@ -65,7 +65,7 @@ namespace SettlementSimulation.Engine.Helpers
                 Start = roadStart,
                 End = roadEnd,
                 Fields = model.Fields,
-                BlockedCells = model.BlockedCells
+                //BlockedCells = model.BlockedCells
             }).ToList();
 
             //check whether there is cross with other road - TODO optimize

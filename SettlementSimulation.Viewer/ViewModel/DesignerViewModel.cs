@@ -91,7 +91,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             ClearBreakpoints();
 
-            var step = _endY / 20;
+            var step = 5;
             for (int y = 0; y < _endY; y += step)
             {
                 var x = y / (_endY / (double)MaxGenerations);
