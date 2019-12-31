@@ -17,6 +17,7 @@ namespace SettlementSimulation.Engine
         private readonly SimulationEngine _engine;
         private readonly Stopwatch _stopWatch;
         private CancellationTokenSource _cancellationTokenSource;
+        private bool _isRunning;
         #endregion
 
         #region events
@@ -41,12 +42,13 @@ namespace SettlementSimulation.Engine
 
         public async Task Start()
         {
+            _isRunning = true;
             _stopWatch.Start();
             _cancellationTokenSource = new CancellationTokenSource();
 
             await Task.Run(() =>
             {
-                while (true)
+                while (_isRunning)
                 {
                     _engine.NewGeneration();
                     if (_breakpoints.Contains(_engine.Generation))
@@ -72,6 +74,7 @@ namespace SettlementSimulation.Engine
         {
             _stopWatch.Stop();
             _cancellationTokenSource.Cancel();
+            _isRunning = false;
         }
 
         public void OnFinished()

@@ -31,6 +31,7 @@ namespace SettlementSimulation.Engine
         {
             _fields = fields;
             _mainRoad = mainRoad.ToList();
+            _mainRoad.ForEach(p => _fields[p.X, p.Y].IsBlocked = true);
             Genes = new List<IRoad>();
 
             if (!shouldInitGenes) return;
