@@ -52,6 +52,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         }
 
         [Test]
+        [Repeat(100)]
         public void Generate_Returns_Shortest_Path()
         {
             var expectedPath = new List<Point>()
@@ -66,10 +67,11 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 0)
             };
 
+            _fields[1, 4].IsBlocked = true;
+
             var path = _roadGenerator.Generate(new RoadGenerationTwoPoints()
             {
                 Fields = _fields,
-                BlockedCells = new[] { new Point(1, 4) },
                 Start = new Point(0, 4),
                 End = new Point(3, 0)
             });
@@ -78,69 +80,72 @@ namespace SettlementSimulation.Engine.Tests.Unit
         }
 
         [Test]
+        [Repeat(100)]
         public void GenerateAttached_With_Existing_Single_Road()
         {
             var road = new Road(new[]
             {
-                new Point(2, 1),
-                new Point(2, 2)
+                new Point(0, 3),
+                new Point(0, 4)
             });
 
-            road.AddBuilding(new Residence() { Position = new Point(1, 1) });
-            road.AddBuilding(new Residence() { Position = new Point(1, 2) });
-            road.AddBuilding(new Residence() { Position = new Point(3, 1) });
+            road.AddBuilding(new Residence() { Position = new Point(1, 3) });
 
             var actual = _roadGenerator.GenerateAttached(new RoadGenerationAttached()
             {
                 Fields = _fields,
                 Road = road,
-                Roads = new List<IRoad>() { road }
+                Roads = new List<IRoad>() { road },
+                MinRoadLength = 4,
+                MaxRoadLength = 5
             });
 
             var expected = new[]
             {
-                new Point(3, 2),
-                new Point(4, 2)
+                new Point(1, 4),
+                new Point(2, 4),
+                new Point(3, 4),
+                new Point(4, 4)
             };
 
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
         [Test]
+        [Repeat(100)]
         public void GenerateAttached_With_Existing_Multiple_Roads()
         {
-            var road1 = new Road(new[]
+            var road = new Road(new[]
             {
-                new Point(0, 1),
-                new Point(0, 2),
-                new Point(0,3)
+                new Point(0, 3),
+                new Point(0, 4)
             });
+            road.AddBuilding(new Residence() { Position = new Point(1, 3) });
 
             var road2 = new Road(new[]
             {
+                new Point(3, 0),
                 new Point(3, 1),
                 new Point(3, 2),
-                new Point(3,3)
+                new Point(3, 3),
+                new Point(3,4)
             });
 
-            road2.AddBuilding(new Residence() { Position = new Point(4, 1) });
-            road2.AddBuilding(new Residence() { Position = new Point(4, 2) });
-            road2.AddBuilding(new Residence() { Position = new Point(4, 3) });
-            road2.AddBuilding(new Residence() { Position = new Point(2, 1) });
-            road2.AddBuilding(new Residence() { Position = new Point(2, 2) });
-            
 
             var actual = _roadGenerator.GenerateAttached(new RoadGenerationAttached()
             {
                 Fields = _fields,
-                Road = road2,
-                Roads = new List<IRoad>() { road1, road2 }
+                Road = road,
+                Roads = new List<IRoad>() { road, road2 },
+                MinRoadLength = 2,
+                MinDistanceBetweenRoads = 3,
+                MaxRoadLength = 100
             });
 
             var expected = new[]
             {
-                new Point(1, 3),
-                new Point(2, 3)
+                new Point(1, 4),
+                new Point(2, 4)
             };
 
             CollectionAssert.AreEquivalent(expected, actual);

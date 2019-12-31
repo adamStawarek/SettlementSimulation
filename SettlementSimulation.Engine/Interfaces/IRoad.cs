@@ -11,14 +11,13 @@ namespace SettlementSimulation.Engine.Interfaces
         List<Point> BlockedCells { get; }
         Point Start { get; }
         Point End { get; }
+        Point Center { get; }
         bool IsVertical { get; } //TODO to remove later
         List<Building> Buildings { get; }
-        List<Point> AttachedRoads { get; } 
         int Length { get; }
 
-        List<Point> GetPossiblePositionsToAttachBuilding();
-        List<Point> GetPossiblePositionsToAttachRoad(int minDistanceBetweenRoads = 15);
+        List<Point> GetPossiblePositionsToAttachBuilding(List<IRoad> roads);
+        List<Point> GetPossiblePositionsToAttachRoad(List<IRoad> roads,int minDistanceBetweenRoads = 15);
         void AddBuilding(Building building);
-        bool BlockCell(Point point);
     }
 }

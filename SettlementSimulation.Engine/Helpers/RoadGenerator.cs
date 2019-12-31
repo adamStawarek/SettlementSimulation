@@ -20,7 +20,7 @@ namespace SettlementSimulation.Engine.Helpers
                 for (int j = 0; j < model.Fields.GetLength(1); j++)
                 {
                     if (!model.Fields[i, j].InSettlement ||
-                        model.BlockedCells.Any(s => (int)s.DistanceTo(new Point(i, j)) == 0))
+                        (model.Fields[i, j].IsBlocked.HasValue && model.Fields[i, j].IsBlocked.Value))
                     {
                         grid.BlockCell(new Position(i, j));
                     }
@@ -34,51 +34,138 @@ namespace SettlementSimulation.Engine.Helpers
             return positions.Select(p => new Point(p.X, p.Y));
         }
 
+        public IEnumerable<Point> GenerateStraight(RoadGenerationTwoPoints model)
+        {
+            var (minX, maxX) = model.Start.X < model.End.X
+                ? (model.Start.X, model.End.X)
+                : (model.End.X, model.Start.X);
+
+            var (minY, maxY) = model.Start.Y < model.End.Y
+                ? (model.Start.Y, model.End.Y)
+                : (model.End.Y, model.Start.Y);
+
+            var positions = new List<Point>();
+            if (model.Start.X.Equals(model.End.X))
+            {
+                for (int i = minY; i <= maxY; i++)
+                {
+                    positions.Add(new Point(model.Start.X, i));
+                }
+            }
+            else
+            {
+                for (int i = minX; i <= maxX; i++)
+                {
+                    positions.Add(new Point(i, model.Start.Y));
+                }
+            }
+
+            return positions.Any(p => p.X < 0 ||
+                                      p.X >= model.Fields.GetLength(0) ||
+                                      p.Y < 0 ||
+                                      p.Y >= model.Fields.GetLength(1)) ?
+                new List<Point>() : positions;
+        }
+
         public IEnumerable<Point> GenerateAttached(RoadGenerationAttached model)
         {
-            var possiblePositions = model.Road.GetPossiblePositionsToAttachRoad(model.MinDistanceBetweenRoads);
-            if (!possiblePositions.Any()) return null;
+            var roads = new List<IRoad>(model.Roads);
+            var possiblePositions = model.Road.GetPossiblePositionsToAttachRoad(roads, model.MinDistanceBetweenRoads);
+            possiblePositions.RemoveAll(p => p.X <= 0 ||
+                                             p.Y < 0 ||
+                                             p.X >= model.Fields.GetLength(0) ||
+                                             p.Y >= model.Fields.GetLength(1));
+            if (!possiblePositions.Any())
+                return new List<Point>();
 
-            var roadStart = possiblePositions[RandomProvider.Next(0, possiblePositions.Count)];
-            var minRoadLength = model.Roads.Min(r => r.Length); //TODO - random endPoint between (minRL,maxRL)
-            var maxRoadLength = model.Roads.Max(r => r.Length);
+            var roadStart = possiblePositions.OrderBy(p => p.DistanceTo(model.SettlementCenter)).First();
+            var minRoadLength = model.MinRoadLength;
+            var maxRoadLength = model.MaxRoadLength;
+
+            var roadLength = RandomProvider.Next(minRoadLength, maxRoadLength);
 
             var segment = model.Road.Segments.Single(s => s.Position.X == roadStart.X ||
                                                           s.Position.Y == roadStart.Y);
 
             Point roadEnd = new Point(-1, -1);
+            Direction direction;
+
             if (segment.Position.X.Equals(roadStart.X))//vertical road
             {
-                roadEnd = segment.Position.Y > roadStart.Y ?
-                    new Point(segment.Position.X, roadStart.Y - maxRoadLength) :
-                    new Point(segment.Position.X, roadStart.Y + maxRoadLength);
+                if (segment.Position.Y > roadStart.Y)
+                {
+                    roadEnd = new Point(segment.Position.X, roadStart.Y - roadLength);
+                    direction = Direction.Down;
+                }
+                else
+                {
+                    roadEnd = new Point(segment.Position.X, roadStart.Y + roadLength);
+                    direction = Direction.Up;
+                }
+
+                if (roadEnd.Y < 0)
+                    roadEnd.Y = 0;
+                if (roadEnd.Y >= model.Fields.GetLength(1))
+                    roadEnd.Y = model.Fields.GetLength(1) - 1;
             }
             else//horizontal road
             {
-                roadEnd = segment.Position.X > roadStart.X ?
-                    new Point(segment.Position.X - maxRoadLength, roadStart.Y) :
-                    new Point(segment.Position.X + maxRoadLength, roadStart.Y);
+                if (segment.Position.X <= roadStart.X)
+                {
+                    roadEnd = new Point(segment.Position.X + roadLength, roadStart.Y);
+                    direction = Direction.Right;
+                }
+                else
+                {
+                    roadEnd = new Point(segment.Position.X - roadLength, roadStart.Y);
+                    direction = Direction.Left;
+                }
+                if (roadEnd.X < 0)
+                    roadEnd.X = 0;
+                if (roadEnd.X >= model.Fields.GetLength(0))
+                    roadEnd.X = model.Fields.GetLength(0) - 1;
             }
 
-            var roadPoints = this.Generate(new RoadGenerationTwoPoints()
+            var roadPoints = this.GenerateStraight(new RoadGenerationTwoPoints()
             {
                 Start = roadStart,
                 End = roadEnd,
-                Fields = model.Fields,
-                //BlockedCells = model.BlockedCells
+                Fields = model.Fields
             }).ToList();
 
-            //check whether there is cross with other road - TODO optimize
-
-            Point? intersectPoint = model.Roads //TODO - can be multiple intersect points
+            var intersectPoints = roads
                 .SelectMany(r => r.Segments.Select(s => s.Position))
                 .Intersect(roadPoints)
-                .Cast<Point?>()
-                .FirstOrDefault();
+                .ToList();
 
-            return intersectPoint != null ? 
-                roadPoints.Take(roadPoints.IndexOf((Point)intersectPoint)) : 
-                roadPoints;
+            if (!intersectPoints.Any()) return roadPoints;
+
+            var selectedPoint = new Point(-1, -1);
+            switch (direction)
+            {
+                case Direction.Up:
+                    {
+                        selectedPoint = intersectPoints.OrderBy(p => p.Y).First();
+                        break;
+                    }
+                case Direction.Down:
+                    {
+                        selectedPoint = intersectPoints.OrderByDescending(p => p.Y).First();
+                        break;
+                    }
+                case Direction.Right:
+                    {
+                        selectedPoint = intersectPoints.OrderByDescending(p => p.X).First();
+                        break;
+                    }
+                case Direction.Left:
+                    {
+                        selectedPoint = intersectPoints.OrderBy(p => p.X).First();
+                        break;
+                    }
+            }
+
+            return roadPoints.Take(roadPoints.IndexOf(selectedPoint));
         }
     }
 }

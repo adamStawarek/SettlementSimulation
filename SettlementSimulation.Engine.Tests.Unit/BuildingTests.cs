@@ -33,7 +33,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         }
 
         [Test]
-        [Retry(100)]
+        [Retry(200)]
         public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_Church_In_100_Tries()
         {
             var gene = Building.GetRandom(Models.Epoch.Second);

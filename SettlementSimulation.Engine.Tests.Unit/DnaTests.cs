@@ -51,7 +51,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }
 
             var roadGenerator = new RoadGenerator();
-            _mainRoad = roadGenerator.Generate(new Models.RoadGenerationTwoPoints()
+            _mainRoad = roadGenerator.GenerateStraight(new Models.RoadGenerationTwoPoints()
             {
                 Start = new Point(0, waterLevel),
                 End = new Point(_fields.GetLength(0) - 1, waterLevel),

@@ -31,7 +31,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachBuilding();
+            var actual = road.GetPossiblePositionsToAttachBuilding(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -59,7 +59,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad();
+            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -88,7 +88,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachBuilding();
+            var actual = road.GetPossiblePositionsToAttachBuilding(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -117,7 +117,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad();
+            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -132,7 +132,11 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(1, 3)
             });
 
-            road.BlockedCells.Add(new Point(2, 2));
+            var road2 = new Road(new[]
+            {
+                new Point(2, 2),
+                new Point(3, 2)
+            });
 
             var expected = new[]
             {
@@ -147,7 +151,8 @@ namespace SettlementSimulation.Engine.Tests.Unit
 
             };
 
-            var actual = road.GetPossiblePositionsToAttachBuilding();
+            var actual = road.GetPossiblePositionsToAttachBuilding(
+                new System.Collections.Generic.List<Interfaces.IRoad>(){road, road2});
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -156,24 +161,29 @@ namespace SettlementSimulation.Engine.Tests.Unit
         {
             var road = new Road(new[]
             {
-                new Point(1, 0),
-                new Point(1, 1),
-                new Point(1, 2),
-                new Point(1, 3)
+                new Point(2, 0),
+                new Point(2, 1),
+                new Point(2, 2),
+                new Point(2, 3)
             });
 
-            road.BlockedCells.Add(new Point(2, 2));
+            var road2 = new Road(new[]
+            {
+                new Point(0, 3),
+                new Point(1, 3)
+            });
+           
 
             var expected = new[]
             {
-                new Point(0, 0),
-                new Point(0, 1),
-                //new Point(0, 2),TODO maybe???
-                new Point(0, 3),
-
+                new Point(1, 0),
+                new Point(3, 0),
+                new Point(3, 1),
+                new Point(3, 2),
+                new Point(3, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad();
+            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road, road2 }, 3);
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -182,23 +192,30 @@ namespace SettlementSimulation.Engine.Tests.Unit
         {
             var road = new Road(new[]
             {
-                new Point(1, 0),
-                new Point(1, 1),
-                new Point(1, 2),
-                new Point(1, 3)
+                new Point(2, 0),
+                new Point(2, 1),
+                new Point(2, 2),
+                new Point(2, 3)
             });
 
-            road.BlockedCells.Add(new Point(0, 3));
-            road.BlockedCells.Add(new Point(2, 3));
-
+            var road2 = new Road(new[]
+            {
+                new Point(0, 3),
+                new Point(1, 3)
+            });
+            var road3 = new Road(new[]
+            {
+                new Point(3, 3),
+                new Point(4,3)
+            });
 
             var expected = new[]
             {
-                new Point(0, 0),
-                new Point(2, 0)
+                new Point(1, 0),
+                new Point(3, 0)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(3);
+            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road, road2, road3 }, 3);
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -207,23 +224,30 @@ namespace SettlementSimulation.Engine.Tests.Unit
         {
             var road = new Road(new[]
             {
-                new Point(1, 0),
-                new Point(1, 1),
-                new Point(1, 2),
-                new Point(1, 3)
+                new Point(2, 0),
+                new Point(2, 1),
+                new Point(2, 2),
+                new Point(2, 3)
             });
 
-            road.AddBuilding(new Residence() {Position = new Point(0, 0)});
-            road.BlockedCells.Add(new Point(0, 3));
-            road.BlockedCells.Add(new Point(2, 3));
-
+            road.AddBuilding(new Residence() { Position = new Point(1, 0) });
+            var road2 = new Road(new[]
+            {
+                new Point(0, 3),
+                new Point(1, 3)
+            });
+            var road3 = new Road(new[]
+            {
+                new Point(3, 3),
+                new Point(4,3)
+            });
 
             var expected = new[]
             {
-                new Point(2, 0)
+                new Point(3, 0)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(3);
+            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road, road2, road3 },3);
             CollectionAssert.AreEquivalent(expected, actual);
         }
 

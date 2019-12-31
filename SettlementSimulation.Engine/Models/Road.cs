@@ -19,13 +19,12 @@ namespace SettlementSimulation.Engine.Models
         public List<Point> BlockedCells { get; }
         public Point Start => Segments.First().Position;
         public Point End => Segments.Last().Position;
+        public Point Center => new Point((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         public int Length => Segments.Count;
         public bool IsVertical => Start.X.Equals(End.X);
         public List<Building> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
-        public List<Point> AttachedRoads => BlockedCells
-            .Where(c => !Buildings.Select(b => b.Position).Contains(c)).ToList();
 
-        public List<Point> GetPossiblePositionsToAttachBuilding()
+        public List<Point> GetPossiblePositionsToAttachBuilding(List<IRoad> roads)
         {
             var possiblePositions = new List<Point>();
 
@@ -45,7 +44,8 @@ namespace SettlementSimulation.Engine.Models
                     points.Add(new Point(segment.Position.X, segment.Position.Y + 1));
                 }
 
-                points.RemoveAll(p => BlockedCells.Any(b => b.Equals(p)));
+                points.RemoveAll(p => BlockedCells.Any(b => b.Equals(p)) ||
+                                      roads.Any(r => r.Start.Equals(p) || r.End.Equals(p)));
 
                 possiblePositions.AddRange(points);
             }
@@ -53,9 +53,10 @@ namespace SettlementSimulation.Engine.Models
             return possiblePositions;
         }
 
-        public List<Point> GetPossiblePositionsToAttachRoad(int minDistanceBetweenRoads = 15)
+        public List<Point> GetPossiblePositionsToAttachRoad(List<IRoad> roads, int minDistanceBetweenRoads = 15)
         {
             var possiblePositions = new List<Point>();
+            roads.RemoveAll(r => r.Start.Equals(this.Start) && r.End.Equals(this.End));
 
             foreach (var segment in Segments)
             {
@@ -75,13 +76,23 @@ namespace SettlementSimulation.Engine.Models
 
                 points.RemoveAll(p => segment.Buildings.Any(b => b.Position.Equals(p)));
 
+                foreach (var r in roads)
+                {
+                    if (!r.IsVertical && this.IsVertical)
+                    {
+                        points.RemoveAll(p => (r.Start.DistanceTo(p) < minDistanceBetweenRoads && (r.Start.X == p.X) ||
+                                               (r.End.DistanceTo(p) < minDistanceBetweenRoads && (r.End.X == p.X))));
+                    }
+                    else if (r.IsVertical && !this.IsVertical)
+                    {
+                        points.RemoveAll(p => (r.Start.DistanceTo(p) < minDistanceBetweenRoads && (r.Start.Y == p.Y) ||
+                                               (r.End.DistanceTo(p) < minDistanceBetweenRoads && (r.End.Y == p.Y))));
+                    }
+                }
+
                 points.ForEach(p =>
                 {
-                    if (!AttachedRoads.Any(r => r.DistanceTo(p) < minDistanceBetweenRoads &&
-                                              (r.X == p.X || r.Y == p.Y)))
-                    {
-                        possiblePositions.Add(p);
-                    }
+                    possiblePositions.Add(p);
                 });
             }
 
@@ -98,7 +109,7 @@ namespace SettlementSimulation.Engine.Models
             }
         }
 
-        public bool BlockCell(Point point)
+        private bool BlockCell(Point point)
         {
             if (BlockedCells.Contains(point) ||
                 Segments.All(s => (int)point.DistanceTo(s.Position) > 1))

@@ -15,12 +15,13 @@ namespace SettlementSimulation.Engine
         #region fields
         private readonly Field[,] _fields;
         private readonly List<Point> _mainRoad;
-        private readonly IRuleDistributor _ruleDistributor;
         #endregion
 
         #region properties
         public List<IRoad> Genes { get; set; }
         public float Fitness { get; private set; }
+        public Point SettlementCenter =>
+            new Point((int)Genes.Average(g => g.Center.X), (int)Genes.Average(g => g.Center.Y));
         #endregion
 
         public Dna(
@@ -31,7 +32,6 @@ namespace SettlementSimulation.Engine
             _fields = fields;
             _mainRoad = mainRoad.ToList();
             Genes = new List<IRoad>();
-            _ruleDistributor = new RuleDistributor();
 
             if (!shouldInitGenes) return;
             InitializeGenes();
@@ -81,65 +81,34 @@ namespace SettlementSimulation.Engine
                 }
             }
 
-            var edgePoints = new List<Point>();
-            while (edgePoints.Count() != 5)
-            {
-                var randX = RandomProvider.Next(center.X - radius, center.X + radius);
-                var randY = RandomProvider.Next(center.Y - radius, center.Y + radius);
-
-                var point = new Point(randX, randY);
-                if (edgePoints.All(p =>
-                    Math.Abs(p.X - point.X) > 1 &&
-                    Math.Abs(p.Y - point.Y) > 1 &&
-                    p.DistanceTo(point) > radius / 2.0))
-                {
-                    edgePoints.Add(point);
-                }
-            }
-
-            var roads = new List<(Point start, Point end)>();
-            var maxX = edgePoints.Max(p => p.X);
-            var minX = edgePoints.Min(p => p.X);
-            var maxY = edgePoints.Max(p => p.Y);
-            var minY = edgePoints.Min(p => p.Y);
-            roads.Add((new Point(minX, minY), new Point(maxX, minY)));
-            roads.Add((new Point(maxX, minY), new Point(maxX, maxY)));
-            roads.Add((new Point(maxX, maxY), new Point(minX, maxY)));
-            roads.Add((new Point(minX, maxY), new Point(minX, minY)));
-            foreach (var point in edgePoints)
-            {
-                if (point.X < maxX && point.X > minX)
-                {
-                    //add vertical road
-                    roads.Add((new Point(point.X, minY), new Point(point.X, maxY)));
-                }
-
-                if (point.Y < maxY && point.Y > minY)
-                {
-                    roads.Add((new Point(minX, point.Y), new Point(maxX, point.Y)));
-                    //add horizontal road
-                }
-            }
-
             var roadGenerator = new RoadGenerator();
-            foreach (var road in roads)
-            {
-                var roadPoints = roadGenerator.Generate(new RoadGenerationTwoPoints()
-                { Start = road.start, End = road.end, Fields = _fields }).ToList();
-                if (roadPoints.Any())
-                {
-                    Genes.Add(new Road(roadPoints));
-                }
-            }
+            var initialRoadsCount = 3;
 
-            foreach (var g1 in Genes)
+            var initialRoads = new List<IRoad>(initialRoadsCount);
+            var firstRoadPoints = roadGenerator.GenerateStraight(new RoadGenerationTwoPoints()
             {
-                foreach (var g2 in Genes)
+                Start = new Point(center.X - radius / 2, center.Y),
+                End = new Point(center.X + radius / 2, center.Y),
+                Fields = _fields
+            });
+            initialRoads.Add(new Road(firstRoadPoints));
+            AddRoad(initialRoads.First());
+
+            while (initialRoads.Count != initialRoadsCount)
+            {
+                var roadToAttach = initialRoads[RandomProvider.Next(initialRoads.Count)];
+                var roadPoints = roadGenerator.GenerateAttached(new RoadGenerationAttached()
                 {
-                    if (g1.Equals(g2)) continue;
-                    g1.BlockCell(g2.Start);
-                    g1.BlockCell(g2.End);
-                }
+                    Road = roadToAttach,
+                    Roads = initialRoads,
+                    Fields = _fields
+                }).ToList();
+
+                if (!roadPoints.Any()) continue;
+
+                var newRoad = new Road(roadPoints);
+                initialRoads.Add(newRoad);
+                AddRoad(newRoad);
             }
         }
 
@@ -163,17 +132,15 @@ namespace SettlementSimulation.Engine
                     Road = road,
                     Roads = dna.Genes,
                     Fields = dna._fields,
-                    BlockedCells = dna.Genes.SelectMany(g => g.BlockedCells).ToList()
+                    SettlementCenter = dna.SettlementCenter,
+                    MinDistanceBetweenRoads = 10
                 }).ToList();
 
-                if (roadPoints.Any())
-                {
-                    dna.Genes.Add(new Road(roadPoints));
-                }
+                dna.AddRoad(new Road(roadPoints));
             }
             else
             {
-                var positions = road.GetPossiblePositionsToAttachBuilding();
+                var positions = road.GetPossiblePositionsToAttachBuilding(dna.Genes);
                 if (!positions.Any()) return dna;
 
                 var building = Building.GetRandom(epoch);
@@ -192,9 +159,45 @@ namespace SettlementSimulation.Engine
         public Dna Copy()
         {
             var copy = new Dna(_fields, _mainRoad, false);
-            this.Genes.Cast<ICopyable<Road>>().ToList().ForEach(g => copy.Genes.Add(g.Copy()));
+            Genes.Cast<ICopyable<Road>>().ToList().ForEach(g => copy.Genes.Add(g.Copy()));
             copy.Fitness = this.Fitness;
             return copy;
+        }
+
+        private bool AddRoad(IRoad road)
+        {
+            if (!road.Segments.Any())
+                return false;
+            if (this.Genes.Any(g => g.Start.DistanceTo(road.Start) < 2 ||
+                                    g.Start.DistanceTo(road.End) < 2 ||
+                                    g.End.DistanceTo(road.Start) < 2 ||
+                                    g.End.DistanceTo(road.End) < 2))
+                return false;
+            if (road.Segments.Any(s => !this._fields[s.Position.X, s.Position.Y].InSettlement ||
+                                     (this._fields[s.Position.X, s.Position.Y].IsBlocked.HasValue &&
+                                     this._fields[s.Position.X, s.Position.Y].IsBlocked.Value)))
+            {
+                return false;
+            }
+            if (road.Buildings.Any(b => !this._fields[b.Position.X, b.Position.Y].InSettlement ||
+                                       (this._fields[b.Position.X, b.Position.Y].IsBlocked.HasValue &&
+                                        this._fields[b.Position.X, b.Position.Y].IsBlocked.Value)))
+            {
+                return false;
+            }
+
+            foreach (var segment in road.Segments)
+            {
+                _fields[segment.Position.X, segment.Position.Y].IsBlocked = true;
+            }
+
+            foreach (var building in road.Buildings)
+            {
+                _fields[building.Position.X, building.Position.Y].IsBlocked = true;
+            }
+
+            this.Genes.Add(road);
+            return true;
         }
     }
 }

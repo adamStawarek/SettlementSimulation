@@ -7,16 +7,19 @@ namespace SettlementSimulation.Engine.Models
     public class RoadGenerationAttached
     {
         public Field[,] Fields { get; set; }
-        public List<Point> BlockedCells { get; set; }
         public List<IRoad> Roads { get; set; }
         public IRoad Road { get; set; }
         public int MinDistanceBetweenRoads { get; set; }
+        public int MinRoadLength { get; set; }
+        public int MaxRoadLength { get; set; }
+        public Point SettlementCenter { get; set; }
 
         public RoadGenerationAttached()
         {
             Roads = new List<IRoad>();
-            BlockedCells = new List<Point>();
             MinDistanceBetweenRoads = 15;
+            MinRoadLength = 10;
+            MaxRoadLength = 100;
         }
     }
 }
