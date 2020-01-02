@@ -9,7 +9,7 @@ using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine.Helpers
 {
-    public class RoadGenerator : IRoadGenerator
+    public class RoadPointsGenerator : IRoadGenerator
     {
         public IEnumerable<Point> Generate(RoadGenerationTwoPoints model)
         {
@@ -167,5 +167,10 @@ namespace SettlementSimulation.Engine.Helpers
 
             return roadPoints.Take(roadPoints.IndexOf(selectedPoint));
         }
+    }
+
+    public class StructureGenerator
+    {
+
     }
 }

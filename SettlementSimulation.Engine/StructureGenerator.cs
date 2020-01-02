@@ -61,7 +61,9 @@ namespace SettlementSimulation.Engine
                         _stopWatch.ElapsedMilliseconds == _timeout)
                     {
                         SetUpSettlementState();
-                        OnFinished();
+                        OnFinished();                       
+                        _isRunning = false;
+                        _cancellationTokenSource.Cancel();
                         _stopWatch.Stop();
                         break;
                     }
@@ -101,8 +103,9 @@ namespace SettlementSimulation.Engine
             {
                 CurrentGeneration = _engine.Generation,
                 Time = (int)_stopWatch.ElapsedMilliseconds/1000,
-                CurrentEpoch = Epoch.First,//TODO
-                Structures = _engine.BestGenes
+                CurrentEpoch = _engine.CurrentEpoch,
+                Roads = _engine.BestGenes,
+                StructureCreatedInLastGeneration = _engine.LastStructureCreated
             };
         }
     }

@@ -9,13 +9,11 @@ using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Viewer.Commands;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Imaging;
+using SettlementSimulation.Engine.Interfaces;
 using Point = SettlementSimulation.AreaGenerator.Models.Point;
 
 namespace SettlementSimulation.Viewer.ViewModel
@@ -177,15 +175,22 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             var originalColorMap = new Bitmap(_colorMap);
 
-            var buildings = SettlementState.Structures
+            var buildings = SettlementState.Roads
                 .SelectMany(s => s.Segments.SelectMany(seg => seg.Buildings)).ToList();
 
-            var roads = SettlementState.Structures.Select(s => s.Segments.Select(sg => sg.Position)).ToList();
+            var roads = SettlementState.Roads.Select(s => s.Segments.Select(sg => sg.Position)).ToList();
 
             MarkBuildingsAndRoads(roads, buildings, originalColorMap);
 
-            var logs = buildings.Select(s => s.ToString()).ToList();
-            logs.AddRange(SettlementState.Structures.Select(r => r.ToString()));
+            var logs = new List<string>
+            {
+                $"Roads: {SettlementState.Roads.Count}",
+                $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
+                $"Last generated structure: {SettlementState.StructureCreatedInLastGeneration}",
+                $"Average road length: {(int)SettlementState.Roads.Average(r => r.Length)}",
+                $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
+                $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"
+            };
             _logs = new List<string>(logs);
 
             var allRoadPoints = roads.SelectMany(s => s).ToList();
@@ -205,7 +210,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         private void MarkBuildingsAndRoads(
             List<IEnumerable<Point>> roads,
-            List<Building> buildings,
+            List<IBuilding> buildings,
             Bitmap originalColorMap)
         {
             foreach (var building in buildings)

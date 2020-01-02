@@ -12,12 +12,13 @@ namespace SettlementSimulation.Engine
     {
         #region private fields
         private float _fitnessSum;
-        private Epoch _currentEpoch;
         private readonly Stack<Epoch> _allEpochs;
         #endregion
 
         #region properties
+        public ISettlementStructure LastStructureCreated { get; set; }
         public List<Dna> Population { get; set; }
+        public Epoch CurrentEpoch { get; set; }
         public int Generation { get; set; }
         public Field[,] Fields { get; }
         public List<Point> MainRoad { get; }
@@ -46,10 +47,9 @@ namespace SettlementSimulation.Engine
             SetNextEpoch();
         }
 
-        public Epoch SetNextEpoch()
+        public void SetNextEpoch()
         {
-            _currentEpoch = _allEpochs.Pop();
-            return _currentEpoch;
+            CurrentEpoch = _allEpochs.Pop();
         }
 
         public void NewGeneration()
@@ -65,9 +65,11 @@ namespace SettlementSimulation.Engine
                 Dna parent1 = ChooseParent();
                 Dna parent2 = ChooseParent();
 
-                Dna child = parent1.Crossover(parent2, _currentEpoch);
+                Dna child = parent1.Crossover(parent2, CurrentEpoch);
 
-                child.Mutate(_currentEpoch);
+                child.Mutate(CurrentEpoch);
+
+                this.LastStructureCreated = child.AddNewSettlementStructure(CurrentEpoch, SetNextEpoch);
 
                 newPopulation.Add(child);
             }

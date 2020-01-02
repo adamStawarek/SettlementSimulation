@@ -12,17 +12,15 @@ namespace SettlementSimulation.Engine.Models
         public Road(IEnumerable<Point> positions)
         {
             Segments = positions.Select(p => new RoadSegment(p)).ToList();
-            BlockedCells = new List<Point>();
         }
 
         public List<RoadSegment> Segments { get; }
-        public List<Point> BlockedCells { get; }
         public Point Start => Segments.First().Position;
         public Point End => Segments.Last().Position;
         public Point Center => new Point((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         public int Length => Segments.Count;
         public bool IsVertical => Start.X.Equals(End.X);
-        public List<Building> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
+        public List<IBuilding> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
 
         public List<Point> GetPossiblePositionsToAttachBuilding(List<IRoad> roads)
         {
@@ -44,7 +42,7 @@ namespace SettlementSimulation.Engine.Models
                     points.Add(new Point(segment.Position.X, segment.Position.Y + 1));
                 }
 
-                points.RemoveAll(p => BlockedCells.Any(b => b.Equals(p)) ||
+                points.RemoveAll(p => Buildings.Select(b=>b.Position).Any(b => b.Equals(p)) ||
                                       roads.Any(r => r.Start.Equals(p) || r.End.Equals(p)));
 
                 possiblePositions.AddRange(points);
@@ -99,24 +97,13 @@ namespace SettlementSimulation.Engine.Models
             return possiblePositions;
         }
 
-        public void AddBuilding(Building building)
+        public void AddBuilding(IBuilding building)
         {
-            if (BlockCell(building.Position))
-            {
-                var segment = Segments.First(s => s.Position.X == building.Position.X ||
-                                                  s.Position.Y == building.Position.Y);
-                segment.Buildings.Add(building);
-            }
-        }
+            if (building == null || Buildings.Any(b=>b.Position.Equals(building.Position))) return;
 
-        private bool BlockCell(Point point)
-        {
-            if (BlockedCells.Contains(point) ||
-                Segments.All(s => (int)point.DistanceTo(s.Position) > 1))
-                return false;
-
-            BlockedCells.Add(point);
-            return true;
+            var segment = Segments.First(s => s.Position.X == building.Position.X ||
+                                              s.Position.Y == building.Position.Y);
+            segment.Buildings.Add(building);
         }
 
         public override string ToString()
@@ -131,21 +118,20 @@ namespace SettlementSimulation.Engine.Models
             var segments = this.Segments.Select(p => p.Position);
             var copy = new Road(segments);
 
-            this.Buildings.ForEach(b => copy.AddBuilding(b.Copy()));
-            this.BlockedCells.ForEach(c => copy.BlockCell(c));
+            this.Buildings.ForEach(b => copy.AddBuilding(((ICopyable<IBuilding>)b).Copy()));
             return copy;
         }
 
         public class RoadSegment
         {
             public Point Position { get; }
-            public List<Building> Buildings { get; }
+            public List<IBuilding> Buildings { get; }
             public bool IsFull => Buildings.Count == 2;
 
             public RoadSegment(Point point)
             {
                 Position = point;
-                Buildings = new List<Building>();
+                Buildings = new List<IBuilding>();
             }
         }
     }

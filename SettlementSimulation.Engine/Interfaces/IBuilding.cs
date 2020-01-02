@@ -2,7 +2,7 @@
 
 namespace SettlementSimulation.Engine.Interfaces
 {
-    public interface IBuilding
+    public interface IBuilding:ISettlementStructure
     {
         double Probability { get; }
         Point Position { get; set; }

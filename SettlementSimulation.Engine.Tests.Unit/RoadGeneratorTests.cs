@@ -48,7 +48,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             _fields[3, 4] = new Field() { InSettlement = true };
             _fields[4, 4] = new Field() { InSettlement = true };
 
-            _roadGenerator = new RoadGenerator();
+            _roadGenerator = new RoadPointsGenerator();
         }
 
         [Test]
