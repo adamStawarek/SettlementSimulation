@@ -42,7 +42,7 @@ namespace SettlementSimulation.Engine.Models
                     points.Add(new Point(segment.Position.X, segment.Position.Y + 1));
                 }
 
-                points.RemoveAll(p => Buildings.Select(b=>b.Position).Any(b => b.Equals(p)) ||
+                points.RemoveAll(p => Buildings.Select(b => b.Position).Any(b => b.Equals(p)) ||
                                       roads.Any(r => r.Start.Equals(p) || r.End.Equals(p)));
 
                 possiblePositions.AddRange(points);
@@ -97,13 +97,15 @@ namespace SettlementSimulation.Engine.Models
             if (this.IsVertical)
             {
                 possiblePositions.RemoveAll(
-                    p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 2));
+                    p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 2 &&
+                                                                  g.Segments.All(s => Math.Abs(s.Position.X - p.X) > 100)));
 
             }
             else
             {
                 possiblePositions.RemoveAll(
-                    p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 2));
+                    p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 2 &&
+                                                                 g.Segments.All(s => Math.Abs(s.Position.Y - p.Y) > 100)));
             }
 
             return possiblePositions;
@@ -111,7 +113,7 @@ namespace SettlementSimulation.Engine.Models
 
         public void AddBuilding(IBuilding building)
         {
-            if (building == null || Buildings.Any(b=>b.Position.Equals(building.Position))) return;
+            if (building == null || Buildings.Any(b => b.Position.Equals(building.Position))) return;
 
             var segment = Segments.First(s => s.Position.X == building.Position.X ||
                                               s.Position.Y == building.Position.Y);
