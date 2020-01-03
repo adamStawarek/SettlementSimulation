@@ -50,6 +50,8 @@ namespace SettlementSimulation.Engine
             {
                 while (_isRunning)
                 {
+                    var previousEpoch = _engine.CurrentEpoch;
+
                     _engine.NewGeneration();
                     if (_breakpoints.Contains(_engine.Generation))
                     {
@@ -57,11 +59,17 @@ namespace SettlementSimulation.Engine
                         OnBreakpoint();
                     }
 
-                    if (_engine.Generation == _maxIterations || 
+                    if (_engine.CurrentEpoch != previousEpoch)
+                    {
+                        SetUpSettlementState();
+                        OnNextEpoch();
+                    }
+
+                    if (_engine.Generation == _maxIterations ||
                         _stopWatch.ElapsedMilliseconds == _timeout)
                     {
                         SetUpSettlementState();
-                        OnFinished();                       
+                        OnFinished();
                         _isRunning = false;
                         _cancellationTokenSource.Cancel();
                         _stopWatch.Stop();
@@ -102,7 +110,7 @@ namespace SettlementSimulation.Engine
             SettlementState = new SettlementState()
             {
                 CurrentGeneration = _engine.Generation,
-                Time = (int)_stopWatch.ElapsedMilliseconds/1000,
+                Time = (int)_stopWatch.ElapsedMilliseconds / 1000,
                 CurrentEpoch = _engine.CurrentEpoch,
                 Roads = _engine.BestGenes,
                 StructureCreatedInLastGeneration = _engine.LastStructureCreated

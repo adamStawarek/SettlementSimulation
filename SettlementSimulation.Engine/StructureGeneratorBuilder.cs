@@ -10,6 +10,7 @@ namespace SettlementSimulation.Engine
         private List<int> _breakpoints;
         private int _maxIterations = 10000;
         private int _timeout = 10 * 60 * 1000;
+        private int? _uniformBreakpointStep;
 
         public StructureGeneratorBuilder WithFields(Field[,] fields)
         {
@@ -29,6 +30,12 @@ namespace SettlementSimulation.Engine
             return this;
         }
 
+        public StructureGeneratorBuilder WithBreakpointStep(int step)
+        {
+            _uniformBreakpointStep = step;
+            return this;
+        }
+
         public StructureGeneratorBuilder WithMaxIterations(int maxIterations)
         {
             this._maxIterations = maxIterations;
@@ -43,6 +50,15 @@ namespace SettlementSimulation.Engine
 
         public StructureGenerator Build()
         {
+            if (_uniformBreakpointStep.HasValue)
+            {
+                _breakpoints = new List<int>();
+                for (int i = 0; i < _maxIterations; i += _uniformBreakpointStep.Value)
+                {
+                    _breakpoints.Add(i);
+                }
+            }
+
             var generator = new StructureGenerator(_fields, _mainRoad, _breakpoints,
                 _maxIterations, _timeout);
 
