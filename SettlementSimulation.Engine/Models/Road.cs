@@ -94,6 +94,18 @@ namespace SettlementSimulation.Engine.Models
                 });
             }
 
+            if (this.IsVertical)
+            {
+                possiblePositions.RemoveAll(
+                    p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 2));
+
+            }
+            else
+            {
+                possiblePositions.RemoveAll(
+                    p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 2));
+            }
+
             return possiblePositions;
         }
 
