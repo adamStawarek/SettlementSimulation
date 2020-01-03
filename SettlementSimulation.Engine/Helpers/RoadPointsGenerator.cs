@@ -155,22 +155,17 @@ namespace SettlementSimulation.Engine.Helpers
                     }
                 case Direction.Right:
                     {
-                        selectedPoint = intersectPoints.OrderByDescending(p => p.X).First();
+                        selectedPoint = intersectPoints.OrderBy(p => p.X).First();
                         break;
                     }
                 case Direction.Left:
                     {
-                        selectedPoint = intersectPoints.OrderBy(p => p.X).First();
+                        selectedPoint = intersectPoints.OrderByDescending(p => p.X).First();
                         break;
                     }
             }
 
             return roadPoints.Take(roadPoints.IndexOf(selectedPoint));
         }
-    }
-
-    public class StructureGenerator
-    {
-
     }
 }

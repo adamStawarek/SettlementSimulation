@@ -192,7 +192,7 @@ namespace SettlementSimulation.Engine
             return building;
         }
 
-        private void AddRoad(IRoad road)
+        public void AddRoad(IRoad road)
         {
             if (!CanAddRoad(road)) return;
 
@@ -208,16 +208,23 @@ namespace SettlementSimulation.Engine
             this.Genes.Add(road);
         }
 
-        private bool CanAddRoad(IRoad road)
+        public bool CanAddRoad(IRoad road)
         {
             if (!road.Segments.Any())
                 return false;
 
-            if (this.Genes.Any(g => g.Start.DistanceTo(road.Start) < 2 ||
-                                    g.Start.DistanceTo(road.End) < 2 ||
-                                    g.End.DistanceTo(road.Start) < 2 ||
-                                    g.End.DistanceTo(road.End) < 2))
-                return false;
+            if (road.IsVertical)
+            {
+                if (this.Genes.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - road.Start.X) <= 2 &&
+                                                                 g.Segments.Any(s => road.Segments.Any(r => r.Position.Y == s.Position.Y))))
+                    return false;
+            }
+            else
+            {
+                if (this.Genes.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - road.Start.Y) <= 2 &&
+                                                                  g.Segments.Any(s => road.Segments.Any(r => r.Position.X == s.Position.X))))
+                    return false;
+            }
 
             if (road.Segments.Any(s => !this._fields[s.Position.X, s.Position.Y].InSettlement ||
                                        (this._fields[s.Position.X, s.Position.Y].IsBlocked.HasValue &&

@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using NUnit.Framework;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.AreaGenerator.Models.Terrains;
 using SettlementSimulation.Engine.Helpers;
-using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine.Tests.Unit
@@ -63,6 +61,54 @@ namespace SettlementSimulation.Engine.Tests.Unit
         public void InitializeGenes_Does_Not_Throw_Exception()
         {
             Assert.DoesNotThrow(() => new Dna(_fields, _mainRoad, shouldInitGenes: true));
+        }
+
+        [Test]
+        public void CanAddRoad_Returns_False_When_There_Exists_Road_Which_Adjacent_ToNew_One()
+        {
+            var road1 = new Road(new[]
+            {
+                new Point(0, 15),
+                new Point(0, 16),
+                new Point(0, 17),
+                new Point(0, 18),
+                new Point(0, 19)
+            });
+            var dna = new Dna(_fields, _mainRoad, shouldInitGenes: false);
+            dna.AddRoad(road1);
+
+            var road2 = new Road(new[]
+            {
+                new Point(1, 16),
+                new Point(1, 17),
+                new Point(1, 18),
+            });
+
+            Assert.IsFalse(dna.CanAddRoad(road2));
+        }
+
+        [Test]
+        public void CanAddRoad_Returns_True_When_There_All_Roads_Of_The_Same_Orientation_Are_Not_Adjacent()
+        {
+            var road1 = new Road(new[]
+            {
+                new Point(0, 15),
+                new Point(0, 16),
+                new Point(0, 17),
+                new Point(0, 18),
+                new Point(0, 19)
+            });
+            var dna = new Dna(_fields, _mainRoad, shouldInitGenes: false);
+            dna.AddRoad(road1);
+
+            var road2 = new Road(new[]
+            {
+                new Point(2, 16),
+                new Point(2, 17),
+                new Point(2, 18),
+            });
+
+            Assert.IsFalse(dna.CanAddRoad(road2));
         }
     }
 }
