@@ -181,12 +181,14 @@ namespace SettlementSimulation.Viewer.ViewModel
             var roads = SettlementState.Roads.Select(s => s.Segments.Select(sg => sg.Position)).ToList();
 
             MarkBuildingsAndRoads(roads, buildings, originalColorMap);
+            MarkPoint(SettlementState.SettlementCenter, originalColorMap, Color.Goldenrod, 4);
 
             var logs = new List<string>
             {
                 $"Roads: {SettlementState.Roads.Count}",
                 $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
-                $"Last generated structure: {SettlementState.StructureCreatedInLastGeneration}",
+                $"Last generated structures: " +
+                $"{SettlementState.LastCreatedStructures.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2.ToString()}")}",
                 $"Average road length: {(int)SettlementState.Roads.Average(r => r.Length)}",
                 $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
                 $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"
@@ -244,7 +246,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                         var color = fastBitmap.GetPixel(i, j);
                         fastBitmap.SetPixel(i, j, Color.FromArgb(255, color.G, color.B));
                     }
-                } 
+                }
             }
 
             return bitmap;
@@ -298,7 +300,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             using (var fastBitmap = bitmap.FastLock())
             {
-                fastBitmap.SetPixel(point.X, point.Y , color);
+                fastBitmap.SetPixel(point.X, point.Y, color);
             }
         }
 
@@ -324,14 +326,14 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 Color.FromArgb(128, 0, 0),
                 Color.FromArgb(170, 110, 40),
-                Color.FromArgb(128, 128, 0),
+                Color.FromArgb(128, 128, 120),
                 Color.FromArgb(0, 128, 128),
                 Color.FromArgb(0, 0, 128),
                 Color.FromArgb(230, 25, 75),
                 Color.FromArgb(245, 130, 48),
-                Color.FromArgb(210, 245, 60),
-                Color.FromArgb(60, 180, 75),
-                Color.FromArgb(70, 240, 240),
+                Color.FromArgb(110, 145, 160),
+                Color.FromArgb(220, 180, 75),
+                Color.FromArgb(0, 140, 240),
                 Color.FromArgb(0, 130, 200),
                 Color.FromArgb(145, 30, 180),
                 Color.FromArgb(240, 50, 230),
@@ -340,7 +342,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                 Color.FromArgb(255, 215, 180),
                 Color.FromArgb(170, 255, 195),
                 Color.FromArgb(230, 190, 255),
-                Color.FromArgb(200, 205, 0),
+                Color.FromArgb(230, 25, 80),
                 Color.FromArgb(60, 190, 200),
                 Color.FromArgb(0, 60, 60),
             };

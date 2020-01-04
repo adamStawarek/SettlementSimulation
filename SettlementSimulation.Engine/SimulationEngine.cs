@@ -16,7 +16,6 @@ namespace SettlementSimulation.Engine
         #endregion
 
         #region properties
-        public ISettlementStructure LastStructureCreated { get; set; }
         public List<Dna> Population { get; set; }
         public Epoch CurrentEpoch { get; set; }
         public int Generation { get; set; }
@@ -24,6 +23,9 @@ namespace SettlementSimulation.Engine
         public List<Point> MainRoad { get; }
         public List<IRoad> BestGenes => 
             Population.OrderByDescending(p => p.Fitness).FirstOrDefault()?.Genes;
+        public Dna BestDna =>
+            Population.OrderByDescending(p => p.Fitness).FirstOrDefault();
+        public IEnumerable<ISettlementStructure> LastStructuresCreated { get; set; }
         #endregion
 
         public SimulationEngine(
@@ -69,7 +71,7 @@ namespace SettlementSimulation.Engine
 
                 child.Mutate(CurrentEpoch);
 
-                this.LastStructureCreated = child.AddNewSettlementStructure(CurrentEpoch, SetNextEpoch);
+                this.LastStructuresCreated = child.AddNewSettlementStructure(CurrentEpoch, SetNextEpoch);
 
                 newPopulation.Add(child);
             }

@@ -113,7 +113,8 @@ namespace SettlementSimulation.Engine
                 Time = (int)_stopWatch.ElapsedMilliseconds / 1000,
                 CurrentEpoch = _engine.CurrentEpoch,
                 Roads = _engine.BestGenes,
-                StructureCreatedInLastGeneration = _engine.LastStructureCreated
+                LastCreatedStructures = _engine.LastStructuresCreated,
+                SettlementCenter = _engine.BestDna.SettlementCenter
             };
         }
     }

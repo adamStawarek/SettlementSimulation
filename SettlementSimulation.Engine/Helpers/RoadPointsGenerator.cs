@@ -78,7 +78,19 @@ namespace SettlementSimulation.Engine.Helpers
             if (!possiblePositions.Any())
                 return new List<Point>();
 
-            var roadStart = possiblePositions.OrderBy(p => p.DistanceTo(model.SettlementCenter)).First();
+            Point roadStart;
+            if (model.Road.IsVertical)
+            {
+                roadStart = possiblePositions
+                    .OrderBy(p => Math.Abs(model.SettlementCenter.X - p.X))
+                    .First();
+            }
+            else
+            {
+                roadStart = possiblePositions
+                    .OrderBy(p => Math.Abs(model.SettlementCenter.Y - p.Y))
+                    .First();
+            }
             var minRoadLength = model.MinRoadLength;
             var maxRoadLength = model.MaxRoadLength;
 
@@ -140,32 +152,46 @@ namespace SettlementSimulation.Engine.Helpers
 
             if (!intersectPoints.Any()) return roadPoints;
 
-            var selectedPoint = new Point(-1, -1);
+            Point selectedPoint = new Point(-1,-1);
             switch (direction)
             {
                 case Direction.Up:
                     {
-                        selectedPoint = intersectPoints.OrderBy(p => p.Y).First();
+                        selectedPoint = intersectPoints
+                            .OrderBy(p => p.Y).FirstOrDefault(p => p.DistanceTo(roadStart) > minRoadLength);
                         break;
                     }
                 case Direction.Down:
                     {
-                        selectedPoint = intersectPoints.OrderByDescending(p => p.Y).First();
+                        selectedPoint = intersectPoints
+                            .OrderByDescending(p => p.Y).FirstOrDefault(p => p.DistanceTo(roadStart) > minRoadLength);
                         break;
                     }
                 case Direction.Right:
                     {
-                        selectedPoint = intersectPoints.OrderBy(p => p.X).First();
+                        selectedPoint = intersectPoints
+                            .OrderBy(p => p.X).FirstOrDefault(p => p.DistanceTo(roadStart) > minRoadLength);
                         break;
                     }
                 case Direction.Left:
                     {
-                        selectedPoint = intersectPoints.OrderByDescending(p => p.X).First();
+                        selectedPoint = intersectPoints
+                            .OrderByDescending(p => p.X).FirstOrDefault(p => p.DistanceTo(roadStart) > minRoadLength);
                         break;
                     }
             }
+            if (!selectedPoint.Equals(new Point(-1,-1)))
+                return new List<Point>();
 
-            return roadPoints.Take(roadPoints.IndexOf(selectedPoint));
+            roadPoints = roadPoints.Take(roadPoints.IndexOf(selectedPoint)).ToList();
+            var lastPoint = roadPoints.Last();
+            var isBlocked = model.Fields[lastPoint.X, lastPoint.Y].IsBlocked;
+            if (isBlocked != null && isBlocked.Value)
+            {
+                roadPoints.Remove(lastPoint);
+            }
+
+            return roadPoints;
         }
     }
 }

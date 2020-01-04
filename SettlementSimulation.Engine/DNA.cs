@@ -128,34 +128,54 @@ namespace SettlementSimulation.Engine
             //TODO
         }
 
-        public ISettlementStructure AddNewSettlementStructure(Epoch epoch, Action setNextEpoch)
+        public IEnumerable<ISettlementStructure> AddNewSettlementStructure(Epoch epoch, Action setNextEpoch)
         {
-            if (Genes.All(r => r.Buildings.Count > 0.25 * r.Length) ||
-                Genes.All(r => r.GetPossiblePositionsToAttachBuilding(this.Genes).Count == 0))
+            var newStructures = new List<ISettlementStructure>();
+            if (Genes.Sum(g => g.Length) < 1.5 * EpochSpecific.GetBuildingsCount(epoch)
+                && Genes.All(g => g.Buildings.Count >= g.Length))
             {
-                var roadToAttach = this.Genes[RandomProvider.Next(this.Genes.Count)];
-                var road = this.CreateNewRoad(roadToAttach);
-                this.AddRoad(road);
-                return CanAddRoad(road) ? road : null;
-            }
+                var genes = this.Genes
+                    .Where(g => g.GetPossiblePositionsToAttachRoad(new List<IRoad>(this.Genes)).Count > 0)
+                    .OrderBy(g => g.IsVertical ? Math.Abs(g.Start.X - SettlementCenter.X) : Math.Abs(g.Start.Y - SettlementCenter.Y))
+                    .Take(5)
+                    .ToList();
 
-            if (Genes.Sum(g => g.Buildings.Count) < EpochSpecific.GetBuildingsCount(epoch))
+                var roadToAttach = genes[RandomProvider.Next(genes.Count)];
+                var road = this.CreateNewRoad(roadToAttach);
+                if (!CanAddRoad(road)) 
+                    return newStructures;
+
+                this.AddRoad(road);
+                while (road.Buildings.Count < road.Length)
+                {
+                    var building = CreateNewBuilding(road, epoch);
+                    road.AddBuilding(building);
+                }
+
+                return newStructures;
+            }
+            else if (Genes.Sum(g => g.Buildings.Count) < EpochSpecific.GetBuildingsCount(epoch))
             {
                 var roadToAttach = this.Genes
-                    .Where(g => g.GetPossiblePositionsToAttachBuilding(this.Genes).Count > 0)
+                    .Where(g => g.Buildings.Count < 1.5 * g.Length)
                     .OrderBy(r => r.Buildings.Count)
                     .First();
-                var building = this.CreateNewBuilding(roadToAttach, epoch);
-                roadToAttach.AddBuilding(building);
-                return building;
-            }
 
-            if (epoch != Epoch.Third)
+                while (roadToAttach.Buildings.Count < 1.5 * roadToAttach.Length)
+                {
+                    var building = this.CreateNewBuilding(roadToAttach, epoch);
+                    roadToAttach.AddBuilding(building);
+                    newStructures.Add(building);
+                }
+
+                return newStructures;
+            }
+            else if (epoch != Epoch.Third)
             {
                 setNextEpoch.Invoke();
             }
 
-            return null;
+            return newStructures;
         }
 
         public Dna Copy()
@@ -175,7 +195,9 @@ namespace SettlementSimulation.Engine
                 Roads = this.Genes,
                 Fields = this._fields,
                 SettlementCenter = this.SettlementCenter,
-                MinDistanceBetweenRoads = 10
+                MinDistanceBetweenRoads = 5,
+                MinRoadLength = 3,
+                MaxRoadLength = 100
             }).ToList();
 
             return new Road(roadPoints);
@@ -184,7 +206,8 @@ namespace SettlementSimulation.Engine
         private IBuilding CreateNewBuilding(IRoad road, Epoch epoch)
         {
             var positions = road.GetPossiblePositionsToAttachBuilding(this.Genes);
-            if (!positions.Any()) return null;
+            if (!positions.Any())
+                return null;
 
             var building = Building.GetRandom(epoch);
             building.Position = positions[RandomProvider.Next(positions.Count)];
@@ -212,19 +235,6 @@ namespace SettlementSimulation.Engine
         {
             if (!road.Segments.Any())
                 return false;
-
-            if (road.IsVertical)
-            {
-                if (this.Genes.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - road.Start.X) <= 2 &&
-                                                                 g.Segments.Any(s => road.Segments.Any(r => r.Position.Y == s.Position.Y))))
-                    return false;
-            }
-            else
-            {
-                if (this.Genes.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - road.Start.Y) <= 2 &&
-                                                                  g.Segments.Any(s => road.Segments.Any(r => r.Position.X == s.Position.X))))
-                    return false;
-            }
 
             if (road.Segments.Any(s => !this._fields[s.Position.X, s.Position.Y].InSettlement ||
                                        (this._fields[s.Position.X, s.Position.Y].IsBlocked.HasValue &&

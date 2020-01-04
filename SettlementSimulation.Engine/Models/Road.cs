@@ -98,14 +98,14 @@ namespace SettlementSimulation.Engine.Models
             {
                 possiblePositions.RemoveAll(
                     p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 2 &&
-                                                                  g.Segments.All(s => Math.Abs(s.Position.X - p.X) > 100)));
+                                                                  g.Segments.Any(s => Math.Abs(s.Position.X - p.X) < 100)));
 
             }
             else
             {
                 possiblePositions.RemoveAll(
                     p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 2 &&
-                                                                 g.Segments.All(s => Math.Abs(s.Position.Y - p.Y) > 100)));
+                                                                 g.Segments.Any(s => Math.Abs(s.Position.Y - p.Y) < 100)));
             }
 
             return possiblePositions;
