@@ -3,6 +3,7 @@ using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using System.Collections.Generic;
+using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Tests.Unit
 {
@@ -336,7 +337,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             var road5 = new Road(new[]
             {
                 new Point(3, 5),
-                new Point(3, 5)
+                new Point(3, 6)
             });
 
             var road6 = new Road(new[]
@@ -360,6 +361,68 @@ namespace SettlementSimulation.Engine.Tests.Unit
             };
 
             CollectionAssert.AreEquivalent(expected, actual);
+        }
+
+        [Test]
+        public void AttachedRoads_Returns_All_Roads_That_Are_Directly_Attached()
+        {
+            var road1 = new Road(new[]
+            {
+                new Point(0, 1),
+                new Point(1, 1),
+                new Point(2, 1),
+                new Point(3, 1),
+                new Point(4, 1)
+            });
+
+            var road2 = new Road(new[]
+            {
+                new Point(1, 2),
+                new Point(1, 3)
+            });
+
+            var road3 = new Road(new[]
+            {
+                new Point(3, 2),
+                new Point(3, 3)
+            });
+
+            var road4 = new Road(new[]
+            {
+                new Point(4, 2),
+                new Point(4, 3)
+            });
+
+            var road5 = new Road(new[]
+            {
+                new Point(3, 5),
+                new Point(3, 6)
+            });
+
+            var road6 = new Road(new[]
+            {
+                new Point(0, 4),
+                new Point(1, 4),
+                new Point(2, 4),
+                new Point(3, 4),
+                new Point(4, 4)
+            });
+
+            var allRoads = new List<IRoad> {road1, road2, road3, road4, road5, road6};
+            Assert.Multiple(() =>
+            {
+                CollectionAssert.AreEquivalent(
+                    new[] { road2, road3, road4 },
+                    road1.AttachedRoads(allRoads));
+
+                CollectionAssert.AreEquivalent(
+                    new[] { road1, road6 },
+                    road2.AttachedRoads(allRoads));
+
+                CollectionAssert.AreEquivalent(
+                    new IRoad[] { },
+                    road5.AttachedRoads(allRoads));
+            });
         }
 
         [Test]

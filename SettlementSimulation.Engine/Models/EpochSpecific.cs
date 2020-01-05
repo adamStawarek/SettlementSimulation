@@ -3,7 +3,7 @@
     public static class EpochSpecific
     {
         public const int BuildingsFirstEpoch = 500;
-        public const int BuildingsSecondEpoch = 3000;
+        public const int BuildingsSecondEpoch = 5000;
         public const int BuildingsThirdEpoch = 5000;
 
         public static int GetBuildingsCount(Epoch epoch)

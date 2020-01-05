@@ -109,6 +109,12 @@ namespace SettlementSimulation.Engine
                 var newRoad = new Road(roadPoints);
                 initialRoads.Add(newRoad);
                 AddRoad(newRoad);
+
+                while (newRoad.Buildings.Count < 0.25 * newRoad.Length)
+                {
+                    var building = CreateNewBuilding(newRoad, Epoch.First);
+                    AddBuildingToRoad(newRoad, building);
+                }
             }
         }
 
@@ -139,11 +145,15 @@ namespace SettlementSimulation.Engine
 
                 if (RandomProvider.NextDouble() >= 0.95) //in order to make it more probable for roads closer to center to be selected
                 {
-                    var numberOfGenesToInclude = 0.25 * genes.Count <= 1 ? 1 : (int)(0.25 * genes.Count);
+                    var numberOfGenesToInclude = 0.1 * genes.Count <= 1 ? 1 : (int)(0.1 * genes.Count);
                     genes = genes.OrderBy(g =>
                             g.IsVertical
                                 ? Math.Abs(g.Start.X - SettlementCenter.X)
                                 : Math.Abs(g.Start.Y - SettlementCenter.Y))
+                        .Take(2 * numberOfGenesToInclude)
+                        .ToList();
+                    genes = genes
+                        .OrderBy(g => g.AttachedRoads(new List<IRoad>(this.Genes)).Count)
                         .Take(numberOfGenesToInclude)
                         .ToList();
                 }

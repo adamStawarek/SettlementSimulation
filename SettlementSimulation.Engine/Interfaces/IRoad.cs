@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Models;
-using SettlementSimulation.Engine.Models.Buildings;
-
 namespace SettlementSimulation.Engine.Interfaces
 {
     public interface IRoad: ISettlementStructure
@@ -17,6 +15,7 @@ namespace SettlementSimulation.Engine.Interfaces
 
         List<Point> GetPossiblePositionsToAttachBuilding(List<IRoad> roads);
         List<Point> GetPossiblePositionsToAttachRoad(List<IRoad> roads,int minDistanceBetweenRoads = 15);
+        List<IRoad> AttachedRoads(List<IRoad> roads);
         bool AddBuilding(IBuilding building);
     }
 }

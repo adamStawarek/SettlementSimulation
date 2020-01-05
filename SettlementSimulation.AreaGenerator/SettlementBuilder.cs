@@ -240,7 +240,10 @@ namespace SettlementSimulation.AreaGenerator
                 }
             }
 
-            var positions = await Task.Run(() => grid.GetPath(new Position(start.X, start.Y), new Position(end.X, end.Y)));
+            var positions = await Task.Run(() => grid.GetPath(
+                new Position(start.X, start.Y),
+                new Position(end.X, end.Y),
+                MovementPatterns.LateralOnly));
 
             return positions.Select(p => new Point(p.X, p.Y));
         }

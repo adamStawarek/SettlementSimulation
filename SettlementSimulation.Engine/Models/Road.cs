@@ -118,6 +118,15 @@ namespace SettlementSimulation.Engine.Models
             return possiblePositions;
         }
 
+        public List<IRoad> AttachedRoads(List<IRoad> roads)
+        {
+            var attachedRows = this.IsVertical ? 
+                roads.Where(g => !g.IsVertical && Math.Abs(this.Start.X - g.Start.X) <= 1).ToList() :
+                roads.Where(g => g.IsVertical && Math.Abs(this.Start.Y - g.Start.Y) <= 1).ToList();
+
+            return attachedRows;
+        }
+
         public bool AddBuilding(IBuilding building)
         {
             if (building == null || Buildings.Any(b => b.Position.Equals(building.Position))) return false;
