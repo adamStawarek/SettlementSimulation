@@ -1,6 +1,7 @@
 ﻿using SettlementSimulation.Engine.Interfaces;
 using System.Collections.Generic;
 using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Enumerators;
 
 namespace SettlementSimulation.Engine.Models
 {

@@ -6,5 +6,6 @@ namespace SettlementSimulation.AreaGenerator.Models.Terrains
     {
         public byte UpperBound => 200;
         public Pixel Color => new Pixel(140, 140, 70);
+        public double Percentile => 0.85;
     }
 }

@@ -5,6 +5,7 @@ using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 using System.Collections.Generic;
 using System.Linq;
+using SettlementSimulation.Engine.Enumerators;
 
 namespace SettlementSimulation.Engine
 {

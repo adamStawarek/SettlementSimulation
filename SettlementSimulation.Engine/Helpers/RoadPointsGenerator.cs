@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using RoyT.AStar;
 using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models;
 

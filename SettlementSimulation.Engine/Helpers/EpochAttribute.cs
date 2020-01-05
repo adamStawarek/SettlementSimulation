@@ -1,5 +1,6 @@
 ﻿using SettlementSimulation.Engine.Models;
 using System;
+using SettlementSimulation.Engine.Enumerators;
 
 namespace SettlementSimulation.Engine.Helpers
 {

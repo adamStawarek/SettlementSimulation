@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Enumerators;
 
 namespace SettlementSimulation.Engine.Models.Buildings
 {

@@ -1,4 +1,5 @@
-﻿using SettlementSimulation.Engine.Helpers;
+﻿using SettlementSimulation.Engine.Enumerators;
+using SettlementSimulation.Engine.Helpers;
 
 namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
 {

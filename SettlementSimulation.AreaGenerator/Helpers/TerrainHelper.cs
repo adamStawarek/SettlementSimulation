@@ -45,5 +45,21 @@ namespace SettlementSimulation.AreaGenerator.Helpers
         {
             return _terrains;
         }
+
+        public byte Percentile(byte[] sequence, double excelPercentile)
+        {
+            Array.Sort(sequence);
+            int N = sequence.Length;
+            double n = (N - 1) * excelPercentile + 1;
+            // Another method: double n = (N + 1) * excelPercentile;
+            if (Math.Abs(n - 1d) < 0.01) return sequence[0];
+            else if (Math.Abs(n - N) < 0.01) return sequence[N - 1];
+            else
+            {
+                int k = (int)n;
+                double d = n - k;
+                return (byte)(sequence[k - 1] + d * (sequence[k] - sequence[k - 1]));
+            }
+        }
     }
 }

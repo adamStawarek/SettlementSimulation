@@ -1,4 +1,6 @@
-﻿namespace SettlementSimulation.Engine.Models
+﻿using SettlementSimulation.Engine.Enumerators;
+
+namespace SettlementSimulation.Engine.Models
 {
     public static class EpochSpecific
     {

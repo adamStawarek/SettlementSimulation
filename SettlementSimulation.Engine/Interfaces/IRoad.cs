@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Models;
 namespace SettlementSimulation.Engine.Interfaces
 {
-    public interface IRoad: ISettlementStructure
+    public interface IRoad : ISettlementStructure
     {
         List<Road.RoadSegment> Segments { get; }
         Point Start { get; }
@@ -12,9 +13,10 @@ namespace SettlementSimulation.Engine.Interfaces
         bool IsVertical { get; }
         List<IBuilding> Buildings { get; }
         int Length { get; }
+        RoadType Type { get; }
 
         List<Point> GetPossiblePositionsToAttachBuilding(List<IRoad> roads);
-        List<Point> GetPossiblePositionsToAttachRoad(List<IRoad> roads,int minDistanceBetweenRoads = 15);
+        List<Point> GetPossiblePositionsToAttachRoad(List<IRoad> roads, int minDistanceBetweenRoads = 15);
         List<IRoad> AttachedRoads(List<IRoad> roads);
         bool AddBuilding(IBuilding building);
     }

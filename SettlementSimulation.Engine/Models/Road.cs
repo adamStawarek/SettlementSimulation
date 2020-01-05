@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Models
@@ -22,6 +23,7 @@ namespace SettlementSimulation.Engine.Models
         public Point End => Segments.Last().Position;
         public Point Center => new Point((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         public int Length => Segments.Count;
+        public RoadType Type => Length < 50 ? RoadType.Unpaved : RoadType.Paved;
         public bool IsVertical => Start.X.Equals(End.X);
         public List<IBuilding> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
 
@@ -120,7 +122,7 @@ namespace SettlementSimulation.Engine.Models
 
         public List<IRoad> AttachedRoads(List<IRoad> roads)
         {
-            var attachedRows = this.IsVertical ? 
+            var attachedRows = this.IsVertical ?
                 roads.Where(g => !g.IsVertical && Math.Abs(this.Start.X - g.Start.X) <= 1).ToList() :
                 roads.Where(g => g.IsVertical && Math.Abs(this.Start.Y - g.Start.Y) <= 1).ToList();
 

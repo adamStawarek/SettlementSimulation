@@ -5,6 +5,7 @@ using SettlementSimulation.Engine.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Models.Buildings;
 
 namespace SettlementSimulation.Engine
@@ -145,7 +146,7 @@ namespace SettlementSimulation.Engine
 
                 if (RandomProvider.NextDouble() <= 0.9) //in order to make it more probable for roads closer to center to be selected
                 {
-                    var numberOfGenesToInclude = 0.15 * genes.Count <= 1 ? 1 : (int)(0.1 * genes.Count);
+                    var numberOfGenesToInclude = (int)(0.1 * genes.Count) <= 1 ? 1 : (int)(0.1 * genes.Count);
                     genes = genes.OrderBy(g =>
                             g.IsVertical
                                 ? Math.Abs(g.Start.X - SettlementCenter.X)
