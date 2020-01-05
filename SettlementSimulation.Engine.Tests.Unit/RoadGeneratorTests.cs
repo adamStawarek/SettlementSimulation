@@ -180,7 +180,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Fields = _fields,
                 Road = road,
                 Roads = new List<IRoad>() { road, road2 ,road3},
-                MinRoadLength = 99,
+                MinRoadLength = 1,
                 MinDistanceBetweenRoads = 3,
                 MaxRoadLength = 100
             });
@@ -221,7 +221,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Fields = _fields,
                 Road = road,
                 Roads = new List<IRoad>() { road, road2, road3 },
-                MinRoadLength = 99,
+                MinRoadLength = 1,
                 MinDistanceBetweenRoads = 3,
                 MaxRoadLength = 100
             });

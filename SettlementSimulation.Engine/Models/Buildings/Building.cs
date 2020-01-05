@@ -19,7 +19,7 @@ namespace SettlementSimulation.Engine.Models.Buildings
                 .Where(t => t.IsSubclassOf(typeof(Building)) &&
                             t.GetCustomAttributes(typeof(EpochAttribute), false)
                                 .Cast<EpochAttribute>()
-                                .Any(a => a.Epoch == epoch))
+                                .Any(a => a.Epoch <= epoch))
                 .Select(t => (Building)Activator.CreateInstance(t))
                 .ToList();
 

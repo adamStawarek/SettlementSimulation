@@ -2,6 +2,7 @@
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
+using System.Collections.Generic;
 
 namespace SettlementSimulation.Engine.Tests.Unit
 {
@@ -59,7 +60,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
+            var actual = road.GetPossiblePositionsToAttachRoad(new List<Interfaces.IRoad>() { road });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -183,7 +184,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road, road2 }, 3);
+            var actual = road.GetPossiblePositionsToAttachRoad(
+                new List<Interfaces.IRoad>() { road, road2 },
+                2);
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -215,7 +218,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 0)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road, road2, road3 }, 3);
+            var actual = road.GetPossiblePositionsToAttachRoad(
+                new List<Interfaces.IRoad>() { road, road2, road3 }, 
+                2);
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -247,7 +252,113 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 0)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road, road2, road3 },3);
+            var actual = road.GetPossiblePositionsToAttachRoad(
+                new List<Interfaces.IRoad>() { road, road2, road3 },
+                2);
+            CollectionAssert.AreEquivalent(expected, actual);
+        }
+
+        [Test]
+        public void GetPossiblePositionsToAttachRoad__Single_Adjacent_Road_Test()
+        {
+            var road1 = new Road(new[]
+            {
+                new Point(0, 1),
+                new Point(1, 1),
+                new Point(2, 1),
+                new Point(3, 1),
+                new Point(4, 1)
+            });
+
+            var road2 = new Road(new[]
+            {
+                new Point(1, 2),
+                new Point(1, 3)
+            });
+
+            var road3 = new Road(new[]
+            {
+                new Point(0, 4),
+                new Point(1, 4),
+                new Point(2, 4),
+                new Point(3, 4),
+                new Point(4, 4)
+            });
+
+            var actual = road3.GetPossiblePositionsToAttachRoad(
+                new List<Interfaces.IRoad> {road1, road2, road3},
+                minDistanceBetweenRoads: 1);
+                
+            var expected = new[]
+            {
+                new Point(4,3),
+                new Point(3,3),
+                new Point(0, 5),
+                new Point(1, 5),
+                new Point(2, 5),
+                new Point(3, 5),
+                new Point(4, 5)
+            };
+
+            CollectionAssert.AreEquivalent(expected, actual);
+        }
+
+        [Test]
+        public void GetPossiblePositionsToAttachRoad__Multiple_Adjacent_Road_Test()
+        {
+            var road1 = new Road(new[]
+            {
+                new Point(0, 1),
+                new Point(1, 1),
+                new Point(2, 1),
+                new Point(3, 1),
+                new Point(4, 1)
+            });
+
+            var road2 = new Road(new[]
+            {
+                new Point(1, 2),
+                new Point(1, 3)
+            });
+
+            var road3 = new Road(new[]
+            {
+                new Point(3, 2),
+                new Point(3, 3)
+            });
+
+            var road4 = new Road(new[]
+            {
+                new Point(4, 2),
+                new Point(4, 3)
+            });
+
+            var road5 = new Road(new[]
+            {
+                new Point(3, 5),
+                new Point(3, 5)
+            });
+
+            var road6 = new Road(new[]
+            {
+                new Point(0, 4),
+                new Point(1, 4),
+                new Point(2, 4),
+                new Point(3, 4),
+                new Point(4, 4)
+            });
+
+            var actual = road6.GetPossiblePositionsToAttachRoad(
+                new List<Interfaces.IRoad> { road1, road2, road3, road4, road5, road6 },
+                minDistanceBetweenRoads: 1);
+
+            var expected = new[]
+            {
+                new Point(0,5),
+                new Point(1,5)
+               
+            };
+
             CollectionAssert.AreEquivalent(expected, actual);
         }
 

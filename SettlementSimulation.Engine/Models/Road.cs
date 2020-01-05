@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Interfaces;
-using SettlementSimulation.Engine.Models.Buildings;
 
 namespace SettlementSimulation.Engine.Models
 {
@@ -11,7 +10,11 @@ namespace SettlementSimulation.Engine.Models
     {
         public Road(IEnumerable<Point> positions)
         {
-            Segments = positions.Select(p => new RoadSegment(p)).ToList();
+            Segments = positions
+                .OrderBy(p => p.X)
+                .ThenBy(p => p.Y)
+                .Select(p => new RoadSegment(p))
+                .ToList();
         }
 
         public List<RoadSegment> Segments { get; }
@@ -78,13 +81,13 @@ namespace SettlementSimulation.Engine.Models
                 {
                     if (!r.IsVertical && this.IsVertical)
                     {
-                        points.RemoveAll(p => (r.Start.DistanceTo(p) < minDistanceBetweenRoads && (r.Start.X == p.X) ||
-                                               (r.End.DistanceTo(p) < minDistanceBetweenRoads && (r.End.X == p.X))));
+                        points.RemoveAll(p => ((int)r.Start.DistanceTo(p) <= minDistanceBetweenRoads && (r.Start.X == p.X) ||
+                                               ((int)r.End.DistanceTo(p) <= minDistanceBetweenRoads && (r.End.X == p.X))));
                     }
                     else if (r.IsVertical && !this.IsVertical)
                     {
-                        points.RemoveAll(p => (r.Start.DistanceTo(p) < minDistanceBetweenRoads && (r.Start.Y == p.Y) ||
-                                               (r.End.DistanceTo(p) < minDistanceBetweenRoads && (r.End.Y == p.Y))));
+                        points.RemoveAll(p => ((int)r.Start.DistanceTo(p) <= minDistanceBetweenRoads && (r.Start.Y == p.Y) ||
+                                               ((int)r.End.DistanceTo(p) <= minDistanceBetweenRoads && (r.End.Y == p.Y))));
                     }
                 }
 
@@ -97,27 +100,32 @@ namespace SettlementSimulation.Engine.Models
             if (this.IsVertical)
             {
                 possiblePositions.RemoveAll(
-                    p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 2 &&
+                    p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 1 &&
+                                                                  ((this.Start.X - g.Start.X < 0 && this.Start.X - p.X < 0) ||
+                                                                   (this.Start.X - g.Start.X > 0 && this.Start.X - p.X > 0)) &&
                                                                   g.Segments.Any(s => Math.Abs(s.Position.X - p.X) < 100)));
 
             }
             else
             {
                 possiblePositions.RemoveAll(
-                    p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 2 &&
+                    p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 1 &&
+                                                                 ((this.Start.Y - g.Start.Y < 0 && this.Start.Y - p.Y < 0) ||
+                                                                  (this.Start.Y - g.Start.Y > 0 && this.Start.Y - p.Y > 0)) &&
                                                                  g.Segments.Any(s => Math.Abs(s.Position.Y - p.Y) < 100)));
             }
 
             return possiblePositions;
         }
 
-        public void AddBuilding(IBuilding building)
+        public bool AddBuilding(IBuilding building)
         {
-            if (building == null || Buildings.Any(b => b.Position.Equals(building.Position))) return;
+            if (building == null || Buildings.Any(b => b.Position.Equals(building.Position))) return false;
 
             var segment = Segments.First(s => s.Position.X == building.Position.X ||
                                               s.Position.Y == building.Position.Y);
             segment.Buildings.Add(building);
+            return true;
         }
 
         public override string ToString()
