@@ -109,6 +109,7 @@ namespace SettlementSimulation.Engine
         {
             SettlementState = new SettlementState()
             {
+                MainRoad = new Road(_engine.MainRoad),
                 CurrentGeneration = _engine.Generation,
                 Time = (int)_stopWatch.ElapsedMilliseconds / 1000,
                 CurrentEpoch = _engine.CurrentEpoch,

@@ -7,6 +7,7 @@ namespace SettlementSimulation.Engine.Models
 {
     public class SettlementState
     {
+        public IRoad MainRoad { get; set; }
         public List<IRoad> Roads { get; set; }
         public Point SettlementCenter { get; set; }
         public IEnumerable<ISettlementStructure> LastCreatedStructures { get; set; }
