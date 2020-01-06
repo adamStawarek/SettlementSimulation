@@ -7,5 +7,15 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     public class Administration : Building
     {
         public override double Probability => 0.03;
+        public override bool IsSatisfied(BuildingRule model)
+        {
+            var minDistanceToSettlementCenter = 15;
+            if (this.Position.DistanceTo(model.SettlementCenter) <= minDistanceToSettlementCenter)
+            {
+                //market is close enough to the settlement center
+                return false;
+            }
+            return true;
+        }
     }
 }

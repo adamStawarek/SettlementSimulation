@@ -7,5 +7,9 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     public class Church : Building
     {
         public override double Probability => 0.03;
+        public override bool IsSatisfied(BuildingRule model)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

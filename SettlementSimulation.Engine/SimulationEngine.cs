@@ -6,6 +6,7 @@ using SettlementSimulation.Engine.Models;
 using System.Collections.Generic;
 using System.Linq;
 using SettlementSimulation.Engine.Enumerators;
+using SettlementSimulation.Engine.Models.Buildings;
 
 namespace SettlementSimulation.Engine
 {
@@ -72,7 +73,24 @@ namespace SettlementSimulation.Engine
 
                 child.Mutate(CurrentEpoch);
 
-                this.LastStructuresCreated = child.AddNewSettlementStructure(CurrentEpoch, SetNextEpoch);
+                var generatedStructures = child.AddNewSettlementStructure(CurrentEpoch, SetNextEpoch);
+
+                if (generatedStructures.NewRoads.Any())
+                {
+                    generatedStructures.NewRoads
+                        .ForEach(r => child.AddRoad(r));
+                    LastStructuresCreated = generatedStructures.NewRoads.ToList();
+                }
+
+                if (generatedStructures.NewBuildings.Any())
+                {
+                    generatedStructures.NewBuildings
+                        .ForEach(b =>
+                        {
+                            child.AddBuildingToRoad(generatedStructures.RoadToAttachNewBuildings, b);
+                            LastStructuresCreated = generatedStructures.NewBuildings.ToList();
+                        });
+                }
 
                 newPopulation.Add(child);
             }

@@ -22,6 +22,10 @@ namespace SettlementSimulation.Engine
         public float Fitness { get; private set; }
         public Point SettlementCenter =>
             new Point((int)Genes.Average(g => g.Center.X), (int)Genes.Average(g => g.Center.Y));
+        public Point SettlementUpperLeftBound =>
+            new Point(this.Genes.Min(g => g.Start.X), this.Genes.Min(g => g.Start.Y));
+        public Point SettlementBottomRightBound =>
+            new Point(this.Genes.Max(g => g.Start.X), this.Genes.Max(g => g.Start.Y));
         #endregion
 
         public Dna(
@@ -109,13 +113,13 @@ namespace SettlementSimulation.Engine
 
                 var newRoad = new Road(roadPoints);
                 initialRoads.Add(newRoad);
-                AddRoad(newRoad);
-
+                
                 while (newRoad.Buildings.Count < 0.25 * newRoad.Length)
                 {
                     var building = CreateNewBuilding(newRoad, Epoch.First);
-                    AddBuildingToRoad(newRoad, building);
+                    newRoad.AddBuilding(building);
                 }
+                AddRoad(newRoad);
             }
         }
 
@@ -135,9 +139,9 @@ namespace SettlementSimulation.Engine
             //TODO
         }
 
-        public IEnumerable<ISettlementStructure> AddNewSettlementStructure(Epoch epoch, Action setNextEpoch)
+        public GeneratedStructures AddNewSettlementStructure(Epoch epoch, Action setNextEpoch)
         {
-            var newStructures = new List<ISettlementStructure>();
+            var generatedStructures = new GeneratedStructures();
             if (Genes.Sum(g => g.Length) < 1.5 * EpochSpecific.GetBuildingsCount(epoch))
             {
                 var genes = this.Genes
@@ -162,18 +166,16 @@ namespace SettlementSimulation.Engine
                 var roadToAttach = genes[RandomProvider.Next(genes.Count)];
                 var road = this.CreateNewRoad(roadToAttach);
                 if (!CanAddRoad(road))
-                    return newStructures;
-
-                this.AddRoad(road);
+                    return generatedStructures;
 
                 while (road.Buildings.Count < 0.5 * road.Length)
                 {
                     var building = CreateNewBuilding(road, epoch);
-                    AddBuildingToRoad(road, building);
+                    road.AddBuilding(building);
                 }
 
-                newStructures.Add(road);
-                return newStructures;
+                generatedStructures.NewRoads.Add(road);
+                return generatedStructures;
             }
             else if (Genes.Sum(g => g.Buildings.Count) < EpochSpecific.GetBuildingsCount(epoch))
             {
@@ -183,21 +185,22 @@ namespace SettlementSimulation.Engine
 
                 var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())];
 
-                while (roadToAttach.Buildings.Count < roadToAttach.Length)
+                while (generatedStructures.NewBuildings.Count < roadToAttach.Length)
                 {
                     var building = this.CreateNewBuilding(roadToAttach, epoch);
-                    AddBuildingToRoad(roadToAttach, building);
-                    newStructures.Add(building);
-
+                    generatedStructures.NewBuildings.Add(building);
                 }
-                return newStructures;
+
+                generatedStructures.RoadToAttachNewBuildings = roadToAttach;
+
+                return generatedStructures;
             }
             else if (epoch != Epoch.Third)
             {
                 setNextEpoch.Invoke();
             }
 
-            return newStructures;
+            return generatedStructures;
         }
 
         public Dna Copy()
@@ -237,10 +240,16 @@ namespace SettlementSimulation.Engine
             return building;
         }
 
+        public void AddBuildingToRoad(IRoad road, IBuilding building)
+        {
+            if (road.AddBuilding(building))
+            {
+                _fields[building.Position.X, building.Position.Y].IsBlocked = true;
+            }
+        }
+       
         public void AddRoad(IRoad road)
         {
-            if (!CanAddRoad(road)) return;
-
             foreach (var segment in road.Segments)
             {
                 _fields[segment.Position.X, segment.Position.Y].IsBlocked = true;
@@ -251,14 +260,6 @@ namespace SettlementSimulation.Engine
                 _fields[building.Position.X, building.Position.Y].IsBlocked = true;
             }
             this.Genes.Add(road);
-        }
-
-        public void AddBuildingToRoad(IRoad road, IBuilding building)
-        {
-            if (road.AddBuilding(building))
-            {
-                _fields[building.Position.X, building.Position.Y].IsBlocked = true;
-            }
         }
 
         public bool CanAddRoad(IRoad road)
