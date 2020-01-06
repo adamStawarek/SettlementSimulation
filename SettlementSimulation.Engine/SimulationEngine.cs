@@ -75,6 +75,7 @@ namespace SettlementSimulation.Engine
 
                 var generatedStructures = child.AddNewSettlementStructure(CurrentEpoch, SetNextEpoch);
 
+                LastStructuresCreated = null;
                 if (generatedStructures.NewRoads.Any())
                 {
                     generatedStructures.NewRoads
