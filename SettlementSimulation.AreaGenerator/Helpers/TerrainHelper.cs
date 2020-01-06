@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using SettlementSimulation.AreaGenerator.Interfaces;
+using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.AreaGenerator.Models.Terrains;
 
 namespace SettlementSimulation.AreaGenerator.Helpers
 {
     public class TerrainHelper
     {
-        private readonly List<ITerrain> _terrains;
+        private static readonly List<ITerrain> Terrains;
 
-        public TerrainHelper()
+        static TerrainHelper()
         {
             var allTerrains = new List<ITerrain>
             {
@@ -24,29 +25,35 @@ namespace SettlementSimulation.AreaGenerator.Helpers
                 new MountainTop()
             };
 
-            _terrains = allTerrains.OrderBy(t => t.UpperBound).ToList();
+            Terrains = allTerrains.OrderBy(t => t.UpperBound).ToList();
+        }
+
+        public static void SetTerrains(Pixel[,] matrix)
+        {
+            var bytes = matrix.ToByteArray();
+            foreach (var terrain in Terrains)
+            {
+                var height = Percentile(bytes, terrain.Percentile);
+                terrain.SetHeight(height);
+            }
         }
 
         public ITerrain GetTerrain<T>() where T : ITerrain
         {
-            return (ITerrain)Assembly.Load("SettlementSimulation.AreaGenerator")
-                .GetTypes()
-                .Where(t => t == typeof(T))
-                .Select(Activator.CreateInstance)
-                .FirstOrDefault();
+            return Terrains.First(t => t is T);
         }
 
         public ITerrain GetTerrainForHeight(byte height)
         {
-            return _terrains.First(f => f.UpperBound >= height);
+            return Terrains.First(f => f.UpperBound >= height);
         }
 
         public IEnumerable<ITerrain> GetAllTerrains()
         {
-            return _terrains;
+            return Terrains;
         }
 
-        public byte Percentile(byte[] sequence, double excelPercentile)
+        private static byte Percentile(byte[] sequence, double excelPercentile)
         {
             Array.Sort(sequence);
             int N = sequence.Length;
