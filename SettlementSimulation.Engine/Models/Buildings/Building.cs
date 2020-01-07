@@ -13,6 +13,7 @@ namespace SettlementSimulation.Engine.Models.Buildings
         public abstract double Probability { get; }
         public abstract bool IsSatisfied(BuildingRule model);
 
+        public Direction? Direction { get; set; }
         public Point Position { get; set; }
         public Building Copy()
         {

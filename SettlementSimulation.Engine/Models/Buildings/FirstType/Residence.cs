@@ -6,7 +6,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
     [Epoch(Epoch.First)]
     public class Residence : Building
     {
-        public override double Probability => 0.88;
+        public override double Probability => 0.885;
         public override bool IsSatisfied(BuildingRule model)
         {
             return false;

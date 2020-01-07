@@ -47,7 +47,7 @@ namespace SettlementSimulation.Engine.Models
                     points.Add(new Point(segment.Position.X, segment.Position.Y + 1));
                 }
 
-                points.RemoveAll(p => Buildings.Select(b => b.Position).Any(b => b.DistanceTo(p) <= 1) ||
+                points.RemoveAll(p => Buildings.Select(b => b.Position).Any(b => b.Equals(p)) ||
                                       roads.Any(r => r.Start.Equals(p) || r.End.Equals(p)));
 
                 possiblePositions.AddRange(points);
@@ -135,6 +135,16 @@ namespace SettlementSimulation.Engine.Models
 
             var segment = Segments.First(s => s.Position.X == building.Position.X ||
                                               s.Position.Y == building.Position.Y);
+
+            if (IsVertical)
+            {
+                building.Direction = building.Position.X > this.Start.X ? Direction.Right : Direction.Left;
+            }
+            else
+            {
+                building.Direction = building.Position.Y > this.Start.Y ? Direction.Up : Direction.Down;
+            }
+
             segment.Buildings.Add(building);
             return true;
         }

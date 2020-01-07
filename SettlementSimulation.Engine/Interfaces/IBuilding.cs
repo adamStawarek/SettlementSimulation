@@ -1,4 +1,5 @@
 ﻿using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Enumerators;
 
 namespace SettlementSimulation.Engine.Interfaces
 {
@@ -6,5 +7,6 @@ namespace SettlementSimulation.Engine.Interfaces
     {
         double Probability { get; }
         Point Position { get; set; }
+        Direction? Direction { get; set; }
     }
 }
