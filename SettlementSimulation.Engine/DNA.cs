@@ -131,7 +131,7 @@ namespace SettlementSimulation.Engine
             if (Genes.Sum(g => g.Length) < 3 * EpochSpecific.GetBuildingsCount(epoch))
             {
                 var genes = this.Genes
-                    .Where(g => g.GetPossiblePositionsToAttachRoad(new List<IRoad>(this.Genes)).Count > 1)
+                    .Where(g => g.GetPossibleRoadPositions(new PossibleRoadPositions(this.Genes)).Count > 1)
                     .ToList();
 
                 if (RandomProvider.NextDouble() <= 0.6) //in order to make it more probable for roads closer to center to be selected
@@ -155,7 +155,7 @@ namespace SettlementSimulation.Engine
                     return generatedStructures;
 
                 while (road.Buildings.Count < 0.5 * road.Length &&
-                       roadToAttach.GetPossiblePositionsToAttachBuilding(new List<IRoad>(this.Genes)).Any())
+                       roadToAttach.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, _fields)).Any())
                 {
                     var building = CreateNewBuilding(road, epoch);
                     road.AddBuilding(building);
@@ -173,7 +173,7 @@ namespace SettlementSimulation.Engine
                 var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())].Copy();
 
                 while (roadToAttach.Buildings.Count < 2 * roadToAttach.Length &&
-                       roadToAttach.GetPossiblePositionsToAttachBuilding(new List<IRoad>(this.Genes)).Any())
+                       roadToAttach.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, _fields)).Any())
                 {
                     var building = this.CreateNewBuilding(roadToAttach, epoch);
                     generatedStructures.NewBuildings.Add(building);
@@ -219,7 +219,7 @@ namespace SettlementSimulation.Engine
 
         private IBuilding CreateNewBuilding(IRoad road, Epoch epoch)
         {
-            var positions = road.GetPossiblePositionsToAttachBuilding(this.Genes);
+            var positions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, _fields));
             if (!positions.Any())
                 return null;
 

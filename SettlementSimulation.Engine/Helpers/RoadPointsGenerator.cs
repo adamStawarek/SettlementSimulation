@@ -71,7 +71,8 @@ namespace SettlementSimulation.Engine.Helpers
         public IEnumerable<Point> GenerateAttached(RoadGenerationAttached model)
         {
             var roads = new List<IRoad>(model.Roads);
-            var possiblePositions = model.Road.GetPossiblePositionsToAttachRoad(roads, model.MinDistanceBetweenRoads);
+            var possiblePositions = model.Road
+                .GetPossibleRoadPositions(new PossibleRoadPositions(roads) { MinDistanceBetweenRoads = model.MinDistanceBetweenRoads });
             possiblePositions.RemoveAll(p => p.X <= 0 ||
                                              p.Y < 0 ||
                                              p.X >= model.Fields.GetLength(0) ||

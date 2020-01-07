@@ -27,7 +27,7 @@ namespace SettlementSimulation.Engine.Models
         public bool IsVertical => Start.X.Equals(End.X);
         public List<IBuilding> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
 
-        public List<Point> GetPossiblePositionsToAttachBuilding(List<IRoad> roads)
+        public List<Point> GetPossibleBuildingPositions(PossibleBuildingPositions model)
         {
             var possiblePositions = new List<Point>();
 
@@ -48,7 +48,9 @@ namespace SettlementSimulation.Engine.Models
                 }
 
                 points.RemoveAll(p => Buildings.Select(b => b.Position).Any(b => b.Equals(p)) ||
-                                      roads.Any(r => r.Start.Equals(p) || r.End.Equals(p)));
+                                      (model.Fields[p.X, p.Y].IsBlocked.HasValue && model.Fields[p.X, p.Y].IsBlocked.Value) ||
+                                      !model.Fields[p.X, p.Y].InSettlement ||
+                                      model.Roads.Any(r => r.Start.Equals(p) || r.End.Equals(p)));
 
                 possiblePositions.AddRange(points);
             }
@@ -56,9 +58,11 @@ namespace SettlementSimulation.Engine.Models
             return possiblePositions;
         }
 
-        public List<Point> GetPossiblePositionsToAttachRoad(List<IRoad> roads, int minDistanceBetweenRoads = 15)
+        public List<Point> GetPossibleRoadPositions(PossibleRoadPositions model)
         {
             var possiblePositions = new List<Point>();
+            var roads = new List<IRoad>(model.Roads);
+            
             roads.RemoveAll(r => r.Start.Equals(this.Start) && r.End.Equals(this.End));
 
             foreach (var segment in Segments)
@@ -83,13 +87,13 @@ namespace SettlementSimulation.Engine.Models
                 {
                     if (!r.IsVertical && this.IsVertical)
                     {
-                        points.RemoveAll(p => ((int)r.Start.DistanceTo(p) <= minDistanceBetweenRoads && (r.Start.X == p.X) ||
-                                               ((int)r.End.DistanceTo(p) <= minDistanceBetweenRoads && (r.End.X == p.X))));
+                        points.RemoveAll(p => ((int)r.Start.DistanceTo(p) <= model.MinDistanceBetweenRoads && (r.Start.X == p.X) ||
+                                               ((int)r.End.DistanceTo(p) <= model.MinDistanceBetweenRoads && (r.End.X == p.X))));
                     }
                     else if (r.IsVertical && !this.IsVertical)
                     {
-                        points.RemoveAll(p => ((int)r.Start.DistanceTo(p) <= minDistanceBetweenRoads && (r.Start.Y == p.Y) ||
-                                               ((int)r.End.DistanceTo(p) <= minDistanceBetweenRoads && (r.End.Y == p.Y))));
+                        points.RemoveAll(p => ((int)r.Start.DistanceTo(p) <= model.MinDistanceBetweenRoads && (r.Start.Y == p.Y) ||
+                                               ((int)r.End.DistanceTo(p) <= model.MinDistanceBetweenRoads && (r.End.Y == p.Y))));
                     }
                 }
 

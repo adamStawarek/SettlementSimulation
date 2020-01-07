@@ -4,11 +4,34 @@ using SettlementSimulation.Engine.Models;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using System.Collections.Generic;
 using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.AreaGenerator.Models.Terrains;
 
 namespace SettlementSimulation.Engine.Tests.Unit
 {
     public class RoadTests
     {
+        private Field[,] _fields;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _fields = new Field[100, 100];
+            for (int i = 0; i < _fields.GetLength(0); i++)
+            {
+                for (int j = 0; j < _fields.GetLength(1); j++)
+                {
+                    _fields[i, j] = new Field()
+                    {
+                        InSettlement = true,
+                        Position = new Point(i, j),
+                        Terrain = new Lowland(),
+                        DistanceToWater = 10,
+                        DistanceToMainRoad = 10
+                    };
+                }
+            }
+        }
+
         [Test]
         public void GetPossiblePositionsToAttachBuilding_When_There_Are_No_Buildings_And_Any_Already_Attached_Roads()
         {
@@ -33,7 +56,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachBuilding(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
+            var actual = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(new List<IRoad>() { road }, _fields));
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -61,7 +84,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(new List<Interfaces.IRoad>() { road });
+            var actual = road.GetPossibleRoadPositions(new PossibleRoadPositions(new List<IRoad>() { road }));
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -90,7 +113,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachBuilding(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
+            var actual = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(new List<IRoad>() { road }, _fields));
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -119,7 +142,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(2, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(new System.Collections.Generic.List<Interfaces.IRoad>() { road });
+            var actual = road.GetPossibleRoadPositions(new PossibleRoadPositions(new List<IRoad>() { road }));
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -153,8 +176,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
 
             };
 
-            var actual = road.GetPossiblePositionsToAttachBuilding(
-                new System.Collections.Generic.List<Interfaces.IRoad>(){road, road2});
+            var actual = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(new List<IRoad>() { road, road2 }, _fields));
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -174,7 +196,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(0, 3),
                 new Point(1, 3)
             });
-           
+
 
             var expected = new[]
             {
@@ -185,9 +207,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 3)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(
-                new List<Interfaces.IRoad>() { road, road2 },
-                2);
+            var actual = road.GetPossibleRoadPositions(new PossibleRoadPositions(new List<IRoad>() { road, road2 }) { MinDistanceBetweenRoads = 2 });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -219,9 +239,8 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 0)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(
-                new List<Interfaces.IRoad>() { road, road2, road3 }, 
-                2);
+            var actual = road.GetPossibleRoadPositions(
+                new PossibleRoadPositions(new List<IRoad>() { road, road2, road3 }) { MinDistanceBetweenRoads = 2 });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -253,9 +272,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(3, 0)
             };
 
-            var actual = road.GetPossiblePositionsToAttachRoad(
-                new List<Interfaces.IRoad>() { road, road2, road3 },
-                2);
+            var actual = road.GetPossibleRoadPositions(new PossibleRoadPositions(new List<IRoad>() { road, road2, road3 }) { MinDistanceBetweenRoads = 2 });
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
@@ -286,10 +303,8 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(4, 4)
             });
 
-            var actual = road3.GetPossiblePositionsToAttachRoad(
-                new List<Interfaces.IRoad> {road1, road2, road3},
-                minDistanceBetweenRoads: 1);
-                
+            var actual = road3.GetPossibleRoadPositions(new PossibleRoadPositions(new List<IRoad>() { road1, road2, road3 }) { MinDistanceBetweenRoads = 1 });
+
             var expected = new[]
             {
                 new Point(4,3),
@@ -349,15 +364,14 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(4, 4)
             });
 
-            var actual = road6.GetPossiblePositionsToAttachRoad(
-                new List<Interfaces.IRoad> { road1, road2, road3, road4, road5, road6 },
-                minDistanceBetweenRoads: 1);
+            var actual = road6.GetPossibleRoadPositions(
+                new PossibleRoadPositions(new List<IRoad> { road1, road2, road3, road4, road5, road6 }) { MinDistanceBetweenRoads = 1 });
 
             var expected = new[]
             {
                 new Point(0,5),
                 new Point(1,5)
-               
+
             };
 
             CollectionAssert.AreEquivalent(expected, actual);
@@ -408,7 +422,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 new Point(4, 4)
             });
 
-            var allRoads = new List<IRoad> {road1, road2, road3, road4, road5, road6};
+            var allRoads = new List<IRoad> { road1, road2, road3, road4, road5, road6 };
             Assert.Multiple(() =>
             {
                 CollectionAssert.AreEquivalent(

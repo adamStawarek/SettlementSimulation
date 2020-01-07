@@ -15,8 +15,8 @@ namespace SettlementSimulation.Engine.Interfaces
         int Length { get; }
         RoadType Type { get; }
 
-        List<Point> GetPossiblePositionsToAttachBuilding(List<IRoad> roads);
-        List<Point> GetPossiblePositionsToAttachRoad(List<IRoad> roads, int minDistanceBetweenRoads = 15);
+        List<Point> GetPossibleBuildingPositions(PossibleBuildingPositions model);
+        List<Point> GetPossibleRoadPositions(PossibleRoadPositions model);
         List<IRoad> AttachedRoads(List<IRoad> roads);
         bool AddBuilding(IBuilding building);
     }
