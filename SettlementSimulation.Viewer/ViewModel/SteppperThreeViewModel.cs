@@ -188,11 +188,18 @@ namespace SettlementSimulation.Viewer.ViewModel
                 $"Roads: {SettlementState.Roads.Count}",
                 $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
                 $"Last generated structures: " +
-                $"{SettlementState.LastCreatedStructures?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2.ToString()}")}",
+                $"{SettlementState.LastCreatedStructures?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
                 $"Average road length: {(int)SettlementState.Roads.Average(r => r.Length)}",
                 $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
                 $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"
             };
+
+            var groups = SettlementState.Roads
+                .SelectMany(r => r.Buildings)
+                .GroupBy(building => building.GetType());
+
+            logs.AddRange(groups.Select(typeBuildings => $"{typeBuildings.Key.Name}: {typeBuildings.Count()}"));
+
             _logs = new List<string>(logs);
 
             var allRoadPoints = roads.SelectMany(s => s).ToList();
