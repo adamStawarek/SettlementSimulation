@@ -4,7 +4,7 @@ using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Models;
 namespace SettlementSimulation.Engine.Interfaces
 {
-    public interface IRoad : ISettlementStructure
+    public interface IRoad : ISettlementStructure, ICopyable<Road>
     {
         List<Road.RoadSegment> Segments { get; }
         Point Start { get; }

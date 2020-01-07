@@ -35,7 +35,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
 
         [Test]
         [Retry(200)]
-        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_Church_In_100_Tries()
+        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_Church_In_200_Tries()
         {
             var gene = Building.GetRandom(Epoch.Second);
             Assert.IsInstanceOf<Church>(gene);
@@ -43,7 +43,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
 
         [Test]
         [Retry(200)]
-        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_AdministrationOffice_In_100_Tries()
+        public void At_Second_Epoch_GetRandomGene_Generates_At_Least_One_AdministrationOffice_In_200_Tries()
         {
             var gene = Building.GetRandom(Epoch.Second);
             Assert.IsInstanceOf<Administration>(gene);
@@ -59,7 +59,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
 
         [Test]
         [Retry(1000)]
-        public void At_Third_Epoch_GetRandomGene_Generates_At_Least_One_Court_In_1000_Tries()
+        public void At_Third_Epoch_GetRandomGene_Generates_At_Least_One_Port_In_1000_Tries()
         {
             var gene = Building.GetRandom(Epoch.Third);
             Assert.IsInstanceOf<Port>(gene);

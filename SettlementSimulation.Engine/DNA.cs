@@ -128,7 +128,7 @@ namespace SettlementSimulation.Engine
         public GeneratedStructures CreateNewDnaStructure(Epoch epoch, Action setNextEpoch)
         {
             var generatedStructures = new GeneratedStructures();
-            if (Genes.Sum(g => g.Length) < 1.5 * EpochSpecific.GetBuildingsCount(epoch))
+            if (Genes.Sum(g => g.Length) < 3 * EpochSpecific.GetBuildingsCount(epoch))
             {
                 var genes = this.Genes
                     .Where(g => g.GetPossiblePositionsToAttachRoad(new List<IRoad>(this.Genes)).Count > 1)
@@ -154,7 +154,8 @@ namespace SettlementSimulation.Engine
                 if (!CanAddRoad(road))
                     return generatedStructures;
 
-                while (road.Buildings.Count < 0.5 * road.Length)
+                while (road.Buildings.Count < 0.5 * road.Length &&
+                       roadToAttach.GetPossiblePositionsToAttachBuilding(new List<IRoad>(this.Genes)).Any())
                 {
                     var building = CreateNewBuilding(road, epoch);
                     road.AddBuilding(building);
@@ -169,12 +170,14 @@ namespace SettlementSimulation.Engine
                     .Where(g => g.Buildings.Count < g.Length)
                     .ToArray();
 
-                var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())];
+                var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())].Copy();
 
-                while (generatedStructures.NewBuildings.Count < 1.5 * roadToAttach.Length)
+                while (roadToAttach.Buildings.Count < 2 * roadToAttach.Length &&
+                       roadToAttach.GetPossiblePositionsToAttachBuilding(new List<IRoad>(this.Genes)).Any())
                 {
                     var building = this.CreateNewBuilding(roadToAttach, epoch);
                     generatedStructures.NewBuildings.Add(building);
+                    roadToAttach.AddBuilding(building);
                 }
 
                 generatedStructures.RoadToAttachNewBuildings = roadToAttach;
@@ -208,7 +211,7 @@ namespace SettlementSimulation.Engine
                 SettlementCenter = this.SettlementCenter,
                 MinDistanceBetweenRoads = 5,
                 MinRoadLength = 5,
-                MaxRoadLength = 100
+                MaxRoadLength = 50
             }).ToList();
 
             return new Road(roadPoints);

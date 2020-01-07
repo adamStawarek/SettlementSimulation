@@ -139,7 +139,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Roads = new List<IRoad>() { road, road2 },
                 MinRoadLength = 2,
                 MinDistanceBetweenRoads = 3,
-                MaxRoadLength = 100
+                MaxRoadLength = 50
             });
 
             var expected = new[]

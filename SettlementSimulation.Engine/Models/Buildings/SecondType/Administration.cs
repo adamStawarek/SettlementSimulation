@@ -6,7 +6,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     [Epoch(Epoch.Second)]
     public class Administration : Building
     {
-        public override double Probability => 0.03;
+        public override double Probability => 0.001;
         public override bool IsSatisfied(BuildingRule model)
         {
             var minDistanceToSettlementCenter = 15;

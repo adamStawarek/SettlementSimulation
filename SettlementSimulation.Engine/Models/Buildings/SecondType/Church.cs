@@ -7,7 +7,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     [Epoch(Epoch.Second)]
     public class Church : Building
     {
-        public override double Probability => 0.03;
+        public override double Probability => 0.005;
         public override bool IsSatisfied(BuildingRule model)
         {
             var minDistanceBetweenChurches = 15;

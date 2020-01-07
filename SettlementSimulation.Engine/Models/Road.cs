@@ -7,7 +7,7 @@ using SettlementSimulation.Engine.Interfaces;
 
 namespace SettlementSimulation.Engine.Models
 {
-    public class Road : IRoad, ICopyable<Road>
+    public class Road : IRoad
     {
         public Road(IEnumerable<Point> positions)
         {
@@ -23,7 +23,7 @@ namespace SettlementSimulation.Engine.Models
         public Point End => Segments.Last().Position;
         public Point Center => new Point((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         public int Length => Segments.Count;
-        public RoadType Type => Length < 50 ? RoadType.Unpaved : RoadType.Paved;
+        public RoadType Type => Length < 25 ? RoadType.Unpaved : RoadType.Paved;
         public bool IsVertical => Start.X.Equals(End.X);
         public List<IBuilding> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
 
@@ -47,7 +47,7 @@ namespace SettlementSimulation.Engine.Models
                     points.Add(new Point(segment.Position.X, segment.Position.Y + 1));
                 }
 
-                points.RemoveAll(p => Buildings.Select(b => b.Position).Any(b => b.Equals(p)) ||
+                points.RemoveAll(p => Buildings.Select(b => b.Position).Any(b => b.DistanceTo(p) <= 1) ||
                                       roads.Any(r => r.Start.Equals(p) || r.End.Equals(p)));
 
                 possiblePositions.AddRange(points);

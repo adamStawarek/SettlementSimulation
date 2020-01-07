@@ -7,7 +7,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
     [Epoch(Epoch.First)]
     public class Market : Building
     {
-        public override double Probability => 0.1;
+        public override double Probability => 0.01;
         public override bool IsSatisfied(BuildingRule model)
         {
             var minDistanceBetweenMarkets = 50;

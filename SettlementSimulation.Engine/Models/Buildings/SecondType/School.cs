@@ -8,7 +8,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     [Epoch(Epoch.Second)]
     public class School : Building
     {
-        public override double Probability => 0.03;
+        public override double Probability => 0.005;
         public override bool IsSatisfied(BuildingRule model)
         {
             var residences = model.Roads.SelectMany(b => b.Buildings).Where(b => b is Residence);
