@@ -113,33 +113,19 @@ namespace SettlementSimulation.Engine
 
                 var newRoad = new Road(roadPoints);
                 initialRoads.Add(newRoad);
-                
+
                 while (newRoad.Buildings.Count < 0.25 * newRoad.Length)
                 {
                     var building = CreateNewBuilding(newRoad, Epoch.First);
                     newRoad.AddBuilding(building);
                 }
-                AddRoad(newRoad);
+
+                if (CanAddRoad(newRoad))
+                    AddRoad(newRoad);
             }
         }
 
-        public float CalculateFitness(Epoch epoch, int generation)
-        {
-            //TODO
-            return 0;
-        }
-
-        public Dna Crossover(Dna otherParent, Epoch epoch)
-        {
-            return this;
-        }
-
-        public void Mutate(Epoch epoch, float mutationRate = 0.01F)
-        {
-            //TODO
-        }
-
-        public GeneratedStructures AddNewSettlementStructure(Epoch epoch, Action setNextEpoch)
+        public GeneratedStructures CreateNewDnaStructure(Epoch epoch, Action setNextEpoch)
         {
             var generatedStructures = new GeneratedStructures();
             if (Genes.Sum(g => g.Length) < 1.5 * EpochSpecific.GetBuildingsCount(epoch))
@@ -148,9 +134,9 @@ namespace SettlementSimulation.Engine
                     .Where(g => g.GetPossiblePositionsToAttachRoad(new List<IRoad>(this.Genes)).Count > 1)
                     .ToList();
 
-                if (RandomProvider.NextDouble() <= 0.9) //in order to make it more probable for roads closer to center to be selected
+                if (RandomProvider.NextDouble() <= 0.6) //in order to make it more probable for roads closer to center to be selected
                 {
-                    var numberOfGenesToInclude = (int)(0.1 * genes.Count) <= 1 ? 1 : (int)(0.1 * genes.Count);
+                    var numberOfGenesToInclude = (int)(0.2 * genes.Count) <= 1 ? 1 : (int)(0.1 * genes.Count);
                     genes = genes.OrderBy(g =>
                             g.IsVertical
                                 ? Math.Abs(g.Start.X - SettlementCenter.X)
@@ -185,7 +171,7 @@ namespace SettlementSimulation.Engine
 
                 var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())];
 
-                while (generatedStructures.NewBuildings.Count < roadToAttach.Length)
+                while (generatedStructures.NewBuildings.Count < 1.5 * roadToAttach.Length)
                 {
                     var building = this.CreateNewBuilding(roadToAttach, epoch);
                     generatedStructures.NewBuildings.Add(building);
@@ -220,7 +206,7 @@ namespace SettlementSimulation.Engine
                 Roads = this.Genes,
                 Fields = this._fields,
                 SettlementCenter = this.SettlementCenter,
-                MinDistanceBetweenRoads = 10,
+                MinDistanceBetweenRoads = 5,
                 MinRoadLength = 5,
                 MaxRoadLength = 100
             }).ToList();
@@ -247,7 +233,7 @@ namespace SettlementSimulation.Engine
                 _fields[building.Position.X, building.Position.Y].IsBlocked = true;
             }
         }
-       
+
         public void AddRoad(IRoad road)
         {
             foreach (var segment in road.Segments)

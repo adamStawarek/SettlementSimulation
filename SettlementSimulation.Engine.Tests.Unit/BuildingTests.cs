@@ -62,7 +62,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         public void At_Third_Epoch_GetRandomGene_Generates_At_Least_One_Court_In_1000_Tries()
         {
             var gene = Building.GetRandom(Epoch.Third);
-            Assert.IsInstanceOf<Court>(gene);
+            Assert.IsInstanceOf<Port>(gene);
         }
     }
 }

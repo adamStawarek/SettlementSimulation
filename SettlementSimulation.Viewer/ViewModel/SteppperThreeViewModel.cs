@@ -188,7 +188,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                 $"Roads: {SettlementState.Roads.Count}",
                 $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
                 $"Last generated structures: " +
-                $"{SettlementState.LastCreatedStructures.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2.ToString()}")}",
+                $"{SettlementState.LastCreatedStructures?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2.ToString()}")}",
                 $"Average road length: {(int)SettlementState.Roads.Average(r => r.Length)}",
                 $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
                 $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"

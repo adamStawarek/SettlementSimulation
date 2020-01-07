@@ -105,7 +105,7 @@ namespace SettlementSimulation.Engine.Models
                     p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 1 &&
                                                                   ((this.Start.X - g.Start.X < 0 && this.Start.X - p.X < 0) ||
                                                                    (this.Start.X - g.Start.X > 0 && this.Start.X - p.X > 0)) &&
-                                                                  g.Segments.Any(s => Math.Abs(s.Position.X - p.X) < 50)));
+                                                                  g.Segments.Any(s => Math.Abs(s.Position.X - p.X) < 25)));
 
             }
             else
@@ -114,7 +114,7 @@ namespace SettlementSimulation.Engine.Models
                     p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 1 &&
                                                                  ((this.Start.Y - g.Start.Y < 0 && this.Start.Y - p.Y < 0) ||
                                                                   (this.Start.Y - g.Start.Y > 0 && this.Start.Y - p.Y > 0)) &&
-                                                                 g.Segments.Any(s => Math.Abs(s.Position.Y - p.Y) < 50)));
+                                                                 g.Segments.Any(s => Math.Abs(s.Position.Y - p.Y) < 25)));
             }
 
             return possiblePositions;

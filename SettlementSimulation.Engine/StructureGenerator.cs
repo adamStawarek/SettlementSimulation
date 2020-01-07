@@ -37,7 +37,7 @@ namespace SettlementSimulation.Engine
             _maxIterations = maxIterations;
             _timeout = timeout;
             _stopWatch = new Stopwatch();
-            _engine = new SimulationEngine(1, fields, mainRoad);
+            _engine = new SimulationEngine(fields, mainRoad);
         }
 
         public async Task Start()
