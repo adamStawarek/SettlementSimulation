@@ -17,9 +17,6 @@ namespace SettlementSimulation.Engine.Models
         public RoadGenerationAttached()
         {
             Roads = new List<IRoad>();
-            MinDistanceBetweenRoads = 15;
-            MinRoadLength = 10;
-            MaxRoadLength = 100;
         }
     }
 }

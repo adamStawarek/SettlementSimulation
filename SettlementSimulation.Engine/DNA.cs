@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Models.Buildings;
+using static SettlementSimulation.Engine.Helpers.ConfigurationManager;
 
 namespace SettlementSimulation.Engine
 {
@@ -87,9 +88,8 @@ namespace SettlementSimulation.Engine
             }
 
             var roadGenerator = new RoadPointsGenerator();
-            var initialRoadsCount = 3;
 
-            var initialRoads = new List<IRoad>(initialRoadsCount);
+            var initialRoads = new List<IRoad>(InitialRoadsCount);
             var firstRoadPoints = roadGenerator.GenerateStraight(new RoadGenerationTwoPoints()
             {
                 Start = new Point(center.X - radius / 2, center.Y),
@@ -99,14 +99,17 @@ namespace SettlementSimulation.Engine
             initialRoads.Add(new Road(firstRoadPoints));
             AddRoad(initialRoads.First());
 
-            while (initialRoads.Count != initialRoadsCount)
+            while (initialRoads.Count != InitialRoadsCount)
             {
                 var roadToAttach = initialRoads[RandomProvider.Next(initialRoads.Count)];
                 var roadPoints = roadGenerator.GenerateAttached(new RoadGenerationAttached()
                 {
                     Road = roadToAttach,
                     Roads = initialRoads,
-                    Fields = _fields
+                    Fields = _fields,
+                    MaxRoadLength= MaxRoadLength,
+                    MinRoadLength=MinRoadLength,
+                    MinDistanceBetweenRoads=MinDistanceBetweenRoads                
                 }).ToList();
 
                 if (!roadPoints.Any()) continue;
@@ -209,9 +212,9 @@ namespace SettlementSimulation.Engine
                 Roads = this.Genes,
                 Fields = this._fields,
                 SettlementCenter = this.SettlementCenter,
-                MinDistanceBetweenRoads = 5,
-                MinRoadLength = 5,
-                MaxRoadLength = 50
+                MinDistanceBetweenRoads = MinDistanceBetweenRoads,
+                MinRoadLength = MinRoadLength,
+                MaxRoadLength = MaxRoadLength
             }).ToList();
 
             return new Road(roadPoints);

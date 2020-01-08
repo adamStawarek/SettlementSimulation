@@ -1,23 +1,20 @@
 ﻿using SettlementSimulation.Engine.Enumerators;
+using static SettlementSimulation.Engine.Helpers.ConfigurationManager;
 
 namespace SettlementSimulation.Engine.Models
 {
     public static class EpochSpecific
     {
-        public const int BuildingsFirstEpoch = 500;
-        public const int BuildingsSecondEpoch = 5000;
-        public const int BuildingsThirdEpoch = 5000;
-
         public static int GetBuildingsCount(Epoch epoch)
         {
             switch (epoch)
             {
                 case Epoch.First:
-                    return BuildingsFirstEpoch;
+                    return FirstEpochBuildings;
                 case Epoch.Second:
-                    return BuildingsSecondEpoch;
+                    return SecondEpochBuildings;
                 case Epoch.Third:
-                    return BuildingsThirdEpoch;
+                    return ThirdEpochBuildings;
             }
 
             return -1;
@@ -28,11 +25,11 @@ namespace SettlementSimulation.Engine.Models
             switch (epoch)
             {
                 case Epoch.First:
-                    return 0.01;
+                    return FirstEpochMutationRate;
                 case Epoch.Second:
-                    return 0.1;
+                    return SecondEpochMutationRate;
                 case Epoch.Third:
-                    return 0.05;
+                    return ThirdEpochMutationRate;
             }
 
             return -1;

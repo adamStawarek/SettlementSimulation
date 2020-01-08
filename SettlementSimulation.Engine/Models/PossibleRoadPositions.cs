@@ -8,7 +8,6 @@ namespace SettlementSimulation.Engine.Models
         public PossibleRoadPositions(IEnumerable<IRoad> roads)
         {
             Roads = new List<IRoad>(roads);
-            MinDistanceBetweenRoads = 15;
         }
 
         public List<IRoad> Roads { get; set; }
