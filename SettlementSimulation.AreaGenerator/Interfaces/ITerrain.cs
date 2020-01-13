@@ -4,8 +4,10 @@ namespace SettlementSimulation.AreaGenerator.Interfaces
 {
     public interface ITerrain
     {
-        byte UpperBound { get; }
+        double Percentile { get; }
+        byte UpperBound { get; set; }
 
         Pixel Color { get; }
+        void SetHeight(byte height);
     }
 }

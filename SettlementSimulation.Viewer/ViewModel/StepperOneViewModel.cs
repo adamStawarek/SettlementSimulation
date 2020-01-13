@@ -13,6 +13,7 @@ using System.Linq;
 using FastBitmapLib;
 using SettlementSimulation.AreaGenerator;
 using SettlementSimulation.AreaGenerator.Helpers;
+using SettlementSimulation.AreaGenerator.Models;
 
 namespace SettlementSimulation.Viewer.ViewModel
 {
@@ -115,6 +116,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             if (_selectedHeightMap == null) return;
 
             var terrainHelper = new TerrainHelper();
+            TerrainHelper.SetTerrains(CreatePixelMatrix(_selectedHeightMap));
 
             var colorMapDictionary = terrainHelper.GetAllTerrains()
                 .OrderBy(t=>t.UpperBound)
@@ -162,5 +164,23 @@ namespace SettlementSimulation.Viewer.ViewModel
                 .OrderBy(b=>b.Tag);
             Maps = new ObservableCollection<Bitmap>(files);
         }
+
+        private Pixel[,] CreatePixelMatrix(Bitmap bitmap)
+        {
+            var pixels = new Pixel[bitmap.Width, bitmap.Height];
+            using (var fastBitmap = bitmap.FastLock())
+            {
+                for (int i = 0; i < fastBitmap.Width; i++)
+                {
+                    for (int j = 0; j < fastBitmap.Height; j++)
+                    {
+                        var pixel = fastBitmap.GetPixel(i, j);
+                        pixels[i, j] = new Pixel(pixel.R, pixel.G, pixel.B);
+                    }
+                }
+            }
+            return pixels;
+        }
+
     }
 }

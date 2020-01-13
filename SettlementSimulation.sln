@@ -15,6 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettlementSimulation.AreaGe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1E144E7-A510-4A3B-9301-1D626D7A850C}"
 	ProjectSection(SolutionItems) = preProject
+		resources\buildingOrientation.png = resources\buildingOrientation.png
 		..\..\..\Desktop\SS.Data\colourmap.png = ..\..\..\Desktop\SS.Data\colourmap.png
 		..\..\..\Desktop\SS.Data\heightmap.png = ..\..\..\Desktop\SS.Data\heightmap.png
 		Readme.md = Readme.md

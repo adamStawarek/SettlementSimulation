@@ -9,13 +9,11 @@ using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Viewer.Commands;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Imaging;
+using SettlementSimulation.Engine.Interfaces;
 using Point = SettlementSimulation.AreaGenerator.Models.Point;
 
 namespace SettlementSimulation.Viewer.ViewModel
@@ -177,15 +175,31 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             var originalColorMap = new Bitmap(_colorMap);
 
-            var buildings = SettlementState.Structures
+            var buildings = SettlementState.Roads
                 .SelectMany(s => s.Segments.SelectMany(seg => seg.Buildings)).ToList();
 
-            var roads = SettlementState.Structures.Select(s => s.Segments.Select(sg => sg.Position)).ToList();
+            var roads = SettlementState.Roads.Select(s => s.Segments.Select(sg => sg.Position)).ToList();
 
             MarkBuildingsAndRoads(roads, buildings, originalColorMap);
+            MarkPoint(SettlementState.SettlementCenter, originalColorMap, Color.Goldenrod, 4);
 
-            var logs = buildings.Select(s => s.ToString()).ToList();
-            logs.AddRange(SettlementState.Structures.Select(r => r.ToString()));
+            var logs = new List<string>
+            {
+                $"Roads: {SettlementState.Roads.Count}",
+                $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
+                $"Last generated structures: " +
+                $"{SettlementState.LastCreatedStructures?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
+                $"Average road length: {(int)SettlementState.Roads.Average(r => r.Length)}",
+                $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
+                $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"
+            };
+
+            var groups = SettlementState.Roads
+                .SelectMany(r => r.Buildings)
+                .GroupBy(building => building.GetType());
+
+            logs.AddRange(groups.Select(typeBuildings => $"{typeBuildings.Key.Name}: {typeBuildings.Count()}"));
+
             _logs = new List<string>(logs);
 
             var allRoadPoints = roads.SelectMany(s => s).ToList();
@@ -194,7 +208,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             var trimmedBitmap = GetTrimmedBitmap(originalColorMap, upperLeft, bottomRight);
             var previewBitmap = GetPreviewBitmap(_colorMap, upperLeft, bottomRight);
-            
+
             SettlementBitmap = new Bitmap(trimmedBitmap);
             PreviewBitmap = new Bitmap(previewBitmap);
 
@@ -205,7 +219,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         private void MarkBuildingsAndRoads(
             List<IEnumerable<Point>> roads,
-            List<Building> buildings,
+            List<IBuilding> buildings,
             Bitmap originalColorMap)
         {
             foreach (var building in buildings)
@@ -217,9 +231,12 @@ namespace SettlementSimulation.Viewer.ViewModel
             foreach (var road in roads)
             {
                 var roadPoints = road.ToList();
-                roadPoints.ForEach(p => MarkPoint(p, originalColorMap, Color.Red));
+                roadPoints.ForEach(p => MarkPoint(p, originalColorMap, Color.Black));
             }
+
+            _settlementInfo.MainRoad.ForEach(p => MarkPoint(p, originalColorMap, Color.Red));
         }
+
         private Bitmap GetPreviewBitmap(
             Bitmap colorMap,
             Point upperLeft,
@@ -236,7 +253,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                         var color = fastBitmap.GetPixel(i, j);
                         fastBitmap.SetPixel(i, j, Color.FromArgb(255, color.G, color.B));
                     }
-                } 
+                }
             }
 
             return bitmap;
@@ -290,11 +307,11 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             using (var fastBitmap = bitmap.FastLock())
             {
-                fastBitmap.SetPixel(point.X, point.Y , color);
+                fastBitmap.SetPixel(point.X, point.Y, color);
             }
         }
 
-        private void MarkPoint(Point point, Bitmap bitmap, Color color, int offset = 5)
+        private void MarkPoint(Point point, Bitmap bitmap, Color color, int offset)
         {
             using (var fastBitmap = bitmap.FastLock())
             {
@@ -316,14 +333,14 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 Color.FromArgb(128, 0, 0),
                 Color.FromArgb(170, 110, 40),
-                Color.FromArgb(128, 128, 0),
+                Color.FromArgb(128, 128, 120),
                 Color.FromArgb(0, 128, 128),
                 Color.FromArgb(0, 0, 128),
                 Color.FromArgb(230, 25, 75),
                 Color.FromArgb(245, 130, 48),
-                Color.FromArgb(210, 245, 60),
-                Color.FromArgb(60, 180, 75),
-                Color.FromArgb(70, 240, 240),
+                Color.FromArgb(110, 145, 160),
+                Color.FromArgb(220, 180, 75),
+                Color.FromArgb(0, 140, 240),
                 Color.FromArgb(0, 130, 200),
                 Color.FromArgb(145, 30, 180),
                 Color.FromArgb(240, 50, 230),
@@ -332,7 +349,7 @@ namespace SettlementSimulation.Viewer.ViewModel
                 Color.FromArgb(255, 215, 180),
                 Color.FromArgb(170, 255, 195),
                 Color.FromArgb(230, 190, 255),
-                Color.FromArgb(200, 205, 0),
+                Color.FromArgb(230, 25, 80),
                 Color.FromArgb(60, 190, 200),
                 Color.FromArgb(0, 60, 60),
             };

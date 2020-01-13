@@ -15,6 +15,14 @@ namespace SettlementSimulation.Engine.Helpers
             }
         }
 
+        public static double NextDouble(double min, double max)
+        {
+            lock (Sync)
+            {
+                return Rnd.NextDouble() * (max - min) + min;
+            }
+        }
+
         public static int Next()
         {
             lock (Sync)

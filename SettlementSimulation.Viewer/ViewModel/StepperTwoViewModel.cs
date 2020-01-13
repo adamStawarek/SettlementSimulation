@@ -24,29 +24,6 @@ namespace SettlementSimulation.Viewer.ViewModel
         #endregion
 
         #region properties
-        private int _minHeight;
-        public int MinHeight
-        {
-            get => _minHeight;
-            set
-            {
-                _minHeight = value;
-                RaisePropertyChanged();
-                ConfigurationManagerHelper.SetSettings("MinHeight", _minHeight.ToString());
-            }
-        }
-
-        private int _maxHeight;
-        public int MaxHeight
-        {
-            get => _maxHeight;
-            set
-            {
-                _maxHeight = value;
-                RaisePropertyChanged();
-                ConfigurationManagerHelper.SetSettings("MaxHeight", _maxHeight.ToString());
-            }
-        }
 
         private Bitmap _heightMap;
         public Bitmap HeightMap
@@ -130,8 +107,6 @@ namespace SettlementSimulation.Viewer.ViewModel
             Messenger.Default.Register<SetColorMapCommand>(this, this.SetColorMap);
 
             _colorMapOpacity = 0.9;
-            int.TryParse(ConfigurationManagerHelper.GetSettings("MinHeight"), out _minHeight);
-            int.TryParse(ConfigurationManagerHelper.GetSettings("MaxHeight"), out _maxHeight);
             _spinnerVisibility = Visibility.Hidden;
 
             HistogramValues = new SeriesCollection
@@ -209,9 +184,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             SpinnerVisibility = Visibility.Visible;
             HeightMap = new Bitmap(_originalHeightMap);
             var settlementInfo = await new SettlementBuilder()
-                .WithColorMap(this.CreatePixelMatrix(_colorMap))
                 .WithHeightMap(this.CreatePixelMatrix(_heightMap))
-                .WithHeightRange(_minHeight, _maxHeight)
                 .BuildAsync();
             _heightMap = this.CreateBitmap(settlementInfo.PreviewBitmap);
             RaisePropertyChanged(nameof(HeightMap));

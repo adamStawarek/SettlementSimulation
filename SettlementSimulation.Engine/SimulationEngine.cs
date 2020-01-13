@@ -1,43 +1,36 @@
 ﻿using System;
-using SettlementSimulation.AreaGenerator.Models;
-using SettlementSimulation.Engine.Helpers;
-using SettlementSimulation.Engine.Interfaces;
-using SettlementSimulation.Engine.Models;
 using System.Collections.Generic;
 using System.Linq;
+using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.Engine.Enumerators;
+using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine
 {
     public class SimulationEngine
     {
         #region private fields
-        private float _fitnessSum;
-        private Epoch _currentEpoch;
         private readonly Stack<Epoch> _allEpochs;
         #endregion
 
         #region properties
-        public List<Dna> Population { get; set; }
+        public Epoch CurrentEpoch { get; set; }
         public int Generation { get; set; }
         public Field[,] Fields { get; }
         public List<Point> MainRoad { get; }
-        public List<IRoad> BestGenes => 
-            Population.OrderByDescending(p => p.Fitness).FirstOrDefault()?.Genes;
+        public IEnumerable<ISettlementStructure> LastStructuresCreated { get; set; }
+        public Settlement Settlement { get; set; }
         #endregion
 
         public SimulationEngine(
-            int populationSize,
             Field[,] fields,
             List<Point> mainRoad)
         {
             Fields = fields;
             MainRoad = mainRoad;
             Generation = 1;
-            Population = new List<Dna>(populationSize);
-            for (int i = 0; i < populationSize; i++)
-            {
-                Population.Add(new Dna(fields, mainRoad));
-            }
+            Settlement = new Settlement(fields, mainRoad);
 
             _allEpochs = new Stack<Epoch>();
             _allEpochs.Push(Epoch.Third);
@@ -46,46 +39,89 @@ namespace SettlementSimulation.Engine
             SetNextEpoch();
         }
 
-        public Epoch SetNextEpoch()
+        public void SetNextEpoch()
         {
-            _currentEpoch = _allEpochs.Pop();
-            return _currentEpoch;
+            CurrentEpoch = _allEpochs.Pop();
         }
 
         public void NewGeneration()
         {
-            if (!Population.Any()) return;
+            var structures = Enumerable.Range(1, 5).ToList()
+                .Select(s => Settlement.CreateNewDnaStructure(CurrentEpoch))
+                .ToList();
 
-            CalculateFitness();
+            var generatedStructures = GetBestStructures(structures);
 
-            var newPopulation = new List<Dna>();
-
-            for (int i = 0; i < Population.Count; i++)
+            LastStructuresCreated = null;
+            if (generatedStructures.NewRoads.Any())
             {
-                Dna parent1 = ChooseParent();
-                Dna parent2 = ChooseParent();
-
-                Dna child = parent1.Crossover(parent2, _currentEpoch);
-
-                child.Mutate(_currentEpoch);
-
-                newPopulation.Add(child);
+                generatedStructures.NewRoads
+                    .ForEach(r => Settlement.AddRoad(r));
+                LastStructuresCreated = generatedStructures.NewRoads.ToList();
             }
 
-            Population = newPopulation;
+            if (generatedStructures.NewBuildings.Any())
+            {
+                generatedStructures.NewBuildings
+                    .ForEach(b =>
+                    {
+                        Settlement.AddBuildingToRoad(generatedStructures.RoadToAttachNewBuildings, b);
+                        LastStructuresCreated = generatedStructures.NewBuildings.ToList();
+                    });
+            }
+
+            if (Settlement.Buildings.Count >= EpochSpecific.GetBuildingsCount(CurrentEpoch))
+            {
+                SetNextEpoch();
+            }
 
             Generation++;
         }
 
-        public void CalculateFitness()
+        private GeneratedStructures GetBestStructures(List<GeneratedStructures> structures)
         {
-            //TODO
+            var structuresFitness = structures.ToDictionary(s => s, s => 0);
+            foreach (var structure in structures)
+            {
+                var fitness = CalculateGeneratedStructuresFitness(structure);
+                structuresFitness[structure] = fitness;
+            }
+
+            //TODO perform crossover
+            return structuresFitness.OrderByDescending(s => s.Value).First().Key;
         }
 
-        public Dna ChooseParent()
+        private int CalculateGeneratedStructuresFitness(GeneratedStructures model)
         {
-            //TODO
-            return Population.First();
+            var fitness = 0;
+            foreach (var road in model.NewRoads)
+            {
+                var roads = new List<IRoad>(Settlement.Genes) { road };
+
+                fitness += road.Buildings.Sum(b => b.GetFitness(new BuildingRule()
+                {
+                    Fields = Settlement.Fields,
+                    Roads = roads,
+                    BuildingRoad = road,
+                    SettlementCenter = Settlement.SettlementCenter
+
+                }));
+            }
+
+            foreach (var building in model.NewBuildings)
+            {
+                var roads = new List<IRoad>(Settlement.Genes);
+
+                fitness += building.GetFitness(new BuildingRule()
+                {
+                    Fields = Settlement.Fields,
+                    Roads = roads,
+                    BuildingRoad = model.RoadToAttachNewBuildings,
+                    SettlementCenter = Settlement.SettlementCenter
+                });
+            }
+
+            return fitness;
         }
     }
 }

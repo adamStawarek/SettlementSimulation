@@ -2,9 +2,10 @@
 
 namespace SettlementSimulation.AreaGenerator.Models.Terrains
 {
-    public class DeepWater : ITerrain
+    public class DeepWater : Terrain
     {
-        public byte UpperBound => 75;
-        public Pixel Color => new Pixel(0, 55, 255);
+        public override double Percentile => 0.05;
+        public override byte UpperBound { get; set; } = 75;
+        public override Pixel Color => new Pixel(0, 55, 255);
     }
 }

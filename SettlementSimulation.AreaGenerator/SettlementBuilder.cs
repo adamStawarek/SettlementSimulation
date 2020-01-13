@@ -12,19 +12,12 @@ namespace SettlementSimulation.AreaGenerator
     public class SettlementBuilder
     {
         private Pixel[,] _heightMap;
-        private Pixel[,] _colorMap;
-        private int _maxHeight;
-        private int _minHeight;
-
         private readonly TerrainHelper _terrainHelper;
 
         public SettlementBuilder()
         {
             this._terrainHelper = new TerrainHelper();
-            _minHeight = _terrainHelper.GetTerrain<Sand>().UpperBound;
-            _maxHeight = _terrainHelper.GetTerrain<Lowland>().UpperBound;
         }
-
 
         public SettlementBuilder WithHeightMap(Pixel[,] bitmap)
         {
@@ -32,23 +25,13 @@ namespace SettlementSimulation.AreaGenerator
             return this;
         }
 
-        public SettlementBuilder WithColorMap(Pixel[,] bitmap)
-        {
-            _colorMap = bitmap;
-            return this;
-        }
-
-        public SettlementBuilder WithHeightRange(int min, int max)
-        {
-            _minHeight = min;
-            _maxHeight = max;
-            return this;
-        }
-
         public async Task<SettlementInfo> BuildAsync()
         {
-            #region find water aquens
+            TerrainHelper.SetTerrains(_heightMap);
+            var minHeight = _terrainHelper.GetTerrain<Sand>().UpperBound;
+            var maxHeight = _terrainHelper.GetTerrain<Lowland>().UpperBound;
 
+            #region find water aquens
             byte waterUpperBound = _terrainHelper.GetTerrain<Water>().UpperBound;
             var map = (Pixel[,])_heightMap.Clone();
             var waterAreasBoundaryFunc = new Func<Pixel, bool>(p => p.Intensity <= waterUpperBound);
@@ -71,7 +54,7 @@ namespace SettlementSimulation.AreaGenerator
 
             #region find settlement areas
             var previewBitmap = (Pixel[,])_heightMap.Clone();
-            var settlementAreaBoundaryFunc = new Func<Pixel, bool>(color => color.G >= _minHeight && color.G <= _maxHeight);
+            var settlementAreaBoundaryFunc = new Func<Pixel, bool>(color => color.G >= minHeight && color.G <= maxHeight);
             var areas = new List<IEnumerable<Point>>();
             var potentialAreaPoints = GetPixels(previewBitmap, settlementAreaBoundaryFunc)
                 .ToList();
@@ -108,7 +91,6 @@ namespace SettlementSimulation.AreaGenerator
             }).OrderBy(f => f.DistanceToWater).ToList();
 
             #region mark settlement area and water aquens on bitmap
-
             fields.Take((int)(fields.Count * 0.2)).ToList()
                 .ForEach(p => MarkPoint(p.Point, previewBitmap, new Pixel(255, 0, 0), 1));
             fields.Skip((int)(fields.Count * 0.2)).Take((int)(fields.Count * 0.3)).ToList()
@@ -125,7 +107,11 @@ namespace SettlementSimulation.AreaGenerator
             {
                 for (int j = 0; j < _heightMap.GetLength(1); j++)
                 {
-                    fieldGrid[i, j] = new Field() { Position = new Point(i, j) };
+                    fieldGrid[i, j] = new Field()
+                    {
+                        Position = new Point(i, j),
+                        Terrain = _terrainHelper.GetTerrainForHeight(_heightMap[i, j].Intensity)
+                    };
                 }
             }
             foreach (var field in fields)
@@ -239,7 +225,10 @@ namespace SettlementSimulation.AreaGenerator
                 }
             }
 
-            var positions = await Task.Run(() => grid.GetPath(new Position(start.X, start.Y), new Position(end.X, end.Y)));
+            var positions = await Task.Run(() => grid.GetPath(
+                new Position(start.X, start.Y),
+                new Position(end.X, end.Y),
+                MovementPatterns.LateralOnly));
 
             return positions.Select(p => new Point(p.X, p.Y));
         }

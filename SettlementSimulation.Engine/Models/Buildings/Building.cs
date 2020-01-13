@@ -4,13 +4,25 @@ using System;
 using System.Linq;
 using System.Reflection;
 using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Enumerators;
 
 namespace SettlementSimulation.Engine.Models.Buildings
 {
-    public abstract class Building : IBuilding
+    public abstract class Building : IBuilding, ICopyable<Building>
     {
         public abstract double Probability { get; }
+        public abstract int GetFitness(BuildingRule model);
+        public abstract int Space { get; }
+
+        public Direction? Direction { get; set; }
         public Point Position { get; set; }
+        
+        public Building Copy()
+        {
+            var copy = (Building)Activator.CreateInstance(this.GetType());
+            copy.Position = this.Position;
+            return copy;
+        }
 
         public static Building GetRandom(Epoch epoch)
         {
@@ -19,8 +31,8 @@ namespace SettlementSimulation.Engine.Models.Buildings
                 .Where(t => t.IsSubclassOf(typeof(Building)) &&
                             t.GetCustomAttributes(typeof(EpochAttribute), false)
                                 .Cast<EpochAttribute>()
-                                .Any(a => a.Epoch == epoch))
-                .Select(t => (Building)Activator.CreateInstance(t))
+                                .Any(a => a.Epoch <= epoch))
+                .Select(t => (Building) Activator.CreateInstance(t))
                 .ToList();
 
             var diceRoll = RandomProvider.NextDouble();
@@ -36,11 +48,11 @@ namespace SettlementSimulation.Engine.Models.Buildings
 
             return buildings.OrderByDescending(b => b.Probability).First();
         }
-
         public override string ToString()
         {
             return $"{nameof(Type)}: {this.GetType().Name} " +
                    $"{nameof(Position)}: {Position}";
         }
+
     }
 }

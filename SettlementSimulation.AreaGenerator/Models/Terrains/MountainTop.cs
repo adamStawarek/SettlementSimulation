@@ -2,9 +2,10 @@
 
 namespace SettlementSimulation.AreaGenerator.Models.Terrains
 {
-    public class MountainTop : ITerrain
+    public class MountainTop : Terrain
     {
-        public byte UpperBound => byte.MaxValue;
-        public Pixel Color => new Pixel(255, 255, 255);
+        public override byte UpperBound { get; set; } = byte.MaxValue;
+        public override Pixel Color => new Pixel(255, 255, 255);
+        public override double Percentile => 1;
     }
 }

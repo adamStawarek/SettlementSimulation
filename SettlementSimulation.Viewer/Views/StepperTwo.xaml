@@ -68,32 +68,14 @@
             </i:Interaction.Triggers>
         </Grid>
         <StackPanel Margin="5" VerticalAlignment="Stretch" Grid.Column="1">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5">
-                    <Label Content="Minimum height:" FontSize="16"
-                             Margin="0,0,5,0" VerticalAlignment="Bottom"/>
-                    <Slider Value="{Binding MinHeight,Mode=TwoWay}" Width="400" Margin="0,0,0,5"
-                            Minimum="0" Maximum="255" Style="{StaticResource MaterialDesignDiscreteSlider}"
-                            ToolTip="MaterialDesignDiscreteSlider"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" Margin="5">
-                    <Label Content="Maximum height:" FontSize="16"
-                           Margin="0,0,5,0" VerticalAlignment="Bottom"/>
-                    <Slider Value="{Binding MaxHeight,Mode=TwoWay}"  Width="400"  Margin="0,0,0,5"
-                            Minimum="0" Maximum="255" Style="{StaticResource MaterialDesignDiscreteSlider}"
-                            ToolTip="MaterialDesignDiscreteSlider"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
-                    <Button Width="150" Content="Reset bitmap" Background="OrangeRed" BorderBrush="OrangeRed" 
+            <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
+                <Button Width="150" Content="Reset bitmap" Background="OrangeRed" BorderBrush="OrangeRed" 
                             Command="{Binding ResetCommand}" Margin="0,0,5,0"/>
-                    <Button Width="150" Content="Find area" Command="{Binding FindAreaCommand}"/>
-                </StackPanel>
+                <Button Width="150" Content="Find area" Command="{Binding FindAreaCommand}"/>
             </StackPanel>
 
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="5">
-                <wpf:CartesianChart Series="{Binding HistogramValues}"  MinHeight="300" Width="1400"/>
+                <wpf:CartesianChart Series="{Binding HistogramValues}"  MinHeight="450" Width="1400"/>
             </ScrollViewer>
         </StackPanel>
     </Grid>

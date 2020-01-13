@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.0;net462</TargetFrameworks>
     <PackageId>SettlementSimulation.AreaGenerator</PackageId>
-    <Version>1.1.2</Version>
+    <Version>1.3.2</Version>
     <Authors>Adam Stawarek</Authors>
     <Company>Adam Stawarek</Company>
     <PackageProjectUrl>https://github.com/adamStawarek/Human-settlement-simulation</PackageProjectUrl>
