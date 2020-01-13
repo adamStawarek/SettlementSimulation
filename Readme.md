@@ -128,17 +128,20 @@ of the simulation:
 
 ## Algorithm description
 
-At the begging we create empty settlement and initialize it with few roads and buildings.
-Then unitl maximum number of generation is reached or specyfied timeout is exceeded we 
-create new generation or in other words we modify our settlement by adding new structures or
-removing and changing the exisiting ones(in case of mutations). 
-Each time we create new settlement we generate multiple sets of possible structures: buildings or roads with buildings.
-Next we must compute fitness for each set, we do it by checking how well given structure fits current settlement. 
-Rules for scoring buildings are described in section below called: 'Rules for scoring buildings'.
-After that we take 2 sets with best overall fitness and perform crossover: if we generated roads and they don't 
-collide with each other we add both of the to the new settlement, if they collide then we add only the one with better
-fitness score. Similary when we generated only buildings - then if some building from first set has the same position as the other building  from second set we add to new settelement the one with higher fitness.
-After crossover is finished and we added new structures to the settlement 
+At the begging we create empty settlement and initialize it with few roads and buildings.  
+Then unitl maximum number of generation is reached or specyfied timeout is exceeded we  
+create new generation or in other words we modify our settlement by adding new structures or  
+removing and changing the exisiting ones(in case of mutations).   
+Each time we create new settlement we generate multiple sets of possible structures: buildings or roads with buildings.  
+Next we must compute fitness for each set, we do it by checking how well given structure fits current settlement.   
+Rules for scoring buildings are described in section below called: 'Rules for scoring buildings'.  
+After that we take 2 sets with best overall fitness and perform crossover: if we generated roads and they don't   
+collide with each other we add both of the to the new settlement, if they collide then we add only the one with better  
+fitness score. Similary when we generated only buildings - then if some building from first set has the same position as the other   building  from second set we add to new settelement the one with higher fitness.  
+Instead of adding new structures, the exisiting ones can be also i.e some buildings can change their types.
+We decide wheter to add or change structures at random but the probability of selecting one option vary according   
+to current epoch (More in section 'Division execution time into 3 epochs')  
+At last there is probability of mutation that can occur. If it happen some of the buildings and roads will be destroyed
 
 ### Types of structures that can be generated in the simulation
 * Buildings
