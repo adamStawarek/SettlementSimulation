@@ -2,8 +2,8 @@
 
 namespace SettlementSimulation.Engine.Interfaces
 {
-    public interface IBuildingRule
+    public interface IBuildingFitness
     {
-        bool IsSatisfied(BuildingRule model);
+        int GetFitness(BuildingRule model);
     }
 }

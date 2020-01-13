@@ -11,10 +11,12 @@ namespace SettlementSimulation.Engine.Models.Buildings
     public abstract class Building : IBuilding, ICopyable<Building>
     {
         public abstract double Probability { get; }
-        public abstract bool IsSatisfied(BuildingRule model);
+        public abstract int GetFitness(BuildingRule model);
+        public abstract int Space { get; }
 
         public Direction? Direction { get; set; }
         public Point Position { get; set; }
+        
         public Building Copy()
         {
             var copy = (Building)Activator.CreateInstance(this.GetType());

@@ -4,12 +4,11 @@ using NUnit.Framework;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.AreaGenerator.Models.Terrains;
 using SettlementSimulation.Engine.Helpers;
-using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine.Tests.Unit
 {
     [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
-    public class DnaTests
+    public class SettlementTests
     {
         private Field[,] _fields;
         private IEnumerable<Point> _mainRoad;
@@ -60,7 +59,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void InitializeGenes_Does_Not_Throw_Exception()
         {
-            Assert.DoesNotThrow(() => new Dna(_fields, _mainRoad, shouldInitGenes: true));
+            Assert.DoesNotThrow(() => new Settlement(_fields, _mainRoad, shouldInitGenes: true));
         }
     }
 }

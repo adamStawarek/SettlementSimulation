@@ -11,32 +11,30 @@ using static SettlementSimulation.Engine.Helpers.ConfigurationManager;
 
 namespace SettlementSimulation.Engine
 {
-    public class Dna : ICopyable<Dna>
+    public class Settlement : ICopyable<Settlement>
     {
-        #region fields
-        private readonly Field[,] _fields;
-        private readonly List<Point> _mainRoad;
-        #endregion
-
         #region properties
+        public Field[,] Fields { get; }
+        public List<Point> MainRoad { get; }
         public List<IRoad> Genes { get; set; }
         public float Fitness { get; private set; }
         public Point SettlementCenter =>
             new Point((int)Genes.Average(g => g.Center.X), (int)Genes.Average(g => g.Center.Y));
+        public List<IBuilding> Buildings => Genes.SelectMany(g => g.Buildings).ToList();
         public Point SettlementUpperLeftBound =>
             new Point(this.Genes.Min(g => g.Start.X), this.Genes.Min(g => g.Start.Y));
         public Point SettlementBottomRightBound =>
             new Point(this.Genes.Max(g => g.Start.X), this.Genes.Max(g => g.Start.Y));
         #endregion
 
-        public Dna(
+        public Settlement(
             Field[,] fields,
             IEnumerable<Point> mainRoad,
             bool shouldInitGenes = true)
         {
-            _fields = fields;
-            _mainRoad = mainRoad.ToList();
-            _mainRoad.ForEach(p => _fields[p.X, p.Y].IsBlocked = true);
+            Fields = fields;
+            MainRoad = mainRoad.ToList();
+            MainRoad.ForEach(p => Fields[p.X, p.Y].IsBlocked = true);
             Genes = new List<IRoad>();
 
             if (!shouldInitGenes) return;
@@ -45,14 +43,14 @@ namespace SettlementSimulation.Engine
 
         private void InitializeGenes()
         {
-            var minRadius = _fields.GetLength(0) / 100 < 10 ? 10 : _fields.GetLength(0) / 100;
-            var maxRadius = _fields.GetLength(0) / 10 < 10 ? 10 : _fields.GetLength(0) / 10;
-            var settlementFields = _fields.ToList()
+            var minRadius = Fields.GetLength(0) / 100 < 10 ? 10 : Fields.GetLength(0) / 100;
+            var maxRadius = Fields.GetLength(0) / 10 < 10 ? 10 : Fields.GetLength(0) / 10;
+            var settlementFields = Fields.ToList()
                 .Where(f => f.InSettlement &&
                             f.Position.X > maxRadius &&
-                            f.Position.X < _fields.GetLength(0) - maxRadius &&
+                            f.Position.X < Fields.GetLength(0) - maxRadius &&
                             f.Position.Y > maxRadius &&
-                            f.Position.Y < _fields.GetLength(1) - maxRadius)
+                            f.Position.Y < Fields.GetLength(1) - maxRadius)
                 .ToList();
 
             Point center = new Point(-1, -1);
@@ -62,17 +60,17 @@ namespace SettlementSimulation.Engine
                 Field centerField = settlementFields
                     .FirstOrDefault(f =>
                         f.Position.GetCircularPoints(r, Math.PI / 17.0f)
-                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                            .All(p => Fields[p.X, p.Y].InSettlement) &&
                         f.Position.GetCircularPoints(r / 2.0, Math.PI / 17.0f)
-                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                            .All(p => Fields[p.X, p.Y].InSettlement) &&
                         f.Position.GetCircularPoints(r / 4.0, Math.PI / 17.0f)
-                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                            .All(p => Fields[p.X, p.Y].InSettlement) &&
                         f.Position.GetCircularPoints(r / 6.0, Math.PI / 17.0f)
-                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                            .All(p => Fields[p.X, p.Y].InSettlement) &&
                         f.Position.GetCircularPoints(r / 8.0, Math.PI / 17.0f)
-                            .All(p => _fields[p.X, p.Y].InSettlement) &&
+                            .All(p => Fields[p.X, p.Y].InSettlement) &&
                         f.Position.GetCircularPoints(r / 10.0, Math.PI / 17.0f)
-                            .All(p => _fields[p.X, p.Y].InSettlement));
+                            .All(p => Fields[p.X, p.Y].InSettlement));
 
                 if (centerField != null)
                 {
@@ -94,7 +92,7 @@ namespace SettlementSimulation.Engine
             {
                 Start = new Point(center.X - radius / 2, center.Y),
                 End = new Point(center.X + radius / 2, center.Y),
-                Fields = _fields
+                Fields = Fields
             });
             initialRoads.Add(new Road(firstRoadPoints));
             AddRoad(initialRoads.First());
@@ -106,10 +104,10 @@ namespace SettlementSimulation.Engine
                 {
                     Road = roadToAttach,
                     Roads = initialRoads,
-                    Fields = _fields,
-                    MaxRoadLength= MaxRoadLength,
-                    MinRoadLength=MinRoadLength,
-                    MinDistanceBetweenRoads=MinDistanceBetweenRoads                
+                    Fields = Fields,
+                    MaxRoadLength = MaxRoadLength,
+                    MinRoadLength = MinRoadLength,
+                    MinDistanceBetweenRoads = MinDistanceBetweenRoads
                 }).ToList();
 
                 if (!roadPoints.Any()) continue;
@@ -128,9 +126,10 @@ namespace SettlementSimulation.Engine
             }
         }
 
-        public GeneratedStructures CreateNewDnaStructure(Epoch epoch, Action setNextEpoch)
+        public GeneratedStructures CreateNewDnaStructure(Epoch epoch)
         {
             var generatedStructures = new GeneratedStructures();
+            var safetyCounter = 0;
             if (Genes.Sum(g => g.Length) < 3 * EpochSpecific.GetBuildingsCount(epoch))
             {
                 var genes = this.Genes
@@ -158,10 +157,12 @@ namespace SettlementSimulation.Engine
                     return generatedStructures;
 
                 while (road.Buildings.Count < 0.5 * road.Length &&
-                       roadToAttach.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, _fields)).Any())
+                       roadToAttach.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields)).Any() &&
+                       safetyCounter < 10)
                 {
                     var building = CreateNewBuilding(road, epoch);
                     road.AddBuilding(building);
+                    safetyCounter++;
                 }
 
                 generatedStructures.NewRoads.Add(road);
@@ -174,30 +175,27 @@ namespace SettlementSimulation.Engine
                     .ToArray();
 
                 var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())].Copy();
-
+                safetyCounter = 0;
                 while (roadToAttach.Buildings.Count < 2 * roadToAttach.Length &&
-                       roadToAttach.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, _fields)).Any())
+                       roadToAttach.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields)).Any() &&
+                       safetyCounter < 10)
                 {
                     var building = this.CreateNewBuilding(roadToAttach, epoch);
                     generatedStructures.NewBuildings.Add(building);
                     roadToAttach.AddBuilding(building);
+                    safetyCounter++;
                 }
 
                 generatedStructures.RoadToAttachNewBuildings = roadToAttach;
 
                 return generatedStructures;
             }
-            else if (epoch != Epoch.Third)
-            {
-                setNextEpoch.Invoke();
-            }
-
             return generatedStructures;
         }
 
-        public Dna Copy()
+        public Settlement Copy()
         {
-            var copy = new Dna(_fields, _mainRoad, false);
+            var copy = new Settlement(Fields, MainRoad, false);
             Genes.Cast<ICopyable<Road>>().ToList().ForEach(g => copy.Genes.Add(g.Copy()));
             copy.Fitness = this.Fitness;
             return copy;
@@ -210,7 +208,7 @@ namespace SettlementSimulation.Engine
             {
                 Road = road,
                 Roads = this.Genes,
-                Fields = this._fields,
+                Fields = this.Fields,
                 SettlementCenter = this.SettlementCenter,
                 MinDistanceBetweenRoads = MinDistanceBetweenRoads,
                 MinRoadLength = MinRoadLength,
@@ -222,7 +220,7 @@ namespace SettlementSimulation.Engine
 
         private IBuilding CreateNewBuilding(IRoad road, Epoch epoch)
         {
-            var positions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, _fields));
+            var positions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
             if (!positions.Any())
                 return null;
 
@@ -236,7 +234,7 @@ namespace SettlementSimulation.Engine
         {
             if (road.AddBuilding(building))
             {
-                _fields[building.Position.X, building.Position.Y].IsBlocked = true;
+                Fields[building.Position.X, building.Position.Y].IsBlocked = true;
             }
         }
 
@@ -244,12 +242,12 @@ namespace SettlementSimulation.Engine
         {
             foreach (var segment in road.Segments)
             {
-                _fields[segment.Position.X, segment.Position.Y].IsBlocked = true;
+                Fields[segment.Position.X, segment.Position.Y].IsBlocked = true;
             }
 
             foreach (var building in road.Buildings)
             {
-                _fields[building.Position.X, building.Position.Y].IsBlocked = true;
+                Fields[building.Position.X, building.Position.Y].IsBlocked = true;
             }
             this.Genes.Add(road);
         }
@@ -273,16 +271,16 @@ namespace SettlementSimulation.Engine
             }
 
 
-            if (road.Segments.Any(s => !this._fields[s.Position.X, s.Position.Y].InSettlement ||
-                                       (this._fields[s.Position.X, s.Position.Y].IsBlocked.HasValue &&
-                                        this._fields[s.Position.X, s.Position.Y].IsBlocked.Value)))
+            if (road.Segments.Any(s => !this.Fields[s.Position.X, s.Position.Y].InSettlement ||
+                                       (this.Fields[s.Position.X, s.Position.Y].IsBlocked.HasValue &&
+                                        this.Fields[s.Position.X, s.Position.Y].IsBlocked.Value)))
             {
                 return false;
             }
 
-            if (road.Buildings.Any(b => !this._fields[b.Position.X, b.Position.Y].InSettlement ||
-                                        (this._fields[b.Position.X, b.Position.Y].IsBlocked.HasValue &&
-                                         this._fields[b.Position.X, b.Position.Y].IsBlocked.Value)))
+            if (road.Buildings.Any(b => !this.Fields[b.Position.X, b.Position.Y].InSettlement ||
+                                        (this.Fields[b.Position.X, b.Position.Y].IsBlocked.HasValue &&
+                                         this.Fields[b.Position.X, b.Position.Y].IsBlocked.Value)))
             {
                 return false;
             }

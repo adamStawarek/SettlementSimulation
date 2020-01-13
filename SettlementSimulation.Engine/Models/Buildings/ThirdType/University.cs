@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Models.Buildings.SecondType;
@@ -9,31 +10,19 @@ namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
     public class University : Building
     {
         public override double Probability => 0.005;
-        public override bool IsSatisfied(BuildingRule model)
+        public override int Space => 2;
+
+        public override int GetFitness(BuildingRule model)
         {
-            var schoolsCount = model.Roads.SelectMany(b => b.Buildings).Count(b => b != this && b is School);
-            if (schoolsCount < 3)
+            var universities = model.Roads.SelectMany(b => b.Buildings).Count(b => b is University);
+            var schools = model.Roads.SelectMany(b => b.Buildings).Count(b => b is School);
+            if (schools / (universities+1) < 5)
             {
-                // there are at least 3 schools
-                return false;
+                Console.WriteLine("No more than one school per 100 residences");
+                return 0;
             }
 
-            var universitiesCount = model.Roads.SelectMany(b => b.Buildings).Count(b => b != this && b is University);
-            if (universitiesCount < schoolsCount / 5)
-            {
-                //there area at least 5 schools per university
-                return false;
-            }
-
-            var minDistanceToSettlementCenter =
-                model.SettlementUpperLeftBound.DistanceTo(model.SettlementBottomRightBound) / 4;
-            if (this.Position.DistanceTo(model.SettlementCenter) > minDistanceToSettlementCenter)
-            {
-                //market is close enough to the settlement center
-                return false;
-            }
-
-            return true;
+            return 15;
         }
     }
 }

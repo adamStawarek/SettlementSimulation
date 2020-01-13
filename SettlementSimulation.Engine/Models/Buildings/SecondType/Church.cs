@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Helpers;
+using SettlementSimulation.Engine.Models.Buildings.FirstType;
 
 namespace SettlementSimulation.Engine.Models.Buildings.SecondType
 {
@@ -8,17 +10,25 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     public class Church : Building
     {
         public override double Probability => 0.005;
-        public override bool IsSatisfied(BuildingRule model)
+        public override int Space => 1;
+
+        public override int GetFitness(BuildingRule model)
         {
-            var minDistanceBetweenChurches = 15;
+            var minDistanceBetweenChurches = 30;
             var churches = model.Roads.SelectMany(b => b.Buildings).Where(b => b != this && b is Church);
             if (!churches.All(m => m.Position.DistanceTo(this.Position) >= minDistanceBetweenChurches))
             {
-                //all other markets are far enough
-                return false;
+                Console.WriteLine("Other markets are too close");
+                return 0;
             }
 
-            return true;
+            var residences = model.Roads.SelectMany(b => b.Buildings).Where(b => b is Residence);
+            if (residences.Count(r => r.Position.DistanceTo(this.Position) <= 50) < 100)
+            {
+                Console.WriteLine("Not enough residences in closest neighborhood");
+                return 0;
+            }
+            return 5;
         }
     }
 }

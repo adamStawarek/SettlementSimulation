@@ -1,8 +1,10 @@
-﻿using SettlementSimulation.AreaGenerator.Models;
-using SettlementSimulation.Engine.Interfaces;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SettlementSimulation.AreaGenerator.Models;
+using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Enumerators;
+using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine
 {
@@ -18,8 +20,7 @@ namespace SettlementSimulation.Engine
         public Field[,] Fields { get; }
         public List<Point> MainRoad { get; }
         public IEnumerable<ISettlementStructure> LastStructuresCreated { get; set; }
-        public List<IRoad> BestGenes => BestDna.Genes;
-        public Dna BestDna { get; set; }
+        public Settlement Settlement { get; set; }
         #endregion
 
         public SimulationEngine(
@@ -29,7 +30,7 @@ namespace SettlementSimulation.Engine
             Fields = fields;
             MainRoad = mainRoad;
             Generation = 1;
-            BestDna = new Dna(fields, mainRoad);
+            Settlement = new Settlement(fields, mainRoad);
 
             _allEpochs = new Stack<Epoch>();
             _allEpochs.Push(Epoch.Third);
@@ -45,15 +46,17 @@ namespace SettlementSimulation.Engine
 
         public void NewGeneration()
         {
-            CalculateFitness();
+            var structures = Enumerable.Range(1, 5).ToList()
+                .Select(s => Settlement.CreateNewDnaStructure(CurrentEpoch))
+                .ToList();
 
-            var generatedStructures = BestDna.CreateNewDnaStructure(CurrentEpoch, SetNextEpoch);
+            var generatedStructures = GetBestStructures(structures);
 
             LastStructuresCreated = null;
             if (generatedStructures.NewRoads.Any())
             {
                 generatedStructures.NewRoads
-                    .ForEach(r => BestDna.AddRoad(r));
+                    .ForEach(r => Settlement.AddRoad(r));
                 LastStructuresCreated = generatedStructures.NewRoads.ToList();
             }
 
@@ -62,18 +65,63 @@ namespace SettlementSimulation.Engine
                 generatedStructures.NewBuildings
                     .ForEach(b =>
                     {
-                        BestDna.AddBuildingToRoad(generatedStructures.RoadToAttachNewBuildings, b);
+                        Settlement.AddBuildingToRoad(generatedStructures.RoadToAttachNewBuildings, b);
                         LastStructuresCreated = generatedStructures.NewBuildings.ToList();
                     });
+            }
+
+            if (Settlement.Buildings.Count >= EpochSpecific.GetBuildingsCount(CurrentEpoch))
+            {
+                SetNextEpoch();
             }
 
             Generation++;
         }
 
-        public void CalculateFitness()
+        private GeneratedStructures GetBestStructures(List<GeneratedStructures> structures)
         {
-            //TODO
+            var structuresFitness = structures.ToDictionary(s => s, s => 0);
+            foreach (var structure in structures)
+            {
+                var fitness = CalculateGeneratedStructuresFitness(structure);
+                structuresFitness[structure] = fitness;
+            }
+
+            //TODO perform crossover
+            return structuresFitness.OrderByDescending(s => s.Value).First().Key;
         }
 
+        private int CalculateGeneratedStructuresFitness(GeneratedStructures model)
+        {
+            var fitness = 0;
+            foreach (var road in model.NewRoads)
+            {
+                var roads = new List<IRoad>(Settlement.Genes) { road };
+
+                fitness += road.Buildings.Sum(b => b.GetFitness(new BuildingRule()
+                {
+                    Fields = Settlement.Fields,
+                    Roads = roads,
+                    BuildingRoad = road,
+                    SettlementCenter = Settlement.SettlementCenter
+
+                }));
+            }
+
+            foreach (var building in model.NewBuildings)
+            {
+                var roads = new List<IRoad>(Settlement.Genes);
+
+                fitness += building.GetFitness(new BuildingRule()
+                {
+                    Fields = Settlement.Fields,
+                    Roads = roads,
+                    BuildingRoad = model.RoadToAttachNewBuildings,
+                    SettlementCenter = Settlement.SettlementCenter
+                });
+            }
+
+            return fitness;
+        }
     }
 }

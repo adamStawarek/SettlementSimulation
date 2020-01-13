@@ -7,9 +7,11 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
     public class Residence : Building
     {
         public override double Probability => 0.885;
-        public override bool IsSatisfied(BuildingRule model)
+        public override int Space => 0;
+
+        public override int GetFitness(BuildingRule model)
         {
-            return false;
+            return 1;
         }
     }
 }

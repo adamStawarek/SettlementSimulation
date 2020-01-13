@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Helpers;
+using SettlementSimulation.Engine.Models.Buildings.SecondType;
 
 namespace SettlementSimulation.Engine.Models.Buildings.FirstType
 {
@@ -8,24 +10,28 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
     public class Tavern : Building
     {
         public override double Probability => 0.01;
-        public override bool IsSatisfied(BuildingRule model)
+        public override int Space => 1;
+
+        public override int GetFitness(BuildingRule model)
         {
-            var minDistanceBetweenTaverns = 5;
-            var taverns = model.Roads.SelectMany(b => b.Buildings).Where(b => b != this && b is Tavern);
-            if (!taverns.All(m => m.Position.DistanceTo(this.Position) >= minDistanceBetweenTaverns))
+            var maxResidencesPerTavern = Position.DistanceTo(model.SettlementCenter) < 30 ? 20 : 50;
+
+            var residences = model.Roads
+                .SelectMany(b => b.Buildings)
+                .Where(r => r.Position.DistanceTo(this.Position) <= 50)
+                .Count(b => b is Residence);
+            var taverns = model.Roads
+                .SelectMany(b => b.Buildings)
+                .Where(r => r.Position.DistanceTo(this.Position) <= 50)
+                .Count(b => b is Tavern);
+
+            if (residences / (taverns + 1) < maxResidencesPerTavern)
             {
-                //all other markets are far enough
-                return false;
+                Console.WriteLine("No more than one school per 100 residences");
+                return 0;
             }
 
-            var residences = model.Roads.SelectMany(b => b.Buildings).Where(b => b is Residence);
-            if (residences.Count(r => r.Position.DistanceTo(this.Position) <= 10) <= 100)
-            {
-                //there are enough residences in closest neighborhood
-                return false;
-            }
-
-            return true;
+            return 3;
         }
     }
 }
