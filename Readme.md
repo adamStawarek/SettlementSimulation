@@ -128,13 +128,13 @@ of the simulation:
 
 ## Algorithm description
 
-At the begging we create empty settlement and initialize it with few roads and buildings.  
+At the begin of th simulation we create empty settlement and initialize it with few roads and buildings.  
 Then unitl maximum number of iterations is reached or specyfied timeout is exceeded we  
-create we modify our settlement by adding new structures or    
-removing and changing the exisiting ones (in case of mutations).   
-Each time we update settlement we generate multiple sets of possible structures: buildings or roads.  
+modify our settlement by adding new structures or    
+removing and changing the exisiting ones.   
+Each time we update the settlement we generate multiple sets of possible structures(that are supposed to be added or changed). 
 Next we must compute fitness for each set, we do it by checking how well given structure fits current settlement.   
-Rules for scoring buildings are described in section below called: 'Rules for scoring buildings'.  
+Rules for computing fitness/scoring buildings are described in section below called: 'Rules for scoring buildings'.  
 After that we take 2 sets with best overall fitness(we sum fitness of each structure in the set) and perform crossover:  
 if we generated roads and they don't collide/cross with each other we add both of the to the new settlement, otherwise  
 we add only the one with better fitness score.  
@@ -229,21 +229,21 @@ area near to the building.
 Below are listed rules described above, for each supported type of buildding:  
 - Residence: ~
 - Tavern:  
-    5) at least 50 residences in tavern-neighborhood-50.
+    5) at least 50 residences in tavern-neighborhood-20.
     Additionaly 3) if distance from tavern to settlement center is less than 15,
     then in tavern-neighborhood-10 there must be no less than 5 residences per one tavern,
     otherwsie  if distance from tavern to settlement center is greater than 15,
     then in tavern-neighborhood-10 there must be no less than 10 residences per one tavern.         
 - Market:  
-     2) no other markets in neighbourhood-50,  
-     3) at least 100 residences in neighbourhood-50
+     2) no other markets in neighbourhood-20,  
+     3) at least 100 residences in neighbourhood-20
 - School:  
      3) there must be at least 100 residences per one school, 
 - Church:  
-     2) no other churches in neighbourhood-50  
+     2) no other churches in neighbourhood-20  
      3) at least 100 residnces in this neighbourhood 
 - Administration:  
-     1) building must be in settelement neighbourhood-40  
+     1) building must be in settelement center neighbourhood-10  
      3) there can be no more that 1 admistration buildings per 1000 buildings
 - Port:  
     4) distance to water must be less or equal to 10.  
