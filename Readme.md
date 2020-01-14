@@ -128,20 +128,53 @@ of the simulation:
 
 ## Algorithm description
 
-At the begging we create empty settlement and initialize it with few roads and buildings.  
-Then unitl maximum number of generation is reached or specyfied timeout is exceeded we  
-create new generation or in other words we modify our settlement by adding new structures or  
-removing and changing the exisiting ones(in case of mutations).   
-Each time we create new settlement we generate multiple sets of possible structures: buildings or roads with buildings.  
+At the begin of th simulation we create empty settlement and initialize it with few roads and buildings.  
+Then unitl maximum number of iterations is reached or specyfied timeout is exceeded we  
+modify our settlement by adding new structures or    
+removing and changing the exisiting ones.   
+Each time we update the settlement we generate multiple sets of possible structures(that are supposed to be added or changed). 
 Next we must compute fitness for each set, we do it by checking how well given structure fits current settlement.   
-Rules for scoring buildings are described in section below called: 'Rules for scoring buildings'.  
-After that we take 2 sets with best overall fitness and perform crossover: if we generated roads and they don't   
-collide with each other we add both of the to the new settlement, if they collide then we add only the one with better  
-fitness score. Similary when we generated only buildings - then if some building from first set has the same position as the other   building  from second set we add to new settelement the one with higher fitness.  
-Instead of adding new structures, the exisiting ones can be also i.e some buildings can change their types.
-We decide wheter to add or change structures at random but the probability of selecting one option vary according   
-to current epoch (More in section 'Division execution time into 3 epochs')  
-At last there is probability of mutation that can occur. If it happen some of the buildings and roads will be destroyed
+Rules for computing fitness/scoring buildings are described in section below called: 'Rules for scoring buildings'.  
+After that we take 2 sets with best overall fitness(we sum fitness of each structure in the set) and perform crossover:  
+if we generated roads and they don't collide/cross with each other we add both of the to the new settlement, otherwise  
+we add only the one with better fitness score.  
+Similary when we generated only buildings: then if some building from first set has the same position as the other  
+building from second set we add to the settlement only the one with higher fitness.  
+Instead of adding new structures we can also update the existing one i.e some buildings can change their types.
+We decide wheter to add or change structures at random but the probability of selecting one option over another  
+may vary according to current epoch (More in section 'Division simulation time into 3 epochs')  
+Finally before the iteration is finished there is some probability that mutation can occur.  
+If that would happen some of the buildings and roads will be destroyed depeing of the type of the mutation.(See 'Mutations').  
+
+### Division simulation time into 3 epochs
+When settlement reaches new level of development some building types unavailable
+in previous iterations can be now generated. These levels are called 'epochs' 
+and symbolize how well settlement is developed. 
+Prooperties of each epoch:  
+- First epoch:
+    Available building: residence, market, tavern.
+    Condions that must be fullfiled to enter second epoch:  
+    1) more that 500 buildings,
+    2) at least 1 market,
+    3) at least 3 taverns
+- Second epoch:
+    Available buildings: all from first epoch + school, church, administration building.
+    Condions that must be fullfiled to enter third epoch:  
+    1) more that 3000 buildings,
+    2) at least 1 administration building,
+    3) at least 2 schools,
+    4) at least 1 church
+ - Third epoch:
+    Available buildings: all from first and second epoch + port, university.
+ 
+### Mutations
+ 
+In simulation mutations were introduced to imitiate natural disasters that can have major impact of
+the shape of the settlement.  
+Types of mutations that are supported and implemented:    
+1) Flood: all roads and buildings near big enough water aquen are removed from settlement. 
+2) Earthquake: randomly remove buildings across whole settlement. Older buildings 
+are more probable to be removed.
 
 ![uml](resources/uml.png)  
 
@@ -160,7 +193,8 @@ Properties of buildings:
   - Direction: determines the orientation of the building towards 
     the roads to which it is attached. For example on the picture below
     building (red square) would have Direction set to Right, because 
-    on its right side the is road (black line).   
+    on its right side the is road (black line). 
+  - Age: how many iterations building is a part of the settlement.
  ![direction](resources/buildingOrientation.png)
   - Position: point location (x,y) which is the center location of the building.
 * Roads
@@ -224,21 +258,21 @@ area near to the building.
 Below are listed rules described above, for each supported type of buildding:  
 - Residence: ~
 - Tavern:  
-    5) at least 50 residences in tavern-neighborhood-50.
+    5) at least 50 residences in tavern-neighborhood-20.
     Additionaly 3) if distance from tavern to settlement center is less than 15,
     then in tavern-neighborhood-10 there must be no less than 5 residences per one tavern,
     otherwsie  if distance from tavern to settlement center is greater than 15,
     then in tavern-neighborhood-10 there must be no less than 10 residences per one tavern.         
 - Market:  
-     2) no other markets in neighbourhood-50,  
-     3) at least 100 residences in neighbourhood-50
+     2) no other markets in neighbourhood-20,  
+     3) at least 100 residences in neighbourhood-20
 - School:  
      3) there must be at least 100 residences per one school, 
 - Church:  
-     2) no other churches in neighbourhood-50  
+     2) no other churches in neighbourhood-20  
      3) at least 100 residnces in this neighbourhood 
 - Administration:  
-     1) building must be in settelement neighbourhood-40  
+     1) building must be in settelement center neighbourhood-10  
      3) there can be no more that 1 admistration buildings per 1000 buildings
 - Port:  
     4) distance to water must be less or equal to 10.  
