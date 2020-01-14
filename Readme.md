@@ -147,8 +147,36 @@ Finally before the iteration is finished there is some probability that mutation
 If that would happen some of the buildings and roads will be destroyed depeing of the type of the mutation.(See 'Mutations').  
 
 ### Division simulation time into 3 epochs
+When settlement reaches New level of development
+We unlock generation of building Types u available
+In previous iterations. These levels are called 'epochs' 
+and symbolize how well settlement is developer. 
+Conditions for setting next epoch:
+-1st epoch
+ 500 buildings
+ 1 markets
+ 3 taverns
+-2nd epoch
+ 3000 buildings
+ 1 administraton building
+ 2 schools
+ 1 church
+-3rd epoch
+ 3000 buildings
+ 1 port
+ 1 university. 
 
 ### Mutations
+ 
+In simulation mutations were introduced
+To imidiate natural disasters that can occur 
+In settlements. Two Types of These mutations are supported:
+1) Flood: all roads and buildings near 
+ BIG enough water aquen are removed from settlement. 
+2) Earthquake: randomly remove buildings
+Across whole settlement. Older buildings 
+ARe more próba le to ne removed
+3) Fire: 
 
 ### Types of structures that can be generated in the simulation
 * Buildings
