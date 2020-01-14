@@ -11,12 +11,13 @@ namespace SettlementSimulation.Engine.Models.Buildings
     public abstract class Building : IBuilding, ICopyable<Building>
     {
         public abstract double Probability { get; }
-        public abstract int GetFitness(BuildingRule model);
+        public abstract int CalculateFitness(BuildingRule model);
         public abstract int Space { get; }
 
         public Direction? Direction { get; set; }
         public Point Position { get; set; }
-        
+        public int Fitness { get; set; }
+
         public Building Copy()
         {
             var copy = (Building)Activator.CreateInstance(this.GetType());
@@ -24,6 +25,10 @@ namespace SettlementSimulation.Engine.Models.Buildings
             return copy;
         }
 
+        public void SetFitness(BuildingRule model)
+        {
+            Fitness = this.CalculateFitness(model);
+        }
         public static Building GetRandom(Epoch epoch)
         {
             var buildings = Assembly.GetAssembly(typeof(SimulationEngine))

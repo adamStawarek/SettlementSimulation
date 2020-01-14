@@ -11,7 +11,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
         public override double Probability => 0.005;
         public override int Space => 2;
 
-        public override int GetFitness(BuildingRule model)
+        public override int CalculateFitness(BuildingRule model)
         {
             var minDistanceBetweenMarkets = 50;
             var markets = model.Roads.SelectMany(b => b.Buildings).Where(b => b != this && b is Market);

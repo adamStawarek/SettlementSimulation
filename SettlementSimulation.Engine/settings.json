@@ -5,7 +5,7 @@
   "InitialRoadsCount": 3,
   "FirstEpochBuildings": 500,
   "SecondEpochBuildings": 3000,
-  "ThirdEpochBuildings": 3500,
+  "ThirdEpochBuildings": 3000,
   "FirstEpochMutationRate": 0.01,
   "SecondEpochMutationRate": 0.05,
   "ThirdEpochMutationRate": 0.1

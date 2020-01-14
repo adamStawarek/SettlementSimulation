@@ -9,10 +9,10 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     [Epoch(Epoch.Second)]
     public class Administration : Building
     {
-        public override double Probability => 0.001;
+        public override double Probability => 0.0001;
         public override int Space => 1;
 
-        public override int GetFitness(BuildingRule model)
+        public override int CalculateFitness(BuildingRule model)
         {
             var maxDistanceToCenter = 40;
             if (Position.DistanceTo(model.SettlementCenter) > maxDistanceToCenter)

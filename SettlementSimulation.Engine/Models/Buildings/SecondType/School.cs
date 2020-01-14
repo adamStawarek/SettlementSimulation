@@ -9,10 +9,10 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     [Epoch(Epoch.Second)]
     public class School : Building
     {
-        public override double Probability => 0.005;
+        public override double Probability => 0.002;
         public override int Space => 2;
 
-        public override int GetFitness(BuildingRule model)
+        public override int CalculateFitness(BuildingRule model)
         {
             var residences = model.Roads.SelectMany(b => b.Buildings).Count(b => b is Residence);
             var schools = model.Roads.SelectMany(b => b.Buildings).Count(b => b is School);

@@ -19,5 +19,6 @@ namespace SettlementSimulation.Engine.Interfaces
         List<Point> GetPossibleRoadPositions(PossibleRoadPositions model);
         List<IRoad> AttachedRoads(List<IRoad> roads);
         bool AddBuilding(IBuilding building);
+        bool RemoveBuilding(IBuilding building);
     }
 }

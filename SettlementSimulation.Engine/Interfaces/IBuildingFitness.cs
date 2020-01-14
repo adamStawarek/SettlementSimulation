@@ -4,6 +4,8 @@ namespace SettlementSimulation.Engine.Interfaces
 {
     public interface IBuildingFitness
     {
-        int GetFitness(BuildingRule model);
+        void SetFitness(BuildingRule model);
+        int CalculateFitness(BuildingRule model);
+        int Fitness { get; set; }
     }
 }

@@ -1,6 +1,4 @@
-﻿using SettlementSimulation.AreaGenerator.Interfaces;
-
-namespace SettlementSimulation.AreaGenerator.Models.Terrains
+﻿namespace SettlementSimulation.AreaGenerator.Models.Terrains
 {
     public class Sand : Terrain
     {

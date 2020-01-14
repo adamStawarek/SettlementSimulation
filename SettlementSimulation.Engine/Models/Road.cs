@@ -104,24 +104,6 @@ namespace SettlementSimulation.Engine.Models
                 });
             }
 
-            if (this.IsVertical)
-            {
-                possiblePositions.RemoveAll(
-                    p => roads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - p.Y) <= 1 &&
-                                                                  ((this.Start.X - g.Start.X < 0 && this.Start.X - p.X < 0) ||
-                                                                   (this.Start.X - g.Start.X > 0 && this.Start.X - p.X > 0)) &&
-                                                                  g.Segments.Any(s => Math.Abs(s.Position.X - p.X) < 25)));
-
-            }
-            else
-            {
-                possiblePositions.RemoveAll(
-                    p => roads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - p.X) <= 1 &&
-                                                                 ((this.Start.Y - g.Start.Y < 0 && this.Start.Y - p.Y < 0) ||
-                                                                  (this.Start.Y - g.Start.Y > 0 && this.Start.Y - p.Y > 0)) &&
-                                                                 g.Segments.Any(s => Math.Abs(s.Position.Y - p.Y) < 25)));
-            }
-
             return possiblePositions;
         }
 
@@ -151,6 +133,15 @@ namespace SettlementSimulation.Engine.Models
             }
 
             segment.Buildings.Add(building);
+            return true;
+        }
+
+        public bool RemoveBuilding(IBuilding building)
+        {
+            if (!this.Buildings.Contains(building)) return false;
+            var segment = Segments.First(s => s.Position.X == building.Position.X ||
+                                              s.Position.Y == building.Position.Y);
+            segment.Buildings.Remove(building);
             return true;
         }
 

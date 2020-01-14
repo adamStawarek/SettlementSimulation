@@ -9,10 +9,10 @@ namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
     [Epoch(Epoch.Third)]
     public class Port : Building
     {
-        public override double Probability => 0.005;
+        public override double Probability => 0.0001;
         public override int Space => 3;
 
-        public override int GetFitness(BuildingRule model)
+        public override int CalculateFitness(BuildingRule model)
         {
             var maxPortDistanceToWater = 10;
             var field = model.Fields[this.Position.X, this.Position.Y];

@@ -118,7 +118,6 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 MarkPoint(point, SettlementBitmap, Color.Red, 3);
             }
-
         }
 
         private async void StartSimulation()
@@ -187,8 +186,12 @@ namespace SettlementSimulation.Viewer.ViewModel
             {
                 $"Roads: {SettlementState.Roads.Count}",
                 $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
-                $"Last generated structures: " +
-                $"{SettlementState.LastCreatedStructures?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
+                $"Last generated roads: " +
+                $"{SettlementState.LastSettlementUpdate.NewRoads?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
+                $"Last generated buildings: " +
+                $"{SettlementState.LastSettlementUpdate.NewBuildingsAttachedToRoad.Select(s=>s.building)?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
+                $"Last removed buildings: " +
+                $"{SettlementState.LastSettlementUpdate.BuildingRemovedFromRoad.Select(s=>s.building)?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
                 $"Average road length: {(int)SettlementState.Roads.Average(r => r.Length)}",
                 $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
                 $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"

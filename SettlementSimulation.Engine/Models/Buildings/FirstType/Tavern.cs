@@ -9,10 +9,10 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
     [Epoch(Epoch.First)]
     public class Tavern : Building
     {
-        public override double Probability => 0.01;
+        public override double Probability => 0.007;
         public override int Space => 1;
 
-        public override int GetFitness(BuildingRule model)
+        public override int CalculateFitness(BuildingRule model)
         {
             var maxResidencesPerTavern = Position.DistanceTo(model.SettlementCenter) < 30 ? 20 : 50;
 

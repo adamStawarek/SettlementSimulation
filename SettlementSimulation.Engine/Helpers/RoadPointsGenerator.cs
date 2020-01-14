@@ -61,11 +61,18 @@ namespace SettlementSimulation.Engine.Helpers
                 }
             }
 
-            return positions.Any(p => p.X < 0 ||
-                                      p.X >= model.Fields.GetLength(0) ||
-                                      p.Y < 0 ||
-                                      p.Y >= model.Fields.GetLength(1)) ?
-                new List<Point>() : positions;
+            positions = positions
+                .SkipWhile(s => !model.Fields[s.X, s.Y].InSettlement ||
+                                                 (model.Fields[s.X, s.Y].IsBlocked.HasValue &&
+                                                  model.Fields[s.X, s.Y].IsBlocked.Value))
+                .Reverse()
+                .SkipWhile(s => !model.Fields[s.X, s.Y].InSettlement ||
+                                (model.Fields[s.X, s.Y].IsBlocked.HasValue &&
+                                 model.Fields[s.X, s.Y].IsBlocked.Value))
+                .Reverse()
+                .ToList();
+
+            return positions;
         }
 
         public IEnumerable<Point> GenerateAttached(RoadGenerationAttached model)

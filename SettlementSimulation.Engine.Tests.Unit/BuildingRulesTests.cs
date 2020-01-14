@@ -91,7 +91,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }
 
 
-            Assert.AreEqual(5,market.GetFitness(new BuildingRule()
+            Assert.AreEqual(5,market.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -127,7 +127,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }
 
 
-            Assert.AreEqual(0, market1.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, market1.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -172,7 +172,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 _settlement.AddBuildingToRoad(road1, building);
             }
 
-            Assert.AreEqual(5,market1.GetFitness(new BuildingRule()
+            Assert.AreEqual(5,market1.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
@@ -200,7 +200,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(5,school.GetFitness(new BuildingRule()
+            Assert.AreEqual(5,school.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -234,7 +234,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Position = new Point(80, 51)
             };
 
-            Assert.AreEqual(0, school2.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, school2.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -262,7 +262,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(5,church.GetFitness(new BuildingRule()
+            Assert.AreEqual(5,church.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -290,7 +290,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(0, church.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, church.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -324,7 +324,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(0, church.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, church.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -352,7 +352,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(10,administration.GetFitness(new BuildingRule()
+            Assert.AreEqual(10,administration.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -380,7 +380,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(0, administration.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, administration.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -407,7 +407,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Position = new Point(51, 10)
             };
 
-            Assert.AreEqual(15,port.GetFitness(new BuildingRule()
+            Assert.AreEqual(15,port.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
@@ -434,7 +434,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Position = new Point(51, 25)
             };
 
-            Assert.AreEqual(0, port.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, port.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
@@ -467,7 +467,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             };
             _settlement.AddBuildingToRoad(road2, exitingPort);
 
-            Assert.AreEqual(0, port.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, port.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
@@ -512,7 +512,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Position = new Point(50, 49)
             };
 
-            Assert.AreEqual(15,university.GetFitness(new BuildingRule()
+            Assert.AreEqual(15,university.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -553,7 +553,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Position = new Point(50, 49)
             };
 
-            Assert.AreEqual(0, university.GetFitness(new BuildingRule()
+            Assert.AreEqual(0, university.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,

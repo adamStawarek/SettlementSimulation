@@ -9,9 +9,9 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
         public override double Probability => 0.885;
         public override int Space => 0;
 
-        public override int GetFitness(BuildingRule model)
+        public override int CalculateFitness(BuildingRule model)
         {
-            return 1;
+            return 0;
         }
     }
 }

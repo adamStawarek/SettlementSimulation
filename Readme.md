@@ -143,6 +143,9 @@ We decide wheter to add or change structures at random but the probability of se
 to current epoch (More in section 'Division execution time into 3 epochs')  
 At last there is probability of mutation that can occur. If it happen some of the buildings and roads will be destroyed
 
+![uml](resources/uml.png)  
+
+
 ### Types of structures that can be generated in the simulation
 * Buildings
 There are 8 types of buildings currently supported. 
@@ -200,7 +203,6 @@ Using this formula we can assume that most of the paved roads will
 be placed close to the center of the simulation, 
 when road have attached many building, 
 when road is long and when the settlement will be well developed
-
 
 ### Rules for scoring buildings
 To determine how similar created settlement is to the real one we define 

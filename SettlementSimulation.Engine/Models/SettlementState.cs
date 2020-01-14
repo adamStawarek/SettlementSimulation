@@ -10,7 +10,7 @@ namespace SettlementSimulation.Engine.Models
         public IRoad MainRoad { get; set; }
         public List<IRoad> Roads { get; set; }
         public Point SettlementCenter { get; set; }
-        public IEnumerable<ISettlementStructure> LastCreatedStructures { get; set; }
+        public SettlementUpdate LastSettlementUpdate { get; set; }
         public Epoch CurrentEpoch { get; set; }
         public int CurrentGeneration { get; set; }
         public int Time { get; set; }

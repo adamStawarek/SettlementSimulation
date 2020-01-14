@@ -10,16 +10,13 @@ namespace SettlementSimulation.Engine
 {
     public class SimulationEngine
     {
-        #region private fields
-        private readonly Stack<Epoch> _allEpochs;
-        #endregion
 
         #region properties
         public Epoch CurrentEpoch { get; set; }
         public int Generation { get; set; }
         public Field[,] Fields { get; }
         public List<Point> MainRoad { get; }
-        public IEnumerable<ISettlementStructure> LastStructuresCreated { get; set; }
+        public SettlementUpdate LastSettlementUpdate { get; set; }
         public Settlement Settlement { get; set; }
         #endregion
 
@@ -31,54 +28,61 @@ namespace SettlementSimulation.Engine
             MainRoad = mainRoad;
             Generation = 1;
             Settlement = new Settlement(fields, mainRoad);
-
-            _allEpochs = new Stack<Epoch>();
-            _allEpochs.Push(Epoch.Third);
-            _allEpochs.Push(Epoch.Second);
-            _allEpochs.Push(Epoch.First);
-            SetNextEpoch();
-        }
-
-        public void SetNextEpoch()
-        {
-            CurrentEpoch = _allEpochs.Pop();
+            CurrentEpoch = Epoch.First;
         }
 
         public void NewGeneration()
         {
-            var structures = Enumerable.Range(1, 5).ToList()
-                .Select(s => Settlement.CreateNewDnaStructure(CurrentEpoch))
+            var structures = Enumerable.Range(1, 100).ToList()
+                .Select(s => Settlement.CreateNewSettlementUpdate(CurrentEpoch))
                 .ToList();
 
-            var generatedStructures = GetBestStructures(structures);
+            var settlementUpdate = GetBestStructures(structures);
 
-            LastStructuresCreated = null;
-            if (generatedStructures.NewRoads.Any())
+            LastSettlementUpdate = settlementUpdate;
+
+            if (settlementUpdate.NewRoads.Any())
             {
-                generatedStructures.NewRoads
+                settlementUpdate.NewRoads
                     .ForEach(r => Settlement.AddRoad(r));
-                LastStructuresCreated = generatedStructures.NewRoads.ToList();
             }
 
-            if (generatedStructures.NewBuildings.Any())
+            if (settlementUpdate.NewBuildingsAttachedToRoad.Any())
             {
-                generatedStructures.NewBuildings
+                settlementUpdate.BuildingRemovedFromRoad.ForEach(b =>
+                    {
+                        Settlement.RemoveBuildingFromRoad(b.road, b.building);
+                    });
+
+                settlementUpdate.NewBuildingsAttachedToRoad
                     .ForEach(b =>
                     {
-                        Settlement.AddBuildingToRoad(generatedStructures.RoadToAttachNewBuildings, b);
-                        LastStructuresCreated = generatedStructures.NewBuildings.ToList();
+                        Settlement.AddBuildingToRoad(b.road, b.building);
                     });
             }
 
-            if (Settlement.Buildings.Count >= EpochSpecific.GetBuildingsCount(CurrentEpoch))
+            if (EpochSpecific.CanEnterNextEpoch(Settlement, CurrentEpoch))
             {
-                SetNextEpoch();
+                switch (CurrentEpoch)
+                {
+                    case Epoch.First:
+                        CurrentEpoch = Epoch.Second;
+                        break;
+                    case Epoch.Second:
+                        CurrentEpoch = Epoch.Third;
+                        break;
+                    case Epoch.Third:
+                        //TODO
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
 
             Generation++;
         }
 
-        private GeneratedStructures GetBestStructures(List<GeneratedStructures> structures)
+        private SettlementUpdate GetBestStructures(List<SettlementUpdate> structures)
         {
             var structuresFitness = structures.ToDictionary(s => s, s => 0);
             foreach (var structure in structures)
@@ -87,38 +91,39 @@ namespace SettlementSimulation.Engine
                 structuresFitness[structure] = fitness;
             }
 
-            //TODO perform crossover
-            return structuresFitness.OrderByDescending(s => s.Value).First().Key;
+            var bests = structuresFitness.OrderByDescending(s => s.Value).Take(2).Select(u => u.Key).ToArray();
+            var settlementUpdate = bests[0].Crossover(bests[1]);
+
+            return settlementUpdate;
         }
 
-        private int CalculateGeneratedStructuresFitness(GeneratedStructures model)
+        private int CalculateGeneratedStructuresFitness(SettlementUpdate model)
         {
             var fitness = 0;
             foreach (var road in model.NewRoads)
             {
                 var roads = new List<IRoad>(Settlement.Genes) { road };
-
-                fitness += road.Buildings.Sum(b => b.GetFitness(new BuildingRule()
+                road.Buildings.ForEach(b => b.SetFitness(new BuildingRule()
                 {
                     Fields = Settlement.Fields,
                     Roads = roads,
                     BuildingRoad = road,
                     SettlementCenter = Settlement.SettlementCenter
-
                 }));
+                fitness += road.Buildings.Sum(b => b.Fitness);
             }
 
-            foreach (var building in model.NewBuildings)
+            foreach (var (building, road) in model.NewBuildingsAttachedToRoad)
             {
                 var roads = new List<IRoad>(Settlement.Genes);
-
-                fitness += building.GetFitness(new BuildingRule()
+                building.SetFitness(new BuildingRule()
                 {
                     Fields = Settlement.Fields,
                     Roads = roads,
-                    BuildingRoad = model.RoadToAttachNewBuildings,
+                    BuildingRoad = road,
                     SettlementCenter = Settlement.SettlementCenter
                 });
+                fitness += building.Fitness;
             }
 
             return fitness;
