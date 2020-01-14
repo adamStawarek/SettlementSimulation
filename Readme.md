@@ -147,36 +147,34 @@ Finally before the iteration is finished there is some probability that mutation
 If that would happen some of the buildings and roads will be destroyed depeing of the type of the mutation.(See 'Mutations').  
 
 ### Division simulation time into 3 epochs
-When settlement reaches New level of development
-We unlock generation of building Types u available
-In previous iterations. These levels are called 'epochs' 
-and symbolize how well settlement is developer. 
-Conditions for setting next epoch:
--1st epoch
- 500 buildings
- 1 markets
- 3 taverns
--2nd epoch
- 3000 buildings
- 1 administraton building
- 2 schools
- 1 church
--3rd epoch
- 3000 buildings
- 1 port
- 1 university. 
-
+When settlement reaches new level of development some building types unavailable
+in previous iterations can be now generated. These levels are called 'epochs' 
+and symbolize how well settlement is developed. 
+Prooperties of each epoch:  
+- First epoch:
+    Available building: residence, market, tavern.
+    Condions that must be fullfiled to enter second epoch:  
+    1) more that 500 buildings,
+    2) at least 1 market,
+    3) at least 3 taverns
+- Second epoch:
+    Available buildings: all from first epoch + school, church, administration building.
+    Condions that must be fullfiled to enter third epoch:  
+    1) more that 3000 buildings,
+    2) at least 1 administration building,
+    3) at least 2 schools,
+    4) at least 1 church
+ - Third epoch:
+    Available buildings: all from first and second epoch + port, university.
+ 
 ### Mutations
  
-In simulation mutations were introduced
-To imidiate natural disasters that can occur 
-In settlements. Two Types of These mutations are supported:
-1) Flood: all roads and buildings near 
- BIG enough water aquen are removed from settlement. 
-2) Earthquake: randomly remove buildings
-Across whole settlement. Older buildings 
-ARe more próba le to ne removed
-3) Fire: 
+In simulation mutations were introduced to imitiate natural disasters that can have major impact of
+the shape of the settlement.  
+Types of mutations that are supported and implemented:    
+1) Flood: all roads and buildings near big enough water aquen are removed from settlement. 
+2) Earthquake: randomly remove buildings across whole settlement. Older buildings 
+are more probable to be removed.
 
 ### Types of structures that can be generated in the simulation
 * Buildings
@@ -192,7 +190,8 @@ Properties of buildings:
   - Direction: determines the orientation of the building towards 
     the roads to which it is attached. For example on the picture below
     building (red square) would have Direction set to Right, because 
-    on its right side the is road (black line).   
+    on its right side the is road (black line). 
+  - Age: how many iterations building is a part of the settlement.
  ![direction](resources/buildingOrientation.png)
   - Position: point location (x,y) which is the center location of the building.
 * Roads
