@@ -8,6 +8,7 @@ namespace SettlementSimulation.Engine.Interfaces
         int Space { get; }
         double Probability { get; }
         Point Position { get; set; }
-        Direction? Direction { get; set; }       
+        Direction? Direction { get; set; }
+        int Age { get; set; }
     }
 }

@@ -132,24 +132,27 @@ At the begin of th simulation we create empty settlement and initialize it with 
 Then unitl maximum number of iterations is reached or specyfied timeout is exceeded we  
 modify our settlement by adding new structures or    
 removing and changing the exisiting ones.   
-Each time we update the settlement we generate multiple sets of possible structures(that are supposed to be added or changed). 
+Each time we update the settlement we generate multiple sets of possible structures (that are supposed to be added or changed). 
 Next we must compute fitness for each set, we do it by checking how well given structure fits current settlement.   
 Rules for computing fitness/scoring buildings are described in section below called: 'Rules for scoring buildings'.  
-After that we take 2 sets with best overall fitness(we sum fitness of each structure in the set) and perform crossover:  
+After that we take 2 sets with best overall fitness (we sum fitness of each structure in the set) and perform crossover:  
 if we generated roads and they don't collide/cross with each other we add both of the to the new settlement, otherwise  
 we add only the one with better fitness score.  
 Similary when we generated only buildings: then if some building from first set has the same position as the other  
 building from second set we add to the settlement only the one with higher fitness.  
-Instead of adding new structures we can also update the existing one i.e some buildings can change their types.
+Instead of adding new structures we can also update the existing ones i.e some buildings can change their types.
 We decide wheter to add or change structures at random but the probability of selecting one option over another  
 may vary according to current epoch (More in section 'Division simulation time into 3 epochs')  
 Finally before the iteration is finished there is some probability that mutation can occur.  
-If that would happen some of the buildings and roads will be destroyed depeing of the type of the mutation.(See 'Mutations').  
+If that would happen some of the buildings and roads will be destroyed depeing of the type of the mutation (See 'Mutations').  
+
+![uml](resources/uml.png)  
+
 
 ### Division simulation time into 3 epochs
 When settlement reaches new level of development some building types unavailable
 in previous iterations can be now generated. These levels are called 'epochs' 
-and symbolize how well settlement is developed. 
+and symbolize how well settlement is developed.  
 Prooperties of each epoch:  
 - First epoch:
     Available building: residence, market, tavern.
@@ -167,17 +170,20 @@ Prooperties of each epoch:
  - Third epoch:
     Available buildings: all from first and second epoch + port, university.
  
+At each epoch process of updating settlement is in simplifaction as foolows:
+We can generate roads with few buildings attached, or generate only buildings 
+and attach the to exisiting roads. When number of buildings is suffiect to enter next epoch
+we modify existing buildings(change their types) until until we obtain proper number
+of given type buildings.  
+
 ### Mutations
  
 In simulation mutations were introduced to imitiate natural disasters that can have major impact of
 the shape of the settlement.  
-Types of mutations that are supported and implemented:    
-1) Flood: all roads and buildings near big enough water aquen are removed from settlement. 
-2) Earthquake: randomly remove buildings across whole settlement. Older buildings 
-are more probable to be removed.
-
-![uml](resources/uml.png)  
-
+Types of mutations that are supported and implemented:     
+1) Flood: all roads and buildings near big enough water aquen are removed from settlement.   
+2) Earthquake: randomly remove buildings across whole settlement. Older buildings   
+are more probable to be removed.  
 
 ### Types of structures that can be generated in the simulation
 * Buildings
@@ -193,9 +199,11 @@ Properties of buildings:
   - Direction: determines the orientation of the building towards 
     the roads to which it is attached. For example on the picture below
     building (red square) would have Direction set to Right, because 
-    on its right side the is road (black line). 
+    on its right side there is road (black line).   
+
+    ![direction](resources/buildingOrientation.png)
+
   - Age: how many iterations building is a part of the settlement.
- ![direction](resources/buildingOrientation.png)
   - Position: point location (x,y) which is the center location of the building.
 * Roads
 Two types of road are distiguished:
@@ -264,16 +272,16 @@ Below are listed rules described above, for each supported type of buildding:
     otherwsie  if distance from tavern to settlement center is greater than 15,
     then in tavern-neighborhood-10 there must be no less than 10 residences per one tavern.         
 - Market:  
-     2) no other markets in neighbourhood-20,  
-     3) at least 100 residences in neighbourhood-20
+    2) no other markets in neighbourhood-20,  
+    3) at least 100 residences in neighbourhood-20
 - School:  
-     3) there must be at least 100 residences per one school, 
+    3) there must be at least 100 residences per one school, 
 - Church:  
-     2) no other churches in neighbourhood-20  
-     3) at least 100 residnces in this neighbourhood 
-- Administration:  
-     1) building must be in settelement center neighbourhood-10  
-     3) there can be no more that 1 admistration buildings per 1000 buildings
+    2) no other churches in neighbourhood-20  
+    3) at least 100 residnces in this neighbourhood 
+- Administration:
+    1) building must be in settelement center neighbourhood-10
+    3) there can be no more that 1 admistration buildings per 1000 buildings
 - Port:  
     4) distance to water must be less or equal to 10.  
     2) there can be only one port in the settlement    

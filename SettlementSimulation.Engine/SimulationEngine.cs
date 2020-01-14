@@ -61,6 +61,8 @@ namespace SettlementSimulation.Engine
                     });
             }
 
+            this.Settlement.Buildings.ForEach(b => b.Age++);
+
             if (EpochSpecific.CanEnterNextEpoch(Settlement, CurrentEpoch))
             {
                 switch (CurrentEpoch)

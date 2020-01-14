@@ -15,6 +15,7 @@ namespace SettlementSimulation.Engine.Models.Buildings
         public abstract int Space { get; }
 
         public Direction? Direction { get; set; }
+        public int Age { get; set; }
         public Point Position { get; set; }
         public int Fitness { get; set; }
 
