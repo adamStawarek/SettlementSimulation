@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Windows;
 using LiveCharts;
 using LiveCharts.Wpf;
+using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Interfaces;
 using Point = SettlementSimulation.AreaGenerator.Models.Point;
 
@@ -25,7 +26,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         #region fields
         private Bitmap _colorMap;
         private Bitmap _heightMap;
-        private List<int> buildingCountPerIteration;
+        private List<int> buildingsPerIteration;
         private SettlementInfo _settlementInfo;
         private StructureGenerator _generator;
         private readonly ViewModelLocator _viewModelLocator;
@@ -100,7 +101,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         public StepperThreeViewModel()
         {
             _viewModelLocator = new ViewModelLocator();
-            buildingCountPerIteration = new List<int>();
+            buildingsPerIteration = new List<int>();
 
             Messenger.Default.Register<SetSettlementInfoCommand>(this, this.SetSettlementInfo);
             SettlementGraphValues = new SeriesCollection
@@ -150,6 +151,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             _generator.Breakpoint += OnBreakpoint;
             _generator.NextEpoch += OnNextEpoch;
             _generator.Finished += OnFinished;
+            _generator.Initialized += OnInitialized;
 
             Logs.Clear();
             SpinnerVisibility = Visibility.Visible;
@@ -164,15 +166,20 @@ namespace SettlementSimulation.Viewer.ViewModel
             SpinnerVisibility = Visibility.Hidden;
         }
 
+        private void OnInitialized(object sender, EventArgs e)
+        {
+            UpdateSettlementBitmap();
+        }
+
         private void OnBreakpoint(object sender, EventArgs e)
         {
             UpdateSettlementBitmap();
             var buildingsCount = SettlementState.Roads.Sum(r => r.Buildings.Count);
-            buildingCountPerIteration.Add(buildingsCount);
+            buildingsPerIteration.Add(buildingsCount);
 
             if (SettlementState.CurrentGeneration % 10 == 0)
             {
-                SettlementGraphValues.First().Values.Add((double)buildingCountPerIteration.Last());
+                SettlementGraphValues.First().Values.Add((double)buildingsPerIteration.Last());
             }
         }
 
@@ -199,7 +206,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             var buildings = SettlementState.Roads
                 .SelectMany(s => s.Segments.SelectMany(seg => seg.Buildings)).ToList();
 
-            var roads = SettlementState.Roads.Select(s => s.Segments.Select(sg => sg.Position)).ToList();
+            var roads = SettlementState.Roads.ToList();
 
             MarkBuildingsAndRoads(roads, buildings, originalColorMap);
             MarkPoint(SettlementState.SettlementCenter, originalColorMap, Color.Goldenrod, 4);
@@ -227,7 +234,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             _logs = new List<string>(logs);
 
-            var allRoadPoints = roads.SelectMany(s => s).ToList();
+            var allRoadPoints = roads.SelectMany(s => s.Segments.Select(sg => sg.Position)).ToList();
             var upperLeft = new Point(allRoadPoints.Min(s => s.X), allRoadPoints.Min(s => s.Y));
             var bottomRight = new Point(allRoadPoints.Max(s => s.X), allRoadPoints.Max(s => s.Y));
 
@@ -243,7 +250,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         }
 
         private void MarkBuildingsAndRoads(
-            List<IEnumerable<Point>> roads,
+            List<IRoad> roads,
             List<IBuilding> buildings,
             Bitmap originalColorMap)
         {
@@ -255,8 +262,9 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             foreach (var road in roads)
             {
-                var roadPoints = road.ToList();
-                roadPoints.ForEach(p => MarkPoint(p, originalColorMap, Color.Black));
+                var roadPoints = road.Segments.Select(sg => sg.Position).ToList();
+                roadPoints.ForEach(p => 
+                    MarkPoint(p, originalColorMap, road.Type.Equals(RoadType.Unpaved) ? Color.Black : Color.DarkGray));
             }
 
             _settlementInfo.MainRoad.ForEach(p => MarkPoint(p, originalColorMap, Color.Red));

@@ -44,8 +44,19 @@ namespace SettlementSimulation.Engine
 
             if (settlementUpdate.NewRoads.Any())
             {
+                var roadTypeSetUp = new RoadTypeSetUp()
+                {
+                    Epoch = CurrentEpoch,
+                    SettlementCenter = Settlement.SettlementCenter,
+                    AvgDistanceToSettlementCenter =
+                        (int) Settlement.Genes.Average(r => r.Center.DistanceTo(Settlement.SettlementCenter))
+                };
                 settlementUpdate.NewRoads
-                    .ForEach(r => Settlement.AddRoad(r));
+                    .ForEach(r =>
+                    {
+                        r.SetUpRoadType(roadTypeSetUp);
+                        Settlement.AddRoad(r);
+                    });
             }
 
             if (settlementUpdate.NewBuildingsAttachedToRoad.Any())
@@ -100,7 +111,7 @@ namespace SettlementSimulation.Engine
             var structuresFitness = structures.ToDictionary(s => s, s => 0);
             foreach (var structure in structures)
             {
-                var fitness = CalculateGeneratedStructuresFitness(structure);
+                var fitness = CalculateFitness(structure);
                 structuresFitness[structure] = fitness;
             }
 
@@ -110,7 +121,7 @@ namespace SettlementSimulation.Engine
             return settlementUpdate;
         }
 
-        private int CalculateGeneratedStructuresFitness(SettlementUpdate model)
+        private int CalculateFitness(SettlementUpdate model)
         {
             var fitness = 0;
             foreach (var road in model.NewRoads)

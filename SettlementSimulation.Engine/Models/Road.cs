@@ -3,15 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Enumerators;
+using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Interfaces;
+using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using static SettlementSimulation.Engine.Helpers.ConfigurationManager;
 
 namespace SettlementSimulation.Engine.Models
 {
     public class Road : IRoad
     {
+        #region
+        private RoadType roadType;
+        #endregion
+
         public Road(IEnumerable<Point> positions)
         {
+            roadType = RoadType.Unpaved;
             Segments = positions
                 .OrderBy(p => p.X)
                 .ThenBy(p => p.Y)
@@ -24,7 +31,7 @@ namespace SettlementSimulation.Engine.Models
         public Point End => Segments.Last().Position;
         public Point Center => new Point((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         public int Length => Segments.Count;
-        public RoadType Type => Length <= MaxRoadLength / 2 ? RoadType.Unpaved : RoadType.Paved;
+        public RoadType Type => roadType;
         public bool IsVertical => Start.X.Equals(End.X);
         public List<IBuilding> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
 
@@ -143,6 +150,46 @@ namespace SettlementSimulation.Engine.Models
                                               s.Position.Y == building.Position.Y);
             segment.Buildings.Remove(building);
             return true;
+        }
+
+        public RoadType SetUpRoadType(RoadTypeSetUp model)
+        {
+            if (roadType.Equals(RoadType.Paved)) return roadType;
+
+            double prob = 0;
+            var distanceToCenter = model.SettlementCenter.DistanceTo(this.Center);
+            if (distanceToCenter < model.AvgDistanceToSettlementCenter)
+            {
+                prob += 0.2;
+            }
+            else if (this.Length > 0.5 * MaxRoadLength)
+            {
+                prob += 0.1;
+            }
+
+            foreach (var building in this.Buildings)
+            {
+                if (building is Residence)
+                    prob += 0.01;
+                else
+                    prob += 0.05;
+            }
+
+            switch (model.Epoch)
+            {
+                case Epoch.First:
+                    prob += 0.1;
+                    break;
+                case Epoch.Second:
+                    prob += 0.2;
+                    break;
+                case Epoch.Third:
+                    prob += 0.3;
+                    break;
+            }
+
+            roadType = RandomProvider.NextDouble() > prob ? RoadType.Unpaved : RoadType.Paved;
+            return roadType;
         }
 
         public override string ToString()

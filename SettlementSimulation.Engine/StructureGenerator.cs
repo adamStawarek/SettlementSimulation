@@ -24,6 +24,7 @@ namespace SettlementSimulation.Engine
         public event EventHandler Finished;
         public event EventHandler Breakpoint;
         public event EventHandler NextEpoch;
+        public event EventHandler Initialized;
         #endregion
 
         #region properties
@@ -102,6 +103,12 @@ namespace SettlementSimulation.Engine
         public void OnNextEpoch()
         {
             var handler = NextEpoch;
+            handler?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void OnInitialized()
+        {
+            var handler = Initialized;
             handler?.Invoke(this, EventArgs.Empty);
         }
 
