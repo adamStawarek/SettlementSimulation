@@ -4,6 +4,7 @@ using System.Linq;
 using SettlementSimulation.AreaGenerator.Models;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Enumerators;
+using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Models;
 
 namespace SettlementSimulation.Engine
@@ -62,6 +63,16 @@ namespace SettlementSimulation.Engine
             }
 
             this.Settlement.Buildings.ForEach(b => b.Age++);
+
+            if (RandomProvider.NextDouble() < 0.001)
+            {
+                settlementUpdate.FloodMutationResult = Settlement.InvokeFloodMutation();
+            }
+
+            if (RandomProvider.NextDouble() < 0.01)
+            {
+                settlementUpdate.EarthquakeMutationResult = Settlement.InvokeEarthquakeMutation();
+            }
 
             if (EpochSpecific.CanEnterNextEpoch(Settlement, CurrentEpoch))
             {

@@ -127,9 +127,10 @@ namespace SettlementSimulation.Engine
 
                 while (newRoad.Buildings.Count < 0.25 * newRoad.Length)
                 {
+                    var building = Building.GetRandom(Epoch.First);
                     var possiblePlaces =
                         newRoad.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
-                    var building = Building.GetRandom(Epoch.First);
+
                     building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
                     newRoad.AddBuilding(building);
                 }
@@ -211,7 +212,8 @@ namespace SettlementSimulation.Engine
                 var numberOfBuildingsToUpdate = 10;
                 for (int i = 0; i < numberOfBuildingsToUpdate; i++)
                 {
-                    var road = this.Genes[RandomProvider.Next(this.Genes.Count)];
+                    var roadsWithBuildings = this.Genes.Where(g => g.Buildings.Any()).ToList();
+                    var road = roadsWithBuildings[RandomProvider.Next(roadsWithBuildings.Count)];
                     var building = road.Buildings[RandomProvider.Next(road.Buildings.Count)];
 
                     if (!(building is Residence) && building.CalculateFitness(new BuildingRule()
@@ -275,6 +277,20 @@ namespace SettlementSimulation.Engine
             }
         }
 
+        public void RemoveRoad(IRoad road)
+        {
+            foreach (var segment in road.Segments)
+            {
+                Fields[segment.Position.X, segment.Position.Y].IsBlocked = false;
+            }
+
+            foreach (var building in road.Buildings)
+            {
+                Fields[building.Position.X, building.Position.Y].IsBlocked = false;
+            }
+            this.Genes.Remove(road);
+        }
+
         public void AddRoad(IRoad road)
         {
             foreach (var segment in road.Segments)
@@ -326,6 +342,34 @@ namespace SettlementSimulation.Engine
             }
 
             return true;
+        }
+
+        public MutationResult InvokeFloodMutation()
+        {
+            var dangerZone = 5;
+            var roadsNearWater = this.Genes.Where(g =>
+                this.Fields[g.Start.X, g.Start.Y].DistanceToWater <= dangerZone ||
+                this.Fields[g.End.X, g.End.Y].DistanceToWater <= dangerZone).ToList();
+
+            roadsNearWater.ForEach(this.RemoveRoad);
+
+            return new MutationResult() { RemovedRoads = roadsNearWater };
+        }
+
+        public MutationResult InvokeEarthquakeMutation()
+        {
+            var result = new MutationResult();
+            var buildingsToRemove = RandomProvider.Next((int)(this.Buildings.Count * 0.1), (int)(this.Buildings.Count * 0.2));
+            for (int i = 0; i < buildingsToRemove; i++)
+            {
+                var road = this.Genes[RandomProvider.Next(this.Genes.Count)];
+                if (!road.Buildings.Any()) continue;
+                var building = road.Buildings[RandomProvider.Next(road.Buildings.Count)];
+                this.RemoveBuildingFromRoad(road, building);
+                result.RemovedBuildings.Add(building);
+            }
+
+            return result;
         }
     }
 }

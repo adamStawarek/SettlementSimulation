@@ -81,7 +81,7 @@ namespace SettlementSimulation.AreaGenerator
             }
 
             var boundaryPoints = builderHelper.GetBoundaryPoints(waterMatrix).OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
-            var nStep = boundaryPoints.Count() / (15 * waterAreas.Count);
+            var nStep = boundaryPoints.Count() / (100 * waterAreas.Count);
             var waterAreaBoundaryPoints = boundaryPoints.Where((x, i) => i % nStep == 0).ToList();
 
             var fields = selectedArea.Select(a => new
@@ -100,7 +100,7 @@ namespace SettlementSimulation.AreaGenerator
 
             waterAreas.ForEach(w => w.ToList().ForEach(p => MarkPoint(p, previewBitmap, new Pixel(0, 0, 255), 1)));
 
-            waterAreaBoundaryPoints.ForEach(p => { MarkPoint(p, previewBitmap, new Pixel(0, 255, 0)); });
+            //waterAreaBoundaryPoints.ForEach(p => { MarkPoint(p, previewBitmap, new Pixel(0, 255, 0), 3); });
 
             var fieldGrid = new Field[_heightMap.GetLength(0), _heightMap.GetLength(1)];
             for (int i = 0; i < _heightMap.GetLength(0); i++)
@@ -129,7 +129,7 @@ namespace SettlementSimulation.AreaGenerator
             var endFields = verticalRoad ? fields.Where(f => f.Point.Y == max).ToArray() : fields.Where(f => f.Point.X == max).ToArray();
             var end = endFields[rand.Next(0, endFields.Count())];
             var mainRoadPoints = (await FindMainRoad(fieldGrid, start.Point, end.Point)).ToList();
-            mainRoadPoints.ForEach(p => { MarkPoint(new Point(p.X, p.Y), previewBitmap, new Pixel(0, 0, 0)); });
+            mainRoadPoints.ForEach(p => { MarkPoint(new Point(p.X, p.Y), previewBitmap, new Pixel(0, 0, 0),3); });
             #endregion
 
             var mStep = mainRoadPoints.Count() / 15;
@@ -151,7 +151,7 @@ namespace SettlementSimulation.AreaGenerator
             return settlementInfo;
         }
 
-        private void MarkPoint(Point point, Pixel[,] bitmap, Pixel color, int offset = 5)
+        private void MarkPoint(Point point, Pixel[,] bitmap, Pixel color, int offset)
         {
             for (int i = -offset; i < offset; i++)
             {

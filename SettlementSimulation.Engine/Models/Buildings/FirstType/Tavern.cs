@@ -18,11 +18,11 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
 
             var residences = model.Roads
                 .SelectMany(b => b.Buildings)
-                .Where(r => r.Position.DistanceTo(this.Position) <= 50)
+                .Where(r => r.Position.DistanceTo(this.Position) <= 10)
                 .Count(b => b is Residence);
             var taverns = model.Roads
                 .SelectMany(b => b.Buildings)
-                .Where(r => r.Position.DistanceTo(this.Position) <= 50)
+                .Where(r => r.Position.DistanceTo(this.Position) <= 10)
                 .Count(b => b is Tavern);
 
             if (residences / (taverns + 1) < maxResidencesPerTavern)

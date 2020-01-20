@@ -2,14 +2,13 @@
 using System.Linq;
 using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Helpers;
-using SettlementSimulation.Engine.Models.Buildings.SecondType;
 
 namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
 {
     [Epoch(Epoch.Third)]
     public class Port : Building
     {
-        public override double Probability => 0.0001;
+        public override double Probability => 0.005;
         public override int Space => 3;
 
         public override int CalculateFitness(BuildingRule model)

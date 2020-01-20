@@ -13,6 +13,8 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using LiveCharts;
+using LiveCharts.Wpf;
 using SettlementSimulation.Engine.Interfaces;
 using Point = SettlementSimulation.AreaGenerator.Models.Point;
 
@@ -23,6 +25,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         #region fields
         private Bitmap _colorMap;
         private Bitmap _heightMap;
+        private List<int> buildingCountPerIteration;
         private SettlementInfo _settlementInfo;
         private StructureGenerator _generator;
         private readonly ViewModelLocator _viewModelLocator;
@@ -39,6 +42,8 @@ namespace SettlementSimulation.Viewer.ViewModel
                 RaisePropertyChanged();
             }
         }
+
+        public SeriesCollection SettlementGraphValues { get; set; }
 
         public Dictionary<Type, Tuple<Color, string>> StructuresLegend { get; set; }
 
@@ -95,8 +100,18 @@ namespace SettlementSimulation.Viewer.ViewModel
         public StepperThreeViewModel()
         {
             _viewModelLocator = new ViewModelLocator();
+            buildingCountPerIteration = new List<int>();
 
             Messenger.Default.Register<SetSettlementInfoCommand>(this, this.SetSettlementInfo);
+            SettlementGraphValues = new SeriesCollection
+            {
+                new ColumnSeries
+                {
+                    Values = new ChartValues<double>(),
+                    Title="Buildings per iteration"
+                },
+            };
+
 
             Logs = new List<string>();
             StructuresLegend = new Dictionary<Type, Tuple<Color, string>>();
@@ -152,6 +167,13 @@ namespace SettlementSimulation.Viewer.ViewModel
         private void OnBreakpoint(object sender, EventArgs e)
         {
             UpdateSettlementBitmap();
+            var buildingsCount = SettlementState.Roads.Sum(r => r.Buildings.Count);
+            buildingCountPerIteration.Add(buildingsCount);
+
+            if (SettlementState.CurrentGeneration % 10 == 0)
+            {
+                SettlementGraphValues.First().Values.Add((double)buildingCountPerIteration.Last());
+            }
         }
 
         private void OnNextEpoch(object sender, EventArgs e)

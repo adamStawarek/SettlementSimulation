@@ -19,6 +19,8 @@ namespace SettlementSimulation.Engine.Models
         public List<(IBuilding building, IRoad road)> NewBuildingsAttachedToRoad { get; set; }
         public List<IRoad> RemovedRoads { get; set; }
         public List<(IBuilding building, IRoad road)> BuildingRemovedFromRoad { get; set; }
+        public MutationResult FloodMutationResult { get; set; }
+        public MutationResult EarthquakeMutationResult { get; set; }
 
         public SettlementUpdate Crossover(SettlementUpdate other)
         {
