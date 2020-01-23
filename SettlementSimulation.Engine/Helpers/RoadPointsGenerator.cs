@@ -61,16 +61,14 @@ namespace SettlementSimulation.Engine.Helpers
                 }
             }
 
-            positions = positions
-                .SkipWhile(s => !model.Fields[s.X, s.Y].InSettlement ||
+            var toRemove = positions
+                .OrderByDescending(p => p.DistanceTo(model.Start))
+                .TakeWhile(s => !model.Fields[s.X, s.Y].InSettlement ||
                                                  (model.Fields[s.X, s.Y].IsBlocked.HasValue &&
                                                   model.Fields[s.X, s.Y].IsBlocked.Value))
-                .Reverse()
-                .SkipWhile(s => !model.Fields[s.X, s.Y].InSettlement ||
-                                (model.Fields[s.X, s.Y].IsBlocked.HasValue &&
-                                 model.Fields[s.X, s.Y].IsBlocked.Value))
-                .Reverse()
                 .ToList();
+
+            toRemove.ForEach(r => positions.Remove(r));
 
             return positions;
         }
@@ -147,7 +145,8 @@ namespace SettlementSimulation.Engine.Helpers
                 .Intersect(roadPoints)
                 .ToList();
 
-            if (!intersectPoints.Any()) return roadPoints;
+            if (!intersectPoints.Any())
+                return roadPoints;
 
             Point? selectedPoint = null;
             switch (direction)
@@ -182,8 +181,14 @@ namespace SettlementSimulation.Engine.Helpers
 
             roadPoints = roadPoints.Take(roadPoints.IndexOf(selectedPoint.Value)).ToList();
 
-            roadPoints.RemoveAll(r => model.Fields[r.X, r.Y].IsBlocked.HasValue &&
-                                      model.Fields[r.X, r.Y].IsBlocked.Value);
+            for (int i = 0; i < roadPoints.Count - 1; i++)//check whether there point line is solid
+            {
+                if (Math.Abs(roadPoints[i].DistanceTo(roadPoints[i + 1]) - 1) > 0.1)
+                {
+                    throw new Exception();
+                    return new List<Point>();
+                }
+            }
 
             return roadPoints;
         }

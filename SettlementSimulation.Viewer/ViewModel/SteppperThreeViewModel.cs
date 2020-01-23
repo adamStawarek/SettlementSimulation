@@ -9,10 +9,12 @@ using SettlementSimulation.Engine.Models.Buildings;
 using SettlementSimulation.Viewer.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Threading;
 using LiveCharts;
 using LiveCharts.Wpf;
 using SettlementSimulation.Engine.Enumerators;
@@ -33,13 +35,24 @@ namespace SettlementSimulation.Viewer.ViewModel
         #endregion
 
         #region properties
-        private List<string> _logs;
-        public List<string> Logs
+        private ObservableCollection<string> _updateUpdateLogs;
+        public ObservableCollection<string> UpdateLogs
         {
-            get => _logs;
+            get => _updateUpdateLogs;
             set
             {
-                _logs = value;
+                _updateUpdateLogs = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private List<string> _generalStateLogs;
+        public List<string> GeneralStateLogs
+        {
+            get => _generalStateLogs;
+            set
+            {
+                _generalStateLogs = value;
                 RaisePropertyChanged();
             }
         }
@@ -113,8 +126,8 @@ namespace SettlementSimulation.Viewer.ViewModel
                 },
             };
 
-
-            Logs = new List<string>();
+            GeneralStateLogs = new List<string>();
+            UpdateLogs = new ObservableCollection<string>();
             StructuresLegend = new Dictionary<Type, Tuple<Color, string>>();
             SpinnerVisibility = Visibility.Hidden;
 
@@ -153,7 +166,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             _generator.Finished += OnFinished;
             _generator.Initialized += OnInitialized;
 
-            Logs.Clear();
+            UpdateLogs.Clear();
             SpinnerVisibility = Visibility.Visible;
 
             await _generator.Start();
@@ -211,28 +224,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             MarkBuildingsAndRoads(roads, buildings, originalColorMap);
             MarkPoint(SettlementState.SettlementCenter, originalColorMap, Color.Goldenrod, 4);
 
-            var logs = new List<string>
-            {
-                $"Roads: {SettlementState.Roads.Count}",
-                $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
-                $"Last generated roads: " +
-                $"{SettlementState.LastSettlementUpdate.NewRoads?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
-                $"Last generated buildings: " +
-                $"{SettlementState.LastSettlementUpdate.NewBuildingsAttachedToRoad.Select(s=>s.building)?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
-                $"Last removed buildings: " +
-                $"{SettlementState.LastSettlementUpdate.BuildingRemovedFromRoad.Select(s=>s.building)?.Aggregate("",(s1,s2)=>$"{s1.ToString()}\n{s2}")}",
-                $"Average road length: {(int)SettlementState.Roads.Average(r => r.Length)}",
-                $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
-                $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"
-            };
-
-            var groups = SettlementState.Roads
-                .SelectMany(r => r.Buildings)
-                .GroupBy(building => building.GetType());
-
-            logs.AddRange(groups.Select(typeBuildings => $"{typeBuildings.Key.Name}: {typeBuildings.Count()}"));
-
-            _logs = new List<string>(logs);
+            SetUpLogs();
 
             var allRoadPoints = roads.SelectMany(s => s.Segments.Select(sg => sg.Position)).ToList();
             var upperLeft = new Point(allRoadPoints.Min(s => s.X), allRoadPoints.Min(s => s.Y));
@@ -244,9 +236,55 @@ namespace SettlementSimulation.Viewer.ViewModel
             SettlementBitmap = new Bitmap(trimmedBitmap);
             PreviewBitmap = new Bitmap(previewBitmap);
 
-            RaisePropertyChanged(nameof(Logs));
+            RaisePropertyChanged(nameof(UpdateLogs));
             RaisePropertyChanged(nameof(SettlementBitmap));
             RaisePropertyChanged(nameof(PreviewBitmap));
+        }
+
+        private void SetUpLogs()
+        {
+            App.Current.Dispatcher.Invoke((Action) (() =>
+            {
+                int maxLogs = 10;
+                if (UpdateLogs.Count > maxLogs)
+                {
+                    UpdateLogs.RemoveAt(0);
+                }
+
+                switch (SettlementState.LastSettlementUpdate.UpdateType)
+                {
+                    case UpdateType.NewRoads:
+                        UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
+                                       $"({SettlementState.LastSettlementUpdate.NewRoads.Count})");
+                        break;
+                    case UpdateType.NewBuildings:
+                        UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
+                                       $"({SettlementState.LastSettlementUpdate.NewBuildings.Count})");
+                        break;
+                    case UpdateType.NewTypes:
+                        UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
+                                       $"({SettlementState.LastSettlementUpdate.UpdatedBuildings.Count})");
+                        break;
+                }
+            }));
+
+            var logs = new List<string>
+            {
+                $"Roads: {SettlementState.Roads.Count}",
+                $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
+                $"Average road length: {(int) SettlementState.Roads.Average(r => r.Length)}",
+                $"Min road length: {SettlementState.Roads.Min(r => r.Length)}",
+                $"Max road length: {SettlementState.Roads.Max(r => r.Length)}"
+            };
+
+            var groups = SettlementState.Roads
+                .SelectMany(r => r.Buildings)
+                .GroupBy(building => building.GetType());
+
+            logs.AddRange(groups.Select(typeBuildings => $"{typeBuildings.Key.Name}: {typeBuildings.Count()}"));
+
+            GeneralStateLogs = new List<string>(logs);
+            RaisePropertyChanged(nameof(GeneralStateLogs));
         }
 
         private void MarkBuildingsAndRoads(

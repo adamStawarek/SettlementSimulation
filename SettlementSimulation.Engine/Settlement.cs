@@ -20,7 +20,7 @@ namespace SettlementSimulation.Engine
         public List<IRoad> Genes { get; set; }
         public float Fitness { get; private set; }
         public Point SettlementCenter =>
-            new Point((int)Genes.Average(g => g.Center.X), (int)Genes.Average(g => g.Center.Y));
+            new Point((int)Genes.Average(g => g.Center.X), (int)Genes.Average(g => g.Center.Y));//slow
         public List<IBuilding> Buildings => Genes.SelectMany(g => g.Buildings).ToList();
         public Point SettlementUpperLeftBound =>
             new Point(this.Genes.Min(g => g.Start.X), this.Genes.Min(g => g.Start.Y));
@@ -140,99 +140,110 @@ namespace SettlementSimulation.Engine
             }
         }
 
-        public SettlementUpdate CreateNewSettlementUpdate(Epoch epoch)
+        public SettlementUpdate CreateNewSettlementUpdate(UpdateType updateType, Epoch epoch)
         {
-            var generatedStructures = new SettlementUpdate();
-            if (!EpochSpecific.IsSatisfiedBuildingCountCondition(this, epoch))
+            SettlementUpdate settlementUpdate = new SettlementUpdate(updateType);
+            switch (updateType)
             {
-                if (this.Genes.Sum(g => g.Length) < 1.5 * EpochSpecific.GetBuildingsCount(epoch))
-                {
-                    var genes = this.Genes.ToList();
-
-                    if (RandomProvider.NextDouble() < 0.3) //in order to make it more probable for roads closer to center to be selected
+                case UpdateType.NewRoads:
                     {
-                        var numberOfGenesToInclude = (int)(0.2 * genes.Count) <= 1 ? 1 : (int)(0.1 * genes.Count);
-                        genes = genes.OrderBy(g =>
-                                g.IsVertical
-                                    ? Math.Abs(g.Start.X - SettlementCenter.X)
-                                    : Math.Abs(g.Start.Y - SettlementCenter.Y))
-                            .Take(2 * numberOfGenesToInclude)
-                            .ToList();
-                        genes = genes
-                            .OrderBy(g => g.AttachedRoads(new List<IRoad>(this.Genes)).Count)
-                            .Take(numberOfGenesToInclude)
-                            .ToList();
+                        var genes = this.Genes.ToList();//todo
+                        //if (RandomProvider.NextDouble() < 0.5) //in order to make it more probable for roads closer to center to be selected
+                        //{
+                        //    var numberOfGenesToInclude = (int)(0.2 * genes.Count) <= 1 ? 1 : (int)(0.2 * genes.Count);
+                        //    genes = genes.OrderBy(g => g.Center.DistanceTo(this.SettlementCenter))
+                        //        .Take(2 * numberOfGenesToInclude)
+                        //        .ToList();
+                        //}
+                        var roadToAttach = genes[RandomProvider.Next(genes.Count)];
+                        var road = this.CreateNewRoad(roadToAttach);
+                        if (!CanAddRoad(road))
+                            return settlementUpdate;
+
+                        var possiblePlaces =
+                            road.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
+
+                        var buildingsToAdd = 3;//todo
+
+                        for (int i = 0; i < buildingsToAdd; i++)
+                        {
+                            var building = Building.GetRandom(epoch);
+                            building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
+                            road.AddBuilding(building);
+                            building.Road = road;
+                        }
+
+                        settlementUpdate.NewRoads.Add(road);
+                        return settlementUpdate;
+                    }
+                case UpdateType.NewBuildings:
+                    {
+                        var roadsToAttachCount = this.Genes.Count * 0.3 < 10 ? 10 : (int)(this.Genes.Count * 0.3);
+                        var roadsToAttach = this.Genes
+                            .OrderByDescending(g => 2 * g.Length - g.Buildings.Count)
+                            .Take(roadsToAttachCount)
+                            .ToArray();
+
+                        var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())];
+                        var copy = roadToAttach.Copy();
+
+                        var possiblePlaces =
+                            copy.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
+                        if (!possiblePlaces.Any()) return settlementUpdate;
+
+                        var buildingsToAdd = 3;//todo
+
+                        for (int i = 0; i < buildingsToAdd; i++)
+                        {
+                            var building = Building.GetRandom(epoch);
+                            building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
+                            copy.AddBuilding(building);
+                            building.Road = roadToAttach;
+                            settlementUpdate.NewBuildings.Add(building);
+                        }
+                        return settlementUpdate;
+                    }
+                default:
+                    for (int i = 0; i < BuildingsPerUpdate; i++)
+                    {
+                        var roadsWithBuildings = this.Genes.Where(g => g.Buildings.Any()).ToList();
+                        var road = roadsWithBuildings[RandomProvider.Next(roadsWithBuildings.Count)];
+                        var building = road.Buildings[RandomProvider.Next(road.Buildings.Count)];
+
+                        if (!(building is Residence) && building.CalculateFitness(new BuildingRule()
+                        {
+                            Fields = this.Fields,
+                            SettlementCenter = this.SettlementCenter,
+                            BuildingRoad = road,
+                            Roads = this.Genes
+                        }) > 0) continue;//don't update rare buildings with positive fitness
+
+                        var newBuilding = Building.GetRandom(epoch);
+                        newBuilding.Position = building.Position;
+                        newBuilding.Direction = building.Direction;
+                        newBuilding.Road = building.Road;
+
+                        settlementUpdate.UpdatedBuildings.Add((building, newBuilding));
                     }
 
-                    var roadToAttach = genes[RandomProvider.Next(genes.Count)];
-                    var road = this.CreateNewRoad(roadToAttach);
-                    if (!CanAddRoad(road))
-                        return generatedStructures;
-
-                    var possiblePlaces =
-                        road.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
-
-                    var buildingsToAdd = possiblePlaces.Count / 3 < 1 ? possiblePlaces.Count : possiblePlaces.Count / 3;
-
-                    for (int i = 0; i < buildingsToAdd; i++)
+                    var roadTypeSetUp = new RoadTypeSetUp()
                     {
-                        var building = Building.GetRandom(epoch);
-                        building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
-                        road.AddBuilding(building);
+                        Epoch = epoch,
+                        SettlementCenter = SettlementCenter,
+                        AvgDistanceToSettlementCenter =
+                            (int)Genes.Average(r => r.Center.DistanceTo(SettlementCenter))
+                    };
+                    for (int i = 0; i < RoadsPerUpdate; i++)
+                    {
+                        var unpavedRoads = this.Genes.Where(g => g.Type == RoadType.Unpaved).ToList();
+                        if (!unpavedRoads.Any()) break;
+                        var oldRoad = unpavedRoads[RandomProvider.Next(unpavedRoads.Count)];
+                        var newRoad = oldRoad.Copy();
+                        newRoad.SetUpRoadType(roadTypeSetUp);
+                        if(!oldRoad.Type.Equals(newRoad.Type))
+                            settlementUpdate.UpdatedRoads.Add((oldRoad, newRoad));
                     }
-
-                    generatedStructures.NewRoads.Add(road);
-                    return generatedStructures;
-                }
-                else
-                {
-                    var roadsToAttach = this.Genes
-                        .Where(g => g.Buildings.Count < g.Length)
-                        .ToArray();
-
-                    var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())];
-                    var copy = roadToAttach.Copy();
-
-                    var possiblePlaces =
-                        copy.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
-                    var buildingsToAdd = possiblePlaces.Count / 2 < 1 ? possiblePlaces.Count : possiblePlaces.Count / 2;
-
-                    for (int i = 0; i < buildingsToAdd; i++)
-                    {
-                        var building = Building.GetRandom(epoch);
-                        building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
-                        copy.AddBuilding(building);
-                        generatedStructures.NewBuildingsAttachedToRoad.Add((building, roadToAttach));
-                    }
-                    return generatedStructures;
-                }
-            }
-            else
-            {
-                var numberOfBuildingsToUpdate = 10;
-                for (int i = 0; i < numberOfBuildingsToUpdate; i++)
-                {
-                    var roadsWithBuildings = this.Genes.Where(g => g.Buildings.Any()).ToList();
-                    var road = roadsWithBuildings[RandomProvider.Next(roadsWithBuildings.Count)];
-                    var building = road.Buildings[RandomProvider.Next(road.Buildings.Count)];
-
-                    if (!(building is Residence) && building.CalculateFitness(new BuildingRule()
-                    {
-                        Fields = this.Fields,
-                        SettlementCenter = this.SettlementCenter,
-                        BuildingRoad = road,
-                        Roads = this.Genes
-                    }) != 0) continue;
-
-                    var newBuilding = Building.GetRandom(epoch);
-                    newBuilding.Position = building.Position;
-                    newBuilding.Direction = building.Direction;
-
-                    generatedStructures.BuildingRemovedFromRoad.Add((building, road));
-                    generatedStructures.NewBuildingsAttachedToRoad.Add((newBuilding, road));
-                }
-
-                return generatedStructures;
+                    return settlementUpdate;
             }
         }
 
@@ -346,14 +357,14 @@ namespace SettlementSimulation.Engine
 
         public MutationResult InvokeFloodMutation()
         {
-            var dangerZone = 5;
-            var roadsNearWater = this.Genes.Where(g =>
-                this.Fields[g.Start.X, g.Start.Y].DistanceToWater <= dangerZone ||
-                this.Fields[g.End.X, g.End.Y].DistanceToWater <= dangerZone).ToList();
+            var dangerZone = 5;//todo
+            var buildingsNearWater = this.Genes.SelectMany(r => r.Buildings)
+                .Where(b => this.Fields[b.Position.X, b.Position.Y].DistanceToWater <= dangerZone)
+                .ToList();
 
-            roadsNearWater.ForEach(this.RemoveRoad);
+            buildingsNearWater.ForEach(b => RemoveBuildingFromRoad(b.Road, b));
 
-            return new MutationResult() { RemovedRoads = roadsNearWater };
+            return new MutationResult() { RemovedBuildings = buildingsNearWater };
         }
 
         public MutationResult InvokeEarthquakeMutation()

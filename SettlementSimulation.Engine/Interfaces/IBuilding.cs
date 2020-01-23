@@ -10,5 +10,6 @@ namespace SettlementSimulation.Engine.Interfaces
         Point Position { get; set; }
         Direction? Direction { get; set; }
         int Age { get; set; }
+        IRoad Road { get; set; }//Road to which building is attached
     }
 }

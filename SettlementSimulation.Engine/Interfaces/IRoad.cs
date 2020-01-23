@@ -20,6 +20,8 @@ namespace SettlementSimulation.Engine.Interfaces
         List<IRoad> AttachedRoads(List<IRoad> roads);
         bool AddBuilding(IBuilding building);
         bool RemoveBuilding(IBuilding building);
+        bool IsCrossed(IRoad other);
         RoadType SetUpRoadType(RoadTypeSetUp model);
+        void SetRoadType(RoadType roadType);
     }
 }

@@ -152,6 +152,32 @@ namespace SettlementSimulation.Engine.Models
             return true;
         }
 
+        public bool IsCrossed(IRoad other)
+        {
+            if (this.IsVertical && !other.IsVertical)
+            {
+                if (this.Start.X >= other.Start.X &&
+                    this.Start.X <= other.End.X &&
+                    this.Start.Y <= other.Start.Y &&
+                    this.End.Y >= other.Start.Y)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (this.Start.Y >= other.Start.Y &&
+                    this.Start.Y <= other.End.Y &&
+                    this.Start.X <= other.Start.X &&
+                    this.End.X >= other.Start.X)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public RoadType SetUpRoadType(RoadTypeSetUp model)
         {
             if (roadType.Equals(RoadType.Paved)) return roadType;
@@ -192,6 +218,11 @@ namespace SettlementSimulation.Engine.Models
             return roadType;
         }
 
+        public void SetRoadType(RoadType type)
+        {
+            this.roadType = type;
+        }
+
         public override string ToString()
         {
             return $"Road: [{Start};{End}], " +
@@ -202,7 +233,7 @@ namespace SettlementSimulation.Engine.Models
         public Road Copy()
         {
             var segments = this.Segments.Select(p => p.Position);
-            var copy = new Road(segments);
+            var copy = new Road(segments) { roadType = this.Type };
 
             this.Buildings.ForEach(b => copy.AddBuilding(((ICopyable<IBuilding>)b).Copy()));
             return copy;

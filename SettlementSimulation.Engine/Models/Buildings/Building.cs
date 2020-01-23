@@ -26,6 +26,8 @@ namespace SettlementSimulation.Engine.Models.Buildings
             return copy;
         }
 
+        public virtual IRoad Road { get; set; }
+
         public void SetFitness(BuildingRule model)
         {
             Fitness = this.CalculateFitness(model);

@@ -34,53 +34,60 @@ namespace SettlementSimulation.Engine
 
         public void NewGeneration()
         {
+            var updateType = GetUpdateType();
+
             var structures = Enumerable.Range(1, 100).ToList()
-                .Select(s => Settlement.CreateNewSettlementUpdate(CurrentEpoch))
-                .ToList();
+                        .Select(s => Settlement.CreateNewSettlementUpdate(updateType, CurrentEpoch))
+                        .ToList();
 
             var settlementUpdate = GetBestStructures(structures);
 
             LastSettlementUpdate = settlementUpdate;
 
-            if (settlementUpdate.NewRoads.Any())
+            switch (updateType)
             {
-                var roadTypeSetUp = new RoadTypeSetUp()
-                {
-                    Epoch = CurrentEpoch,
-                    SettlementCenter = Settlement.SettlementCenter,
-                    AvgDistanceToSettlementCenter =
-                        (int) Settlement.Genes.Average(r => r.Center.DistanceTo(Settlement.SettlementCenter))
-                };
-                settlementUpdate.NewRoads
-                    .ForEach(r =>
+                case UpdateType.NewRoads:
                     {
-                        r.SetUpRoadType(roadTypeSetUp);
-                        Settlement.AddRoad(r);
-                    });
-            }
-
-            if (settlementUpdate.NewBuildingsAttachedToRoad.Any())
-            {
-                settlementUpdate.BuildingRemovedFromRoad.ForEach(b =>
+                        var roadTypeSetUp = new RoadTypeSetUp()
+                        {
+                            Epoch = CurrentEpoch,
+                            SettlementCenter = Settlement.SettlementCenter,
+                            AvgDistanceToSettlementCenter =
+                                (int)Settlement.Genes.Average(r => r.Center.DistanceTo(Settlement.SettlementCenter))
+                        };
+                        settlementUpdate.NewRoads
+                            .ForEach(r =>
+                            {
+                                r.SetUpRoadType(roadTypeSetUp);
+                                Settlement.AddRoad(r);
+                            });
+                        break;
+                    }
+                case UpdateType.NewBuildings:
+                    settlementUpdate.NewBuildings
+                        .ForEach(b => { Settlement.AddBuildingToRoad(b.Road, b); });
+                    break;
+                case UpdateType.NewTypes:
+                    settlementUpdate.UpdatedBuildings.ForEach(update =>
                     {
-                        Settlement.RemoveBuildingFromRoad(b.road, b.building);
+                        Settlement.RemoveBuildingFromRoad(update.oldBuilding.Road, update.oldBuilding);
+                        Settlement.AddBuildingToRoad(update.newBuilding.Road, update.newBuilding);
                     });
-
-                settlementUpdate.NewBuildingsAttachedToRoad
-                    .ForEach(b =>
+                    settlementUpdate.UpdatedRoads.ForEach(update =>
                     {
-                        Settlement.AddBuildingToRoad(b.road, b.building);
+                        update.oldRoad.SetRoadType(update.newRoad.Type); //todo for now only types
                     });
+                    break;
             }
 
             this.Settlement.Buildings.ForEach(b => b.Age++);
 
-            if (RandomProvider.NextDouble() < 0.001)
+            if (RandomProvider.NextDouble() < 0.001)//todo
             {
                 settlementUpdate.FloodMutationResult = Settlement.InvokeFloodMutation();
             }
 
-            if (RandomProvider.NextDouble() < 0.01)
+            if (RandomProvider.NextDouble() < 0.01)//todo
             {
                 settlementUpdate.EarthquakeMutationResult = Settlement.InvokeEarthquakeMutation();
             }
@@ -106,13 +113,37 @@ namespace SettlementSimulation.Engine
             Generation++;
         }
 
-        private SettlementUpdate GetBestStructures(List<SettlementUpdate> structures)
+        private UpdateType GetUpdateType()
         {
-            var structuresFitness = structures.ToDictionary(s => s, s => 0);
-            foreach (var structure in structures)
+            var config = ConfigurationManager.SettlementConfiguration[CurrentEpoch];
+            UpdateType updateType;
+            switch (RandomProvider.NextDouble())
             {
-                var fitness = CalculateFitness(structure);
-                structuresFitness[structure] = fitness;
+                case double d when d < config.ProbNewRoad:
+                    {
+                        updateType = UpdateType.NewRoads;
+                        break;
+                    }
+                case double d when d < config.ProbNewRoad + config.ProbNewBuildings:
+                    {
+                        updateType = UpdateType.NewBuildings;
+                        break;
+                    }
+                default:
+                    updateType = UpdateType.NewTypes;
+                    break;
+            }
+
+            return updateType;
+        }
+
+        private SettlementUpdate GetBestStructures(List<SettlementUpdate> updates)
+        {
+            var structuresFitness = updates.ToDictionary(s => s, s => 0);
+            foreach (var key in updates)
+            {
+                var fitness = CalculateFitness(key);
+                structuresFitness[key] = fitness;
             }
 
             var bests = structuresFitness.OrderByDescending(s => s.Value).Take(2).Select(u => u.Key).ToArray();
@@ -124,30 +155,52 @@ namespace SettlementSimulation.Engine
         private int CalculateFitness(SettlementUpdate model)
         {
             var fitness = 0;
-            foreach (var road in model.NewRoads)
-            {
-                var roads = new List<IRoad>(Settlement.Genes) { road };
-                road.Buildings.ForEach(b => b.SetFitness(new BuildingRule()
-                {
-                    Fields = Settlement.Fields,
-                    Roads = roads,
-                    BuildingRoad = road,
-                    SettlementCenter = Settlement.SettlementCenter
-                }));
-                fitness += road.Buildings.Sum(b => b.Fitness);
-            }
 
-            foreach (var (building, road) in model.NewBuildingsAttachedToRoad)
+            switch (model.UpdateType)
             {
-                var roads = new List<IRoad>(Settlement.Genes);
-                building.SetFitness(new BuildingRule()
-                {
-                    Fields = Settlement.Fields,
-                    Roads = roads,
-                    BuildingRoad = road,
-                    SettlementCenter = Settlement.SettlementCenter
-                });
-                fitness += building.Fitness;
+                case UpdateType.NewRoads:
+                    foreach (var road in model.NewRoads)
+                    {
+                        fitness += 1;
+                        var roads = new List<IRoad>(Settlement.Genes) { road };
+                        road.Buildings.ForEach(b => b.SetFitness(new BuildingRule()
+                        {
+                            Fields = Settlement.Fields,
+                            Roads = roads,
+                            BuildingRoad = road,
+                            SettlementCenter = Settlement.SettlementCenter
+                        }));
+                        fitness += road.Buildings.Sum(b => b.Fitness);
+                    }
+                    break;
+                case UpdateType.NewBuildings:
+                    foreach (var building in model.NewBuildings)
+                    {
+                        var roads = new List<IRoad>(Settlement.Genes);
+                        building.SetFitness(new BuildingRule()
+                        {
+                            Fields = Settlement.Fields,
+                            Roads = roads,
+                            BuildingRoad = building.Road,
+                            SettlementCenter = Settlement.SettlementCenter
+                        });
+                        fitness += building.Fitness;
+                    }
+                    break;
+                case UpdateType.NewTypes:
+                    foreach (var (oldBuilding, newBuilding) in model.UpdatedBuildings)
+                    {
+                        var roads = new List<IRoad>(Settlement.Genes);
+                        newBuilding.SetFitness(new BuildingRule()
+                        {
+                            Fields = Settlement.Fields,
+                            Roads = roads,
+                            BuildingRoad = newBuilding.Road,
+                            SettlementCenter = Settlement.SettlementCenter
+                        });
+                        fitness += newBuilding.Fitness - oldBuilding.Fitness;
+                    }
+                    break;
             }
 
             return fitness;

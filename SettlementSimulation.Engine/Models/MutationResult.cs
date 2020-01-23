@@ -8,11 +8,9 @@ namespace SettlementSimulation.Engine.Models
     {
         public MutationResult()
         {
-            RemovedRoads = new List<IRoad>();
             RemovedBuildings = new List<IBuilding>();
         }
 
-        public List<IRoad> RemovedRoads { get; set; }
         public List<IBuilding> RemovedBuildings { get; set; }
     }
 }

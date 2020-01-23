@@ -1,12 +1,31 @@
 ﻿{
-  "MinRoadLength": 5,
+  "MinRoadLength": 3,
   "MaxRoadLength": 50,
-  "MinDistanceBetweenRoads": 5,
+  "MinDistanceBetweenRoads": 3,
   "InitialRoadsCount": 3,
-  "FirstEpochBuildings": 500,
-  "SecondEpochBuildings": 3000,
-  "ThirdEpochBuildings": 3000,
-  "FirstEpochMutationRate": 0.01,
-  "SecondEpochMutationRate": 0.05,
-  "ThirdEpochMutationRate": 0.1
+  "BuildingsPerUpdate": 10,
+  "RoadsPerUpdate": 5,
+  "EpochInfos": [
+    {
+      "Epoch": 1,
+      "Buildings": 500,
+      "ProbNewRoad": 0.5,
+      "ProbNewBuildings": 0.5,
+      "ProbUpdate": 0.0
+    },
+    {
+      "Epoch": 2,
+      "Buildings": 3000,
+      "ProbNewRoad": 0.7,
+      "ProbNewBuildings": 0.3,
+      "ProbUpdate": 0.1
+    },
+    {
+      "Epoch": 3,
+      "Buildings": 3000,
+      "ProbNewRoad": 0.1,
+      "ProbNewBuildings": 0.1,
+      "ProbUpdate": 0.8
+    }
+  ]
 }

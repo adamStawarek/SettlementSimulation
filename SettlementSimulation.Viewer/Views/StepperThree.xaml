@@ -70,7 +70,16 @@
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Logs">
-                        <ListView ItemsSource="{Binding Logs, NotifyOnSourceUpdated=True}"  Height="400"/>
+                        <Grid Height="400">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ListView ItemsSource="{Binding GeneralStateLogs, NotifyOnSourceUpdated=True}" Grid.Column="0"/>
+                            <GridSplitter Grid.Column="1"/>
+                            <ListView ItemsSource="{Binding UpdateLogs, NotifyOnSourceUpdated=True}" Grid.Column="2"/>
+                        </Grid>
                     </TabItem>
                     <TabItem Header="Graphs">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="5">

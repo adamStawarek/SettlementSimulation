@@ -24,21 +24,6 @@ namespace SettlementSimulation.Engine.Models
             return -1;
         }
 
-        public static double GetMutationRate(Epoch epoch)
-        {
-            switch (epoch)
-            {
-                case Epoch.First:
-                    return FirstEpochMutationRate;
-                case Epoch.Second:
-                    return SecondEpochMutationRate;
-                case Epoch.Third:
-                    return ThirdEpochMutationRate;
-            }
-
-            return -1;
-        }
-
         public static bool IsSatisfiedBuildingCountCondition(Settlement settlement, Epoch epoch)
         {
             switch (epoch)

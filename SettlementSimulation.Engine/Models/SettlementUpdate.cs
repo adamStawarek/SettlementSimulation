@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 
@@ -7,42 +9,81 @@ namespace SettlementSimulation.Engine.Models
 {
     public class SettlementUpdate
     {
-        public SettlementUpdate()
+        public SettlementUpdate(UpdateType updateType)
         {
+            UpdateType = updateType;
             NewRoads = new List<IRoad>();
-            NewBuildingsAttachedToRoad = new List<(IBuilding, IRoad)>();
-            RemovedRoads = new List<IRoad>();
-            BuildingRemovedFromRoad = new List<(IBuilding, IRoad)>();
+            NewBuildings = new List<IBuilding>();
+            UpdatedBuildings = new List<(IBuilding oldBuilding, IBuilding newBuilding)>();
+            UpdatedRoads = new List<(IRoad oldRoad, IRoad newRoad)>();
         }
 
+        public UpdateType UpdateType { get; }
         public List<IRoad> NewRoads { get; set; }
-        public List<(IBuilding building, IRoad road)> NewBuildingsAttachedToRoad { get; set; }
-        public List<IRoad> RemovedRoads { get; set; }
-        public List<(IBuilding building, IRoad road)> BuildingRemovedFromRoad { get; set; }
+        public List<IBuilding> NewBuildings { get; set; }
+        public List<(IBuilding oldBuilding, IBuilding newBuilding)> UpdatedBuildings { get; set; }
+        public List<(IRoad oldRoad, IRoad newRoad)> UpdatedRoads { get; set; }
         public MutationResult FloodMutationResult { get; set; }
         public MutationResult EarthquakeMutationResult { get; set; }
 
         public SettlementUpdate Crossover(SettlementUpdate other)
         {
-            var child = new SettlementUpdate();
-            foreach (var road in this.NewRoads.Concat(other.NewRoads))
-            {
-                var buildingsToRemove = road.Buildings.Where(b => !(b is Residence) && b.Fitness == 0).ToList();
-                buildingsToRemove.ForEach(b => road.RemoveBuilding(b));
-                child.NewRoads.Add(road);
-            }
+            if (this.UpdateType != other.UpdateType)
+                throw new ArgumentException("In crossover both parents must be of the same settlement update type");
 
-            foreach (var (b,road) in this.NewBuildingsAttachedToRoad.Concat(other.NewBuildingsAttachedToRoad))
-            {
-                if (!(b is Residence) && b.Fitness == 0) continue;
-                child.NewBuildingsAttachedToRoad.Add((b, road));
-            }
+            var child = new SettlementUpdate(this.UpdateType);
 
-            foreach (var (b, road) in this.BuildingRemovedFromRoad.Concat(other.BuildingRemovedFromRoad))
+            switch (UpdateType)
             {
-                child.BuildingRemovedFromRoad.Add((b, road));
-            }
+                case UpdateType.NewRoads:
+                    foreach (var road in this.NewRoads.Concat(other.NewRoads))
+                    {
+                        if (child.NewRoads.Any(r => r.IsCrossed(road)))
+                            continue;
+                        if (road.IsVertical)
+                        {
+                            if (child.NewRoads.Where(g => g.IsVertical).Any(g => Math.Abs(g.Start.X - road.Start.X) <= 2 &&
+                                                                             g.Segments.Any(s => road.Segments.Any(r => r.Position.Y == s.Position.Y))))
+                                continue;
+                        }
+                        else
+                        {
+                            if (child.NewRoads.Where(g => !g.IsVertical).Any(g => Math.Abs(g.Start.Y - road.Start.Y) <= 2 &&
+                                                                              g.Segments.Any(s => road.Segments.Any(r => r.Position.X == s.Position.X))))
+                                continue;
+                        }
 
+                        var buildingsToRemove = road.Buildings.Where(b => !(b is Residence) && b.Fitness == 0).ToList();
+                        buildingsToRemove.ForEach(b => road.RemoveBuilding(b));
+                        if (!road.Buildings.Any())
+                            continue;
+                        child.NewRoads.Add(road);
+                    }
+                    break;
+                case UpdateType.NewBuildings:
+                    foreach (var b in this.NewBuildings.Concat(other.NewBuildings))
+                    {
+                        if ((!(b is Residence) && b.Fitness == 0))
+                            continue;
+                        if (child.NewBuildings.Any(nb => nb.Position.Equals(b.Position)))
+                            continue;
+                        child.NewBuildings.Add(b);
+                    }
+                    break;
+                case UpdateType.NewTypes:
+                    foreach (var b in this.UpdatedBuildings.Concat(other.UpdatedBuildings))
+                    {
+                        if ((!(b.newBuilding is Residence) && b.newBuilding.Fitness <= 0))
+                            continue;
+                        if (b.newBuilding.Fitness <= 0)
+                            continue;
+                        if (child.UpdatedBuildings.Any(nb => nb.newBuilding.Position.Equals(b.newBuilding.Position)))
+                            continue;
+                        child.UpdatedBuildings.Add(b);
+                    }
+                    break;
+
+            }
             return child;
         }
     }
