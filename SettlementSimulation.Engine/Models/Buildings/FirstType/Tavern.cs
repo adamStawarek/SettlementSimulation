@@ -12,7 +12,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
         public override double Probability => 0.007;
         public override int Space => 1;
 
-        public override int CalculateFitness(BuildingRule model)
+        public override double CalculateFitness(BuildingRule model)
         {
             var maxResidencesPerTavern = Position.DistanceTo(model.SettlementCenter) < 30 ? 20 : 50;
 

@@ -12,7 +12,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
         public override double Probability => 0.001;
         public override int Space => 1;
 
-        public override int CalculateFitness(BuildingRule model)
+        public override double CalculateFitness(BuildingRule model)
         {
             var maxDistanceToCenter = 10;
             if (Position.DistanceTo(model.SettlementCenter) > maxDistanceToCenter)
@@ -23,7 +23,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
 
             var buildings = model.Roads.SelectMany(b => b.Buildings).Count();
             var administrations = model.Roads.SelectMany(b => b.Buildings).Count(b => b is Administration);
-            if (buildings / (administrations + 1) < 100)
+            if (buildings / (administrations + 1) < 1000)
             {
                 Console.WriteLine("No more than one administration per 1000 buildings");
                 return 0;

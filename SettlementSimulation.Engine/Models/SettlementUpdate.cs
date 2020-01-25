@@ -53,8 +53,13 @@ namespace SettlementSimulation.Engine.Models
                                 continue;
                         }
 
-                        var buildingsToRemove = road.Buildings.Where(b => !(b is Residence) && b.Fitness == 0).ToList();
-                        buildingsToRemove.ForEach(b => road.RemoveBuilding(b));
+                        var buildingsToRemove = road.Buildings.Where(b => !(b is Residence) && Math.Abs(b.Fitness) < 0.1).ToList();
+                        buildingsToRemove.ForEach(b =>
+                        {
+                            road.RemoveBuilding(b);
+                            road.AddBuilding(new Residence()//otherwise some roads would have no buildings
+                                {Position = b.Position, Road = road, Direction = b.Direction});
+                        });
                         if (!road.Buildings.Any())
                             continue;
                         child.NewRoads.Add(road);
@@ -63,7 +68,7 @@ namespace SettlementSimulation.Engine.Models
                 case UpdateType.NewBuildings:
                     foreach (var b in this.NewBuildings.Concat(other.NewBuildings))
                     {
-                        if ((!(b is Residence) && b.Fitness == 0))
+                        if ((!(b is Residence) && Math.Abs(b.Fitness) < 0.1))
                             continue;
                         if (child.NewBuildings.Any(nb => nb.Position.Equals(b.Position)))
                             continue;
@@ -73,9 +78,9 @@ namespace SettlementSimulation.Engine.Models
                 case UpdateType.NewTypes:
                     foreach (var b in this.UpdatedBuildings.Concat(other.UpdatedBuildings))
                     {
-                        if ((!(b.newBuilding is Residence) && b.newBuilding.Fitness <= 0))
+                        if ((!(b.newBuilding is Residence) && (int)b.newBuilding.Fitness <= 0))
                             continue;
-                        if (b.newBuilding.Fitness <= 0)
+                        if ((int)b.newBuilding.Fitness <= 0)
                             continue;
                         if (child.UpdatedBuildings.Any(nb => nb.newBuilding.Position.Equals(b.newBuilding.Position)))
                             continue;

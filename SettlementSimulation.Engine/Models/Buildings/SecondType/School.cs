@@ -12,7 +12,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
         public override double Probability => 0.002;
         public override int Space => 2;
 
-        public override int CalculateFitness(BuildingRule model)
+        public override double CalculateFitness(BuildingRule model)
         {
             var residences = model.Roads.SelectMany(b => b.Buildings).Count(b => b is Residence);
             var schools = model.Roads.SelectMany(b => b.Buildings).Count(b => b is School);

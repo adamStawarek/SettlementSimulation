@@ -19,13 +19,8 @@ namespace SettlementSimulation.Engine
         public List<Point> MainRoad { get; }
         public List<IRoad> Genes { get; set; }
         public float Fitness { get; private set; }
-        public Point SettlementCenter =>
-            new Point((int)Genes.Average(g => g.Center.X), (int)Genes.Average(g => g.Center.Y));//slow
+        public Point SettlementCenter { get; set; }
         public List<IBuilding> Buildings => Genes.SelectMany(g => g.Buildings).ToList();
-        public Point SettlementUpperLeftBound =>
-            new Point(this.Genes.Min(g => g.Start.X), this.Genes.Min(g => g.Start.Y));
-        public Point SettlementBottomRightBound =>
-            new Point(this.Genes.Max(g => g.Start.X), this.Genes.Max(g => g.Start.Y));
         #endregion
 
         public Settlement(
@@ -86,6 +81,8 @@ namespace SettlementSimulation.Engine
                 }
             }
 
+            SettlementCenter = center;
+
             var roadGenerator = new RoadPointsGenerator();
 
             var initialRoads = new List<IRoad>(InitialRoadsCount);
@@ -102,6 +99,7 @@ namespace SettlementSimulation.Engine
                     firstRoad.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, this.Fields));
                 var building = Building.GetRandom(Epoch.First);
                 building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
+                building.Road = firstRoad;
                 firstRoad.AddBuilding(building);
             }
             initialRoads.Add(firstRoad);
@@ -132,6 +130,7 @@ namespace SettlementSimulation.Engine
                         newRoad.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
 
                     building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
+                    building.Road = newRoad;
                     newRoad.AddBuilding(building);
                 }
 
@@ -148,14 +147,14 @@ namespace SettlementSimulation.Engine
                 case UpdateType.NewRoads:
                     {
                         var genes = this.Genes.ToList();
-                        //todo
-                        //if (RandomProvider.NextDouble() < 0.5) //in order to make it more probable for roads closer to center to be selected
-                        //{
-                        //    var numberOfGenesToInclude = (int)(0.2 * genes.Count) <= 1 ? 1 : (int)(0.2 * genes.Count);
-                        //    genes = genes.OrderBy(g => g.Center.DistanceTo(this.SettlementCenter))
-                        //        .Take(2 * numberOfGenesToInclude)
-                        //        .ToList();
-                        //}
+                        
+                        if (RandomProvider.NextDouble() < 0.3) //in order to make it more probable for roads closer to center to be selected
+                        {
+                            var numberOfGenesToInclude = (int)(0.2 * genes.Count) <= 1 ? 1 : (int)(0.2 * genes.Count);
+                            genes = genes.OrderBy(g => g.Center.DistanceTo(this.SettlementCenter))
+                                .Take(2 * numberOfGenesToInclude)
+                                .ToList();
+                        }
                         var roadToAttach = genes[RandomProvider.Next(genes.Count)];
                         var road = this.CreateNewRoad(roadToAttach);
                         if (!CanAddRoad(road))
@@ -173,8 +172,8 @@ namespace SettlementSimulation.Engine
                         {
                             var building = Building.GetRandom(epoch);
                             building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
-                            road.AddBuilding(building);
                             building.Road = road;
+                            road.AddBuilding(building);
                         }
 
                         settlementUpdate.NewRoads.Add(road);
@@ -182,13 +181,15 @@ namespace SettlementSimulation.Engine
                     }
                 case UpdateType.NewBuildings:
                     {
+                        var roadWithoutBuildings = this.Genes.FirstOrDefault(g => !g.Buildings.Any());
+
                         var roadsToAttachCount = this.Genes.Count * 0.3 < 10 ? 10 : (int)(this.Genes.Count * 0.3);
                         var roadsToAttach = this.Genes
                             .OrderByDescending(g => 2 * g.Length - g.Buildings.Count)
                             .Take(roadsToAttachCount)
                             .ToArray();
 
-                        var roadToAttach = roadsToAttach[RandomProvider.Next(roadsToAttach.Count())];
+                        var roadToAttach = roadWithoutBuildings ?? roadsToAttach[RandomProvider.Next(roadsToAttach.Count())];
                         var copy = roadToAttach.Copy();
 
                         var possiblePlaces =
@@ -217,7 +218,7 @@ namespace SettlementSimulation.Engine
                         var road = roadsWithBuildings[RandomProvider.Next(roadsWithBuildings.Count)];
                         var building = road.Buildings[RandomProvider.Next(road.Buildings.Count)];
 
-                        if (!(building is Residence) && building.CalculateFitness(new BuildingRule()
+                        if (!(building is Residence) && (int)building.CalculateFitness(new BuildingRule()
                         {
                             Fields = this.Fields,
                             SettlementCenter = this.SettlementCenter,
@@ -247,7 +248,7 @@ namespace SettlementSimulation.Engine
                         var oldRoad = unpavedRoads[RandomProvider.Next(unpavedRoads.Count)];
                         var newRoad = oldRoad.Copy();
                         newRoad.SetUpRoadType(roadTypeSetUp);
-                        if(!oldRoad.Type.Equals(newRoad.Type))
+                        if (!oldRoad.Type.Equals(newRoad.Type))
                             settlementUpdate.UpdatedRoads.Add((oldRoad, newRoad));
                     }
                     return settlementUpdate;
@@ -281,6 +282,10 @@ namespace SettlementSimulation.Engine
 
         public void AddBuildingToRoad(IRoad road, IBuilding building)
         {
+            if (road != building.Road)
+            {
+                throw new Exception("Road and building road are not the same");
+            }
             if (road.AddBuilding(building))
             {
                 Fields[building.Position.X, building.Position.Y].IsBlocked = true;
@@ -289,6 +294,10 @@ namespace SettlementSimulation.Engine
 
         public void RemoveBuildingFromRoad(IRoad road, IBuilding building)
         {
+            if (road != building.Road)
+            {
+                throw new Exception("Road and building road are not the same");
+            }
             if (road.RemoveBuilding(building))
             {
                 Fields[building.Position.X, building.Position.Y].IsBlocked = false;
@@ -311,6 +320,11 @@ namespace SettlementSimulation.Engine
 
         public void AddRoad(IRoad road)
         {
+            if (road.Buildings.Any(b => b.Road != road))
+            {
+                throw new Exception("Road and building road are not the same");
+            }
+
             foreach (var segment in road.Segments)
             {
                 Fields[segment.Position.X, segment.Position.Y].IsBlocked = true;
@@ -360,6 +374,11 @@ namespace SettlementSimulation.Engine
             }
 
             return true;
+        }
+
+        public void UpdateSettlementCenter()
+        {
+            SettlementCenter = new Point((int)Genes.Average(g => g.Center.X), (int)Genes.Average(g => g.Center.Y));
         }
 
         public MutationResult InvokeFloodMutation()

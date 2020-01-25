@@ -11,7 +11,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
         public override double Probability => 0.005;
         public override int Space => 3;
 
-        public override int CalculateFitness(BuildingRule model)
+        public override double CalculateFitness(BuildingRule model)
         {
             var maxPortDistanceToWater = 10;
             var field = model.Fields[this.Position.X, this.Position.Y];

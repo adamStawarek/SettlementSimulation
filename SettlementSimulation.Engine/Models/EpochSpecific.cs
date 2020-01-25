@@ -63,5 +63,13 @@ namespace SettlementSimulation.Engine.Models
             return IsSatisfiedBuildingCountCondition(settlement, epoch) &&
                    IsSatisfiedBuildingTypesCondition(settlement, epoch);
         }
+
+        public static bool IncreaseProbabilityOfAddingBuildings(Settlement settlement, Epoch epoch)
+        {
+            if (epoch != Epoch.Second) return false;
+
+            return settlement.Buildings.Count > SecondEpochBuildings / 3 &&
+                   settlement.Genes.Count > SecondEpochBuildings / 10;
+        }
     }
 }

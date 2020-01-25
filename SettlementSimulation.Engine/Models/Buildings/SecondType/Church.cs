@@ -12,7 +12,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
         public override double Probability => 0.002;
         public override int Space => 1;
 
-        public override int CalculateFitness(BuildingRule model)
+        public override double CalculateFitness(BuildingRule model)
         {
             var minDistanceBetweenChurches = 30;
             var churches = model.Roads.SelectMany(b => b.Buildings).Where(b => b != this && b is Church);

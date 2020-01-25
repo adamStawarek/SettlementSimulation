@@ -111,21 +111,32 @@ namespace SettlementSimulation.Engine
                 }
             }
 
+            if (Generation % 100 == 0) Settlement.UpdateSettlementCenter();
+
             Generation++;
         }
 
         private UpdateType GetUpdateType()
         {
             var config = ConfigurationManager.SettlementConfiguration[CurrentEpoch];
+            double probNewRoad = config.ProbNewRoad;
+            double probNewBuildings = config.ProbNewBuildings;
+
+            if (EpochSpecific.IncreaseProbabilityOfAddingBuildings(Settlement, CurrentEpoch))
+            {
+                probNewRoad = 0.1;
+                probNewBuildings = 0.8;
+            }
+
             UpdateType updateType;
             switch (RandomProvider.NextDouble())
             {
-                case double d when d < config.ProbNewRoad:
+                case double d when d < probNewRoad:
                     {
                         updateType = UpdateType.NewRoads;
                         break;
                     }
-                case double d when d < config.ProbNewRoad + config.ProbNewBuildings:
+                case double d when d < probNewRoad + probNewBuildings:
                     {
                         updateType = UpdateType.NewBuildings;
                         break;
@@ -140,7 +151,7 @@ namespace SettlementSimulation.Engine
 
         private SettlementUpdate GetBestStructures(List<SettlementUpdate> updates)
         {
-            var structuresFitness = updates.ToDictionary(s => s, s => 0);
+            var structuresFitness = updates.ToDictionary(s => s, s => 0.0);
             foreach (var key in updates)
             {
                 var fitness = CalculateFitness(key);
@@ -153,9 +164,9 @@ namespace SettlementSimulation.Engine
             return settlementUpdate;
         }
 
-        private int CalculateFitness(SettlementUpdate model)
+        private double CalculateFitness(SettlementUpdate model)
         {
-            var fitness = 0;
+            double fitness = 0;
 
             switch (model.UpdateType)
             {
