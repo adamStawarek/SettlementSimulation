@@ -147,6 +147,13 @@ namespace SettlementSimulation.Engine
 
         public SettlementUpdate CreateNewSettlementUpdate(UpdateType updateType, Epoch epoch)
         {
+            var roadTypeSetUp = new RoadTypeSetUp()
+            {
+                Epoch = epoch,
+                SettlementCenter = SettlementCenter,
+                AvgDistanceToSettlementCenter =
+                    (int)Genes.Average(r => r.Center.DistanceTo(SettlementCenter))
+            };
             SettlementUpdate settlementUpdate = new SettlementUpdate(updateType);
             switch (updateType)
             {
@@ -170,8 +177,8 @@ namespace SettlementSimulation.Engine
                             road.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
 
                         var buildingsToAdd = RandomProvider.Next(1,
-                            possiblePlaces.Count > MaxBuildingsToAddPerIteration
-                                ? MaxBuildingsToAddPerIteration
+                            possiblePlaces.Count > MaxBuildingsToAddPerIteration / 2
+                                ? MaxBuildingsToAddPerIteration / 2
                                 : possiblePlaces.Count);
 
                         for (int i = 0; i < buildingsToAdd; i++)
@@ -182,6 +189,7 @@ namespace SettlementSimulation.Engine
                             road.AddBuilding(building);
                         }
 
+                        road.SetUpRoadType(roadTypeSetUp);
                         settlementUpdate.NewRoads.Add(road);
                         return settlementUpdate;
                     }
@@ -235,13 +243,6 @@ namespace SettlementSimulation.Engine
                             settlementUpdate.UpdatedBuildings.Add((building, newBuilding));
                     }
 
-                    var roadTypeSetUp = new RoadTypeSetUp()
-                    {
-                        Epoch = epoch,
-                        SettlementCenter = SettlementCenter,
-                        AvgDistanceToSettlementCenter =
-                            (int)Genes.Average(r => r.Center.DistanceTo(SettlementCenter))
-                    };
                     for (int i = 0; i < RoadsPerUpdate; i++)
                     {
                         var unpavedRoads = this.Genes.Where(g => g.Type == RoadType.Unpaved).ToList();
@@ -255,7 +256,6 @@ namespace SettlementSimulation.Engine
                     return settlementUpdate;
             }
         }
-
         public Settlement Copy()
         {
             var copy = new Settlement(Fields, MainRoad, false);

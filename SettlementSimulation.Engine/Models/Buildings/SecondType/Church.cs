@@ -23,7 +23,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
             }
 
             var residences = model.Roads.SelectMany(b => b.Buildings).Where(b => b is Residence);
-            if (residences.Count(r => r.Position.DistanceTo(this.Position) <= 20) < 100)
+            if (residences.Count(r => r.Position.DistanceTo(this.Position) <= 30) < 500)
             {
                 Console.WriteLine("Not enough residences in closest neighborhood");
                 return 0;

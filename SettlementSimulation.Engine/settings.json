@@ -5,10 +5,10 @@
   "InitialRoadsCount": 3,
   "BuildingsPerUpdate": 10,
   "RoadsPerUpdate": 5,
-  "MaxBuildingsToAddPerIteration": 5,
+  "MaxBuildingsToAddPerIteration": 10,
   "FloodMutationDistanceToWater": 10,
-  "FloodMutationProbability": 0.005,
-  "EarthquakeMutationProbability": 0.005,
+  "FloodMutationProbability": 0.001,
+  "EarthquakeMutationProbability": 0.001,
   "EpochInfos": [
     {
       "Epoch": 1,
@@ -19,14 +19,14 @@
     },
     {
       "Epoch": 2,
-      "Buildings": 3000,
+      "Buildings": 4500,
       "ProbNewRoad": 0.7,
       "ProbNewBuildings": 0.3,
       "ProbUpdate": 0.1
     },
     {
       "Epoch": 3,
-      "Buildings": 3000,
+      "Buildings": 4500,
       "ProbNewRoad": 0.1,
       "ProbNewBuildings": 0.1,
       "ProbUpdate": 0.8

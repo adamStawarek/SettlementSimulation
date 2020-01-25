@@ -14,7 +14,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
 
         public override double CalculateFitness(BuildingRule model)
         {
-            var maxResidencesPerTavern = Position.DistanceTo(model.SettlementCenter) < 30 ? 20 : 50;
+            var maxResidencesPerTavern = Position.DistanceTo(model.SettlementCenter) < 15 ? 40 : 80;
 
             var residences = model.Roads
                 .SelectMany(b => b.Buildings)

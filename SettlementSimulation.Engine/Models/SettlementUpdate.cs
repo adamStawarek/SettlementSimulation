@@ -86,6 +86,13 @@ namespace SettlementSimulation.Engine.Models
                             continue;
                         child.UpdatedBuildings.Add(b);
                     }
+
+                    foreach (var r in this.UpdatedRoads.Concat(other.UpdatedRoads))
+                    {
+                        if (child.UpdatedRoads.Any(ur => ur.oldRoad == r.oldRoad))
+                            continue;
+                        child.UpdatedRoads.Add(r);
+                    }
                     break;
 
             }

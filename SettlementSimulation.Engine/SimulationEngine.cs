@@ -124,8 +124,8 @@ namespace SettlementSimulation.Engine
 
             if (EpochSpecific.IncreaseProbabilityOfAddingBuildings(Settlement, CurrentEpoch))
             {
-                probNewRoad = 0.1;
-                probNewBuildings = 0.8;
+                probNewRoad = 0.2;
+                probNewBuildings = 0.7;
             }
 
             UpdateType updateType;
@@ -219,6 +219,7 @@ namespace SettlementSimulation.Engine
                         });
                         fitness += newBuilding.Fitness.Value - oldBuilding.Fitness.Value;
                     }
+
                     break;
             }
 

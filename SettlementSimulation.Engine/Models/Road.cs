@@ -192,7 +192,7 @@ namespace SettlementSimulation.Engine.Models
             }
             else if (this.Length > 0.5 * MaxRoadLength)
             {
-                prob += 0.1;
+                prob += 0.05;
             }
 
             foreach (var building in this.Buildings)
@@ -205,14 +205,11 @@ namespace SettlementSimulation.Engine.Models
 
             switch (model.Epoch)
             {
-                case Epoch.First:
+                case Epoch.Second:
                     prob += 0.1;
                     break;
-                case Epoch.Second:
-                    prob += 0.2;
-                    break;
                 case Epoch.Third:
-                    prob += 0.3;
+                    prob += 0.2;
                     break;
             }
 
