@@ -12,6 +12,10 @@ namespace SettlementSimulation.Engine.Models
         public int InitialRoadsCount { get; set; }
         public int BuildingsPerUpdate { get; set; }
         public int RoadsPerUpdate { get; set; }
+        public int MaxBuildingsToAddPerIteration { get; set; }
+        public double FloodMutationDistanceToWater { get; set; }
+        public double FloodMutationProbability { get; set; }
+        public double EarthquakeMutationProbability { get; set; }
         public List<EpochInfo> EpochInfos { get; set; }
 
         public EpochInfo this[Epoch epoch]

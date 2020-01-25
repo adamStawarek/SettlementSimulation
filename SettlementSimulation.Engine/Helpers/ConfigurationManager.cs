@@ -22,7 +22,10 @@ namespace SettlementSimulation.Engine.Helpers
         public static int FirstEpochBuildings => Configuration[Enumerators.Epoch.First].Buildings;
         public static int SecondEpochBuildings => Configuration[Enumerators.Epoch.Second].Buildings;
         public static int ThirdEpochBuildings => Configuration[Enumerators.Epoch.Third].Buildings;
-
+        public static int MaxBuildingsToAddPerIteration => Configuration.MaxBuildingsToAddPerIteration;
+        public static double FloodMutationDistanceToWater => Configuration.FloodMutationDistanceToWater;
+        public static double FloodMutationProbability => Configuration.FloodMutationProbability;
+        public static double EarthquakeMutationProbability => Configuration.EarthquakeMutationProbability;
 
     }   
 }

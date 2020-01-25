@@ -6,6 +6,7 @@ using SettlementSimulation.Engine.Interfaces;
 using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Models;
+using static SettlementSimulation.Engine.Helpers.ConfigurationManager;
 
 namespace SettlementSimulation.Engine
 {
@@ -75,19 +76,19 @@ namespace SettlementSimulation.Engine
                     });
                     settlementUpdate.UpdatedRoads.ForEach(update =>
                     {
-                        update.oldRoad.SetRoadType(update.newRoad.Type); //todo for now only types
+                        update.oldRoad.SetRoadType(update.newRoad.Type); //for only types
                     });
                     break;
             }
 
             this.Settlement.Buildings.ForEach(b => b.Age++);
 
-            if (RandomProvider.NextDouble() < 0.001)//todo
+            if (RandomProvider.NextDouble() <  FloodMutationProbability)
             {
                 settlementUpdate.FloodMutationResult = Settlement.InvokeFloodMutation();
             }
 
-            if (RandomProvider.NextDouble() < 0.01)//todo
+            if (RandomProvider.NextDouble() < EarthquakeMutationProbability)
             {
                 settlementUpdate.EarthquakeMutationResult = Settlement.InvokeEarthquakeMutation();
             }

@@ -5,6 +5,10 @@
   "InitialRoadsCount": 3,
   "BuildingsPerUpdate": 10,
   "RoadsPerUpdate": 5,
+  "MaxBuildingsToAddPerIteration": 5,
+  "FloodMutationDistanceToWater": 10,
+  "FloodMutationProbability": 0.005,
+  "EarthquakeMutationProbability": 0.005,
   "EpochInfos": [
     {
       "Epoch": 1,

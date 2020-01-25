@@ -147,7 +147,8 @@ namespace SettlementSimulation.Engine
             {
                 case UpdateType.NewRoads:
                     {
-                        var genes = this.Genes.ToList();//todo
+                        var genes = this.Genes.ToList();
+                        //todo
                         //if (RandomProvider.NextDouble() < 0.5) //in order to make it more probable for roads closer to center to be selected
                         //{
                         //    var numberOfGenesToInclude = (int)(0.2 * genes.Count) <= 1 ? 1 : (int)(0.2 * genes.Count);
@@ -163,7 +164,10 @@ namespace SettlementSimulation.Engine
                         var possiblePlaces =
                             road.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
 
-                        var buildingsToAdd = 3;//todo
+                        var buildingsToAdd = RandomProvider.Next(1,
+                            possiblePlaces.Count > MaxBuildingsToAddPerIteration
+                                ? MaxBuildingsToAddPerIteration
+                                : possiblePlaces.Count);
 
                         for (int i = 0; i < buildingsToAdd; i++)
                         {
@@ -191,7 +195,10 @@ namespace SettlementSimulation.Engine
                             copy.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
                         if (!possiblePlaces.Any()) return settlementUpdate;
 
-                        var buildingsToAdd = 3;//todo
+                        var buildingsToAdd = RandomProvider.Next(1,
+                            possiblePlaces.Count > MaxBuildingsToAddPerIteration
+                                ? MaxBuildingsToAddPerIteration
+                                : possiblePlaces.Count);
 
                         for (int i = 0; i < buildingsToAdd; i++)
                         {
@@ -357,9 +364,8 @@ namespace SettlementSimulation.Engine
 
         public MutationResult InvokeFloodMutation()
         {
-            var dangerZone = 5;//todo
             var buildingsNearWater = this.Genes.SelectMany(r => r.Buildings)
-                .Where(b => this.Fields[b.Position.X, b.Position.Y].DistanceToWater <= dangerZone)
+                .Where(b => this.Fields[b.Position.X, b.Position.Y].DistanceToWater <= FloodMutationDistanceToWater)
                 .ToList();
 
             buildingsNearWater.ForEach(b => RemoveBuildingFromRoad(b.Road, b));
