@@ -9,7 +9,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     [Epoch(Epoch.Second)]
     public class Church : Building
     {
-        public override double Probability => 0.002;
+        public override double Probability => 0.02;
         public override int Space => 1;
 
         public override double CalculateFitness(BuildingRule model)

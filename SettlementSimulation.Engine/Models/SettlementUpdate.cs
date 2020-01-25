@@ -53,7 +53,7 @@ namespace SettlementSimulation.Engine.Models
                                 continue;
                         }
 
-                        var buildingsToRemove = road.Buildings.Where(b => !(b is Residence) && Math.Abs(b.Fitness) < 0.1).ToList();
+                        var buildingsToRemove = road.Buildings.Where(b => !(b is Residence) && Math.Abs(b.Fitness.Value) < 0.1).ToList();
                         buildingsToRemove.ForEach(b =>
                         {
                             road.RemoveBuilding(b);
@@ -68,7 +68,7 @@ namespace SettlementSimulation.Engine.Models
                 case UpdateType.NewBuildings:
                     foreach (var b in this.NewBuildings.Concat(other.NewBuildings))
                     {
-                        if ((!(b is Residence) && Math.Abs(b.Fitness) < 0.1))
+                        if ((!(b is Residence) && Math.Abs(b.Fitness.Value) < 0.1))
                             continue;
                         if (child.NewBuildings.Any(nb => nb.Position.Equals(b.Position)))
                             continue;

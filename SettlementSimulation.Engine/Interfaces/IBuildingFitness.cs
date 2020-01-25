@@ -6,6 +6,6 @@ namespace SettlementSimulation.Engine.Interfaces
     {
         void SetFitness(BuildingRule model);
         double CalculateFitness(BuildingRule model);
-        double Fitness { get; set; }
+        double? Fitness { get; set; }
     }
 }

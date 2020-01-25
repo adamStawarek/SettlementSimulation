@@ -82,6 +82,8 @@ namespace SettlementSimulation.Engine.Helpers
                                              p.Y < 0 ||
                                              p.X >= model.Fields.GetLength(0) ||
                                              p.Y >= model.Fields.GetLength(1));
+            possiblePositions.RemoveAll(p => model.Fields[p.X, p.Y].DistanceToMainRoad < 10);//to remove possibility of adjacent roads
+
             if (!possiblePositions.Any())
                 return new List<Point>();
 
@@ -180,15 +182,6 @@ namespace SettlementSimulation.Engine.Helpers
                 return new List<Point>();
 
             roadPoints = roadPoints.Take(roadPoints.IndexOf(selectedPoint.Value)).ToList();
-
-            for (int i = 0; i < roadPoints.Count - 1; i++)//check whether there point line is solid
-            {
-                if (Math.Abs(roadPoints[i].DistanceTo(roadPoints[i + 1]) - 1) > 0.1)
-                {
-                    throw new Exception();
-                    return new List<Point>();
-                }
-            }
 
             return roadPoints;
         }

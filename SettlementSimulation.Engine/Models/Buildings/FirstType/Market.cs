@@ -8,7 +8,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
     [Epoch(Epoch.First)]
     public class Market : Building
     {
-        public override double Probability => 0.005;
+        public override double Probability => 0.05;
         public override int Space => 2;
 
         public override double CalculateFitness(BuildingRule model)

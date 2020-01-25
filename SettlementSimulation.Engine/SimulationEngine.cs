@@ -182,7 +182,7 @@ namespace SettlementSimulation.Engine
                             BuildingRoad = road,
                             SettlementCenter = Settlement.SettlementCenter
                         }));
-                        fitness += road.Buildings.Sum(b => b.Fitness);
+                        fitness += road.Buildings.Sum(b => b.Fitness.Value);
                     }
                     break;
                 case UpdateType.NewBuildings:
@@ -196,13 +196,20 @@ namespace SettlementSimulation.Engine
                             BuildingRoad = building.Road,
                             SettlementCenter = Settlement.SettlementCenter
                         });
-                        fitness += building.Fitness;
+                        fitness += building.Fitness.Value;
                     }
                     break;
                 case UpdateType.NewTypes:
                     foreach (var (oldBuilding, newBuilding) in model.UpdatedBuildings)
                     {
                         var roads = new List<IRoad>(Settlement.Genes);
+                        oldBuilding.SetFitness(new BuildingRule()
+                        {
+                            Fields = Settlement.Fields,
+                            Roads = roads,
+                            BuildingRoad = oldBuilding.Road,
+                            SettlementCenter = Settlement.SettlementCenter
+                        });
                         newBuilding.SetFitness(new BuildingRule()
                         {
                             Fields = Settlement.Fields,
@@ -210,7 +217,7 @@ namespace SettlementSimulation.Engine
                             BuildingRoad = newBuilding.Road,
                             SettlementCenter = Settlement.SettlementCenter
                         });
-                        fitness += newBuilding.Fitness - oldBuilding.Fitness;
+                        fitness += newBuilding.Fitness.Value - oldBuilding.Fitness.Value;
                     }
                     break;
             }

@@ -17,7 +17,7 @@ namespace SettlementSimulation.Engine.Models.Buildings
         public Direction? Direction { get; set; }
         public int Age { get; set; }
         public Point Position { get; set; }
-        public double Fitness { get; set; }
+        public double? Fitness { get; set; }
 
         public Building Copy()
         {

@@ -55,6 +55,8 @@ namespace SettlementSimulation.Engine.Models
                     points.Add(new Point(segment.Position.X, segment.Position.Y + 1));
                 }
 
+                points.RemoveAll(p => p.X<0||p.Y<0||p.X>=model.Fields.GetLength(0)|| p.Y >= model.Fields.GetLength(1));
+
                 points.RemoveAll(p => Buildings.Select(b => b.Position).Any(b => b.Equals(p)) ||
                                       (model.Fields[p.X, p.Y].IsBlocked.HasValue && model.Fields[p.X, p.Y].IsBlocked.Value) ||
                                       !model.Fields[p.X, p.Y].InSettlement ||

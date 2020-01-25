@@ -97,9 +97,12 @@ namespace SettlementSimulation.Engine
             {
                 var possiblePlaces =
                     firstRoad.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, this.Fields));
-                var building = Building.GetRandom(Epoch.First);
-                building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
-                building.Road = firstRoad;
+                var building = new Residence
+                {
+                    Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)],
+                    Road = firstRoad,
+                    Fitness = 0.1
+                };
                 firstRoad.AddBuilding(building);
             }
             initialRoads.Add(firstRoad);
@@ -125,12 +128,15 @@ namespace SettlementSimulation.Engine
 
                 while (newRoad.Buildings.Count < 0.25 * newRoad.Length)
                 {
-                    var building = Building.GetRandom(Epoch.First);
                     var possiblePlaces =
                         newRoad.GetPossibleBuildingPositions(new PossibleBuildingPositions(this.Genes, Fields));
 
-                    building.Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)];
-                    building.Road = newRoad;
+                    var building = new Residence
+                    {
+                        Position = possiblePlaces[RandomProvider.Next(possiblePlaces.Count)],
+                        Road = newRoad,
+                        Fitness = 0.1
+                    };
                     newRoad.AddBuilding(building);
                 }
 
@@ -148,7 +154,7 @@ namespace SettlementSimulation.Engine
                     {
                         var genes = this.Genes.ToList();
                         
-                        if (RandomProvider.NextDouble() < 0.3) //in order to make it more probable for roads closer to center to be selected
+                        if (RandomProvider.NextDouble() < 0.5) //in order to make it more probable for roads closer to center to be selected
                         {
                             var numberOfGenesToInclude = (int)(0.2 * genes.Count) <= 1 ? 1 : (int)(0.2 * genes.Count);
                             genes = genes.OrderBy(g => g.Center.DistanceTo(this.SettlementCenter))
@@ -218,20 +224,15 @@ namespace SettlementSimulation.Engine
                         var road = roadsWithBuildings[RandomProvider.Next(roadsWithBuildings.Count)];
                         var building = road.Buildings[RandomProvider.Next(road.Buildings.Count)];
 
-                        if (!(building is Residence) && (int)building.CalculateFitness(new BuildingRule()
-                        {
-                            Fields = this.Fields,
-                            SettlementCenter = this.SettlementCenter,
-                            BuildingRoad = road,
-                            Roads = this.Genes
-                        }) > 0) continue;//don't update rare buildings with positive fitness
+                        if (!(building is Residence) && Math.Abs(building.Fitness.Value) > 0.1) continue;//don't update rare buildings with positive fitness
 
                         var newBuilding = Building.GetRandom(epoch);
                         newBuilding.Position = building.Position;
                         newBuilding.Direction = building.Direction;
                         newBuilding.Road = building.Road;
 
-                        settlementUpdate.UpdatedBuildings.Add((building, newBuilding));
+                        if(building.GetType() != newBuilding.GetType())
+                            settlementUpdate.UpdatedBuildings.Add((building, newBuilding));
                     }
 
                     var roadTypeSetUp = new RoadTypeSetUp()

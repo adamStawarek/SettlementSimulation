@@ -83,7 +83,7 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         public RelayCommand<object> SetHeightMapCommand { get; set; }
 
-        public RelayCommand<object> SetColorMapCommand { get; set; } 
+        public RelayCommand<object> SetColorMapCommand { get; set; }
         #endregion
 
         public StepperOneViewModel()
@@ -119,7 +119,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             TerrainHelper.SetTerrains(CreatePixelMatrix(_selectedHeightMap));
 
             var colorMapDictionary = terrainHelper.GetAllTerrains()
-                .OrderBy(t=>t.UpperBound)
+                .OrderBy(t => t.UpperBound)
                 .ToDictionary(t => t.UpperBound, t => Color.FromArgb(t.Color.R, t.Color.G, t.Color.B));
 
             var bitmap = new Bitmap(this._selectedHeightMap);
@@ -140,7 +140,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             var mapDirectory = MapDirectory + $"/{_selectedHeightMap.Tag.ToString().Replace(".jpg", "_color.png").Replace(".png", "_color.png")}";
             bitmap.Save(mapDirectory);
 
-            bitmap.Tag = $"{_selectedHeightMap.Tag.ToString().Replace(".png","_color.png")}";
+            bitmap.Tag = $"{_selectedHeightMap.Tag.ToString().Replace(".png", "_color.png")}";
             Maps.Add(bitmap);
             SelectedColorMap = bitmap;
         }
@@ -161,24 +161,23 @@ namespace SettlementSimulation.Viewer.ViewModel
             var files = Directory.GetFiles(directory)
                 .Where(file => allowedExtensions.Any(file.ToLower().EndsWith))
                 .Select(file => new Bitmap(file) { Tag = file.Split('\\').Last() })
-                .OrderBy(b=>b.Tag);
+                .OrderBy(b => b.Tag);
             Maps = new ObservableCollection<Bitmap>(files);
         }
 
         private Pixel[,] CreatePixelMatrix(Bitmap bitmap)
         {
             var pixels = new Pixel[bitmap.Width, bitmap.Height];
-            using (var fastBitmap = bitmap.FastLock())
+
+            for (int i = 0; i < bitmap.Width; i++)
             {
-                for (int i = 0; i < fastBitmap.Width; i++)
+                for (int j = 0; j < bitmap.Height; j++)
                 {
-                    for (int j = 0; j < fastBitmap.Height; j++)
-                    {
-                        var pixel = fastBitmap.GetPixel(i, j);
-                        pixels[i, j] = new Pixel(pixel.R, pixel.G, pixel.B);
-                    }
+                    var pixel = bitmap.GetPixel(i, j);
+                    pixels[i, j] = new Pixel(pixel.R, pixel.G, pixel.B);
                 }
             }
+
             return pixels;
         }
 

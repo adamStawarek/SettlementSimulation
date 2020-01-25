@@ -9,7 +9,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
     [Epoch(Epoch.First)]
     public class Tavern : Building
     {
-        public override double Probability => 0.007;
+        public override double Probability => 0.07;
         public override int Space => 1;
 
         public override double CalculateFitness(BuildingRule model)

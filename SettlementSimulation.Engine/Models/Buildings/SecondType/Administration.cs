@@ -9,7 +9,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
     [Epoch(Epoch.Second)]
     public class Administration : Building
     {
-        public override double Probability => 0.001;
+        public override double Probability => 0.01;
         public override int Space => 1;
 
         public override double CalculateFitness(BuildingRule model)

@@ -132,7 +132,7 @@ namespace SettlementSimulation.AreaGenerator
             mainRoadPoints.ForEach(p => { MarkPoint(new Point(p.X, p.Y), previewBitmap, new Pixel(0, 0, 0),3); });
             #endregion
 
-            var mStep = mainRoadPoints.Count() / 15;
+            var mStep = mainRoadPoints.Count() / 100;
             var selectedRoadPoints = mainRoadPoints.OrderBy(p => p.X).ThenBy(p => p.Y).Where((x, i) => i % mStep == 0).ToList();
             foreach (var field in fields)
             {
