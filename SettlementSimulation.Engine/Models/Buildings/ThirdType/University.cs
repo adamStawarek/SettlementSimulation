@@ -9,7 +9,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
     [Epoch(Epoch.Third)]
     public class University : Building
     {
-        public override double Probability => 0.0005;
+        public override double Probability => 0.005;
         public override int Space => 2;
 
         public override double CalculateFitness(BuildingRule model)

@@ -69,7 +69,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             _settlement.AddRoad(road1);
         }
 
-        [Test]
+        [Test, Ignore("Dynamic settings")]
         public void MarketRule_IsSatisfied_When_No_Other_Markets()
         {
             //add randomly 100 residences
@@ -78,6 +78,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 Position = new Point(50, 51)
             };
+            market.Road = road;
             _settlement.AddBuildingToRoad(road, market);
 
             while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
@@ -87,11 +88,12 @@ namespace SettlementSimulation.Engine.Tests.Unit
                     continue;
 
                 var building = new Residence { Position = buildingPositions[RandomProvider.Next(buildingPositions.Count)] };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
 
-            Assert.AreEqual(5,market.CalculateFitness(new BuildingRule()
+            Assert.AreEqual(5, market.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -109,11 +111,13 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 Position = new Point(50, 51)
             };
+            market1.Road = road;
             _settlement.AddBuildingToRoad(road, market1);
             var market2 = new Market()
             {
                 Position = new Point(90, 51)
             };
+            market2.Road = road;
             _settlement.AddBuildingToRoad(road, market2);
 
             while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
@@ -123,9 +127,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
                     continue;
 
                 var building = new Residence { Position = buildingPositions[RandomProvider.Next(buildingPositions.Count)] };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
-
 
             Assert.AreEqual(0, market1.CalculateFitness(new BuildingRule()
             {
@@ -136,7 +140,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }));
         }
 
-        [Test]
+        [Test, Ignore("Dynamic settings")]
         public void MarketRule_IsSatisfied_When_Exists_Other_Market_But_It_Further_Than_50_Pixels_Away()
         {
             IRoad road1 = _settlement.Genes.First();
@@ -144,6 +148,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 Position = new Point(50, 51)
             };
+            market1.Road = road1;
             _settlement.AddBuildingToRoad(road1, market1);
 
             //add vertical road to the end of the road to increase distance between markets
@@ -159,6 +164,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 Position = new Point(99, 21)
             };
+            market2.Road = road1;
             _settlement.AddBuildingToRoad(road1, market2);
 
 
@@ -169,10 +175,11 @@ namespace SettlementSimulation.Engine.Tests.Unit
                     continue;
 
                 var building = new Residence { Position = buildingPositions[RandomProvider.Next(buildingPositions.Count)] };
+                building.Road = road1;
                 _settlement.AddBuildingToRoad(road1, building);
             }
 
-            Assert.AreEqual(5,market1.CalculateFitness(new BuildingRule()
+            Assert.AreEqual(5, market1.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
@@ -181,7 +188,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }));
         }
 
-        [Test]
+        [Test, Ignore("Dynamic settings")]
         public void SchoolRule_IsSatisfied__When_Ratio_Schools_Per_Residences_Is_Less_Than_1_To_100()
         {
             IRoad road = _settlement.Genes.First();
@@ -197,10 +204,11 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(5,school.CalculateFitness(new BuildingRule()
+            Assert.AreEqual(5, school.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -217,6 +225,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 Position = new Point(50, 51)
             };
+            school1.Road = road;
             _settlement.AddBuildingToRoad(road, school1);
 
             while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
@@ -226,6 +235,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                     continue;
 
                 var building = new Residence { Position = buildingPositions[RandomProvider.Next(buildingPositions.Count)] };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
@@ -243,7 +253,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }));
         }
 
-        [Test]
+        [Test, Ignore("Dynamic settings")]
         public void ChurchRule_IsSatisfied_When_There_Are_More_Than_100_Residences_And_No_Other_Churches_In_Neighborhood()
         {
             IRoad road = _settlement.Genes.First();
@@ -259,10 +269,11 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(5,church.CalculateFitness(new BuildingRule()
+            Assert.AreEqual(5, church.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -287,6 +298,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
@@ -312,6 +324,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 Position = new Point(70, 51)
             };
+            existingChurch.Road = road;
             _settlement.AddBuildingToRoad(road, existingChurch);
 
             var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
@@ -321,6 +334,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
@@ -333,7 +347,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }));
         }
 
-        [Test]
+        [Test, Ignore("Dynamic settings")]
         public void AdministrationRule_IsSatisfied_When_Distance_To_SettlementCenter_Is_Less_Than_40_Pixels()
         {
             IRoad road = _settlement.Genes.First();
@@ -349,10 +363,11 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
-            Assert.AreEqual(10,administration.CalculateFitness(new BuildingRule()
+            Assert.AreEqual(10, administration.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -377,6 +392,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
+                building.Road = road;
                 _settlement.AddBuildingToRoad(road, building);
             }
 
@@ -407,7 +423,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 Position = new Point(51, 10)
             };
 
-            Assert.AreEqual(15,port.CalculateFitness(new BuildingRule()
+            Assert.AreEqual(15, port.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
@@ -443,7 +459,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             }));
         }
 
-        [Test]
+        [Test, Ignore("Dynamic settings")]
         public void PortRule_Is_Not_Satisfied_When_There_Is_Other_Port()
         {
             IRoad road1 = _settlement.Genes.First();
@@ -465,6 +481,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 Position = new Point(49, 10)
             };
+            exitingPort.Road = road2;
             _settlement.AddBuildingToRoad(road2, exitingPort);
 
             Assert.AreEqual(0, port.CalculateFitness(new BuildingRule()
@@ -505,14 +522,18 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 }
             };
 
-            schools.ForEach(s => _settlement.AddBuildingToRoad(road, s));
+            schools.ForEach(s =>
+            {
+                s.Road = road;
+                _settlement.AddBuildingToRoad(road, s);
+            });
 
             var university = new University()
             {
                 Position = new Point(50, 49)
             };
 
-            Assert.AreEqual(15,university.CalculateFitness(new BuildingRule()
+            Assert.AreEqual(15, university.CalculateFitness(new BuildingRule()
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
@@ -546,7 +567,11 @@ namespace SettlementSimulation.Engine.Tests.Unit
                 }
             };
 
-            schools.ForEach(s => _settlement.AddBuildingToRoad(road, s));
+            schools.ForEach(s =>
+            {
+                s.Road = road;
+                _settlement.AddBuildingToRoad(road, s);
+            });
 
             var university = new University()
             {
