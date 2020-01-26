@@ -23,9 +23,9 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
 
             var buildings = model.Roads.SelectMany(b => b.Buildings).Count();
             var administrations = model.Roads.SelectMany(b => b.Buildings).Count(b => b is Administration);
-            if (buildings / (administrations + 1) < 1000)
+            if (buildings / (administrations + 1) < 2000)
             {
-                Console.WriteLine("No more than one administration per 1000 buildings");
+                //("No more than one administration per 2000 buildings");
                 return 0;
             }
 

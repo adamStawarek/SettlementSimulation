@@ -18,7 +18,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
             var schools = model.Roads.SelectMany(b => b.Buildings).Count(b => b is School);
             if (residences / (schools + 1) < 500)
             {
-                Console.WriteLine("No more than one school per 300 residences");
+                //("No more than one school per 500 residences");
                 return 0;
             }
 

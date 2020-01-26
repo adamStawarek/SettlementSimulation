@@ -14,7 +14,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
 
         public override double CalculateFitness(BuildingRule model)
         {
-            var maxResidencesPerTavern = Position.DistanceTo(model.SettlementCenter) < 15 ? 40 : 80;
+            var maxResidencesPerTavern = Position.DistanceTo(model.SettlementCenter) < 15 ? 60 : 80;
 
             var residences = model.Roads
                 .SelectMany(b => b.Buildings)
@@ -27,7 +27,6 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
 
             if (residences / (taverns + 1) < maxResidencesPerTavern)
             {
-                Console.WriteLine("No more than one school per 100 residences");
                 return 0;
             }
 

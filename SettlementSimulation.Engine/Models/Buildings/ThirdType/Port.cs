@@ -23,7 +23,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
             var ports = model.Roads.SelectMany(b => b.Buildings).Where(b => b is Port);
             if (ports.Any())
             {
-                Console.WriteLine("There can be only one port");
+                //("There can be only one port");
                 return 0;
             }
 

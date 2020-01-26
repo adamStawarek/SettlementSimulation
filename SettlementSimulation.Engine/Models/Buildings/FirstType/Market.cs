@@ -17,14 +17,14 @@ namespace SettlementSimulation.Engine.Models.Buildings.FirstType
             var markets = model.Roads.SelectMany(b => b.Buildings).Where(b => b != this && b is Market);
             if (!markets.All(m => m.Position.DistanceTo(this.Position) >= minDistanceBetweenMarkets))
             {
-                Console.WriteLine("Other markets are too close");
+                //("Other markets are too close");
                 return 0;
             }
 
             var residences = model.Roads.SelectMany(b => b.Buildings).Where(b => b is Residence);
             if (residences.Count(r => r.Position.DistanceTo(this.Position) <= 20) < 200)
             {
-                Console.WriteLine("Not enough residences in closest neighborhood");
+                //("Not enough residences in closest neighborhood");
                 return 0;
             }
 
