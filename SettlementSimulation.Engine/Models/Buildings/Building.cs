@@ -15,6 +15,7 @@ namespace SettlementSimulation.Engine.Models.Buildings
         public abstract int Space { get; }
 
         public Direction? Direction { get; set; }
+        public Material? Material { get; set; }
         public int Age { get; set; }
         public Point Position { get; set; }
         public double? Fitness { get; set; }
@@ -23,6 +24,9 @@ namespace SettlementSimulation.Engine.Models.Buildings
         {
             var copy = (Building)Activator.CreateInstance(this.GetType());
             copy.Position = this.Position;
+            copy.Material = this.Material;
+            copy.Direction = this.Direction;
+
             return copy;
         }
 

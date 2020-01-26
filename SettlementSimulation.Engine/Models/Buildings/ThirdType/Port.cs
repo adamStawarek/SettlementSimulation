@@ -13,7 +13,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.ThirdType
 
         public override double CalculateFitness(BuildingRule model)
         {
-            var maxPortDistanceToWater = 10;
+            var maxPortDistanceToWater = 5;
             var field = model.Fields[this.Position.X, this.Position.Y];
             if (field.DistanceToWater > maxPortDistanceToWater)
             {

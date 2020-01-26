@@ -16,6 +16,8 @@ namespace SettlementSimulation.Engine.Models
         public double FloodMutationDistanceToWater { get; set; }
         public double FloodMutationProbability { get; set; }
         public double EarthquakeMutationProbability { get; set; }
+        public double FireMutationProbability { get; set; }
+
         public List<EpochInfo> EpochInfos { get; set; }
 
         public EpochInfo this[Epoch epoch]
@@ -30,6 +32,9 @@ namespace SettlementSimulation.Engine.Models
             public float ProbNewRoad { get; set; }
             public float ProbNewBuildings { get; set; }
             public float ProbUpdate { get; set; }
+            public float ProbOfWoodenBuildings { get; set; }
+            public float ProbOfStoneBuildings { get; set; }
+            public float ProbOfBricksBuildings { get; set; }
         }
     }
 }

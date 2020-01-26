@@ -53,8 +53,8 @@ namespace SettlementSimulation.Engine
                 {
                     var previousEpoch = _engine.CurrentEpoch;
 
-                    _engine.NewGeneration();
-                    if (_breakpoints.Contains(_engine.Generation))
+                    _engine.NewIteration();
+                    if (_breakpoints.Contains(_engine.Iteration))
                     {
                         SetUpSettlementState();
                         OnBreakpoint();
@@ -66,7 +66,7 @@ namespace SettlementSimulation.Engine
                         OnNextEpoch();
                     }
 
-                    if (_engine.Generation == _maxIterations ||
+                    if (_engine.Iteration == _maxIterations ||
                         _stopWatch.ElapsedMilliseconds == _timeout)
                     {
                         SetUpSettlementState();
@@ -117,10 +117,10 @@ namespace SettlementSimulation.Engine
             SettlementState = new SettlementState()
             {
                 MainRoad = new Road(_engine.MainRoad),
-                CurrentGeneration = _engine.Generation,
+                CurrentIteration = _engine.Iteration,
                 Time = (int)_stopWatch.ElapsedMilliseconds / 1000,
                 CurrentEpoch = _engine.CurrentEpoch,
-                Roads = _engine.Settlement.Genes,
+                Roads = _engine.Settlement.Roads,
                 LastSettlementUpdate = _engine.LastSettlementUpdate,
                 SettlementCenter = _engine.Settlement.SettlementCenter
             };

@@ -8,7 +8,7 @@ namespace SettlementSimulation.Engine.Models
     public class SettlementState
     { 
         public Epoch CurrentEpoch { get; set; }
-        public int CurrentGeneration { get; set; }
+        public int CurrentIteration { get; set; }
         public IRoad MainRoad { get; set; }
         public List<IRoad> Roads { get; set; }
         public Point SettlementCenter { get; set; }

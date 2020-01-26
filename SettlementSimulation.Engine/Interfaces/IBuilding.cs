@@ -9,6 +9,7 @@ namespace SettlementSimulation.Engine.Interfaces
         double Probability { get; }
         Point Position { get; set; }
         Direction? Direction { get; set; }
+        Material? Material { get; set; }
         int Age { get; set; }
         IRoad Road { get; set; }//Road to which building is attached
     }

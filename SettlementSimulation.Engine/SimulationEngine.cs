@@ -15,7 +15,7 @@ namespace SettlementSimulation.Engine
 
         #region properties
         public Epoch CurrentEpoch { get; set; }
-        public int Generation { get; set; }
+        public int Iteration { get; set; }
         public Field[,] Fields { get; }
         public List<Point> MainRoad { get; }
         public SettlementUpdate LastSettlementUpdate { get; set; }
@@ -28,12 +28,12 @@ namespace SettlementSimulation.Engine
         {
             Fields = fields;
             MainRoad = mainRoad;
-            Generation = 1;
+            Iteration = 1;
             Settlement = new Settlement(fields, mainRoad);
             CurrentEpoch = Epoch.First;
         }
 
-        public void NewGeneration()
+        public void NewIteration()
         {
             var updateType = GetUpdateType();
 
@@ -43,19 +43,21 @@ namespace SettlementSimulation.Engine
 
             var settlementUpdate = GetBestStructures(structures);
 
+            var roadTypeSetUp = new RoadTypeSetUp()
+            {
+                Epoch = CurrentEpoch,
+                SettlementCenter = Settlement.SettlementCenter,
+                AvgDistanceToSettlementCenter =
+                    (int)Settlement.Roads.Average(r => r.Center.DistanceTo(Settlement.SettlementCenter))
+            };
+
             LastSettlementUpdate = settlementUpdate;
 
             switch (updateType)
             {
                 case UpdateType.NewRoads:
                     {
-                        var roadTypeSetUp = new RoadTypeSetUp()
-                        {
-                            Epoch = CurrentEpoch,
-                            SettlementCenter = Settlement.SettlementCenter,
-                            AvgDistanceToSettlementCenter =
-                                (int)Settlement.Genes.Average(r => r.Center.DistanceTo(Settlement.SettlementCenter))
-                        };
+                        
                         settlementUpdate.NewRoads
                             .ForEach(r =>
                             {
@@ -81,7 +83,33 @@ namespace SettlementSimulation.Engine
                     break;
             }
 
-            this.Settlement.Buildings.ForEach(b => b.Age++);
+            this.Settlement.Buildings.ForEach(b =>
+            {
+                b.Age++;
+                if (b.Age % 100 == 0)
+                {
+                    var old = (b as ICopyable<IBuilding>).Copy();
+                    b.Material = EpochSpecific.GetMaterialForBuilding(CurrentEpoch);
+                    if (old.Material != b.Material)
+                    {
+                        settlementUpdate.UpdatedBuildings.Add((old, b));
+                    }
+                }
+            });
+
+            this.Settlement.Roads.ForEach(r =>
+            {
+                r.Age++;
+                if (r.Age % 100 == 0)
+                {
+                    var old = (r as ICopyable<IRoad>).Copy();
+                    r.SetUpRoadType(roadTypeSetUp);
+                    if (old.Type != r.Type)
+                    {
+                        settlementUpdate.UpdatedRoads.Add((old, r));
+                    }
+                }
+            });
 
             if (RandomProvider.NextDouble() <  FloodMutationProbability)
             {
@@ -91,6 +119,11 @@ namespace SettlementSimulation.Engine
             if (RandomProvider.NextDouble() < EarthquakeMutationProbability)
             {
                 settlementUpdate.EarthquakeMutationResult = Settlement.InvokeEarthquakeMutation();
+            }
+
+            if (RandomProvider.NextDouble() < FireMutationProbability)
+            {
+                settlementUpdate.FireMutationResult = Settlement.InvokeFireMutation();
             }
 
             if (EpochSpecific.CanEnterNextEpoch(Settlement, CurrentEpoch))
@@ -111,9 +144,9 @@ namespace SettlementSimulation.Engine
                 }
             }
 
-            if (Generation % 100 == 0) Settlement.UpdateSettlementCenter();
+            if (Iteration % 100 == 0) Settlement.UpdateSettlementCenter();
 
-            Generation++;
+            Iteration++;
         }
 
         private UpdateType GetUpdateType()
@@ -125,7 +158,7 @@ namespace SettlementSimulation.Engine
             if (EpochSpecific.IncreaseProbabilityOfAddingBuildings(Settlement, CurrentEpoch))
             {
                 probNewRoad = 0.2;
-                probNewBuildings = 0.7;
+                probNewBuildings = 0.5;
             }
 
             UpdateType updateType;
@@ -174,7 +207,7 @@ namespace SettlementSimulation.Engine
                     foreach (var road in model.NewRoads)
                     {
                         fitness += 1;
-                        var roads = new List<IRoad>(Settlement.Genes) { road };
+                        var roads = new List<IRoad>(Settlement.Roads) { road };
                         road.Buildings.ForEach(b => b.SetFitness(new BuildingRule()
                         {
                             Fields = Settlement.Fields,
@@ -188,7 +221,7 @@ namespace SettlementSimulation.Engine
                 case UpdateType.NewBuildings:
                     foreach (var building in model.NewBuildings)
                     {
-                        var roads = new List<IRoad>(Settlement.Genes);
+                        var roads = new List<IRoad>(Settlement.Roads);
                         building.SetFitness(new BuildingRule()
                         {
                             Fields = Settlement.Fields,
@@ -202,7 +235,7 @@ namespace SettlementSimulation.Engine
                 case UpdateType.NewTypes:
                     foreach (var (oldBuilding, newBuilding) in model.UpdatedBuildings)
                     {
-                        var roads = new List<IRoad>(Settlement.Genes);
+                        var roads = new List<IRoad>(Settlement.Roads);
                         oldBuilding.SetFitness(new BuildingRule()
                         {
                             Fields = Settlement.Fields,

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using SettlementSimulation.Engine.Enumerators;
+using SettlementSimulation.Engine.Helpers;
 using SettlementSimulation.Engine.Models.Buildings.FirstType;
 using SettlementSimulation.Engine.Models.Buildings.SecondType;
 using SettlementSimulation.Engine.Models.Buildings.ThirdType;
@@ -9,21 +10,6 @@ namespace SettlementSimulation.Engine.Models
 {
     public static class EpochSpecific
     {
-        public static int GetBuildingsCount(Epoch epoch)
-        {
-            switch (epoch)
-            {
-                case Epoch.First:
-                    return FirstEpochBuildings;
-                case Epoch.Second:
-                    return SecondEpochBuildings;
-                case Epoch.Third:
-                    return ThirdEpochBuildings;
-            }
-
-            return -1;
-        }
-
         public static bool IsSatisfiedBuildingCountCondition(Settlement settlement, Epoch epoch)
         {
             switch (epoch)
@@ -69,7 +55,37 @@ namespace SettlementSimulation.Engine.Models
             if (epoch != Epoch.Second) return false;
 
             return settlement.Buildings.Count > SecondEpochBuildings / 3 &&
-                   settlement.Genes.Count > SecondEpochBuildings / 10;
+                   settlement.Roads.Count > SecondEpochBuildings / 10;
+        }
+
+        public static Material GetMaterialForBuilding(Epoch epoch)
+        {
+            var rnd = RandomProvider.NextDouble();
+            var probWooden = 0.0;
+            var probStone = 0.0;
+            switch (epoch)
+            {
+                case Epoch.First:
+                    probWooden = FirstEpochProbOfWoodenBuildings;
+                    probStone = FirstEpochProbOfStoneBuildings;
+                    break;
+                case Epoch.Second:
+                    probWooden = SecondEpochProbOfWoodenBuildings;
+                    probStone = SecondEpochProbOfStoneBuildings;
+                    break;
+
+                case Epoch.Third:
+                    probWooden = ThirdEpochProbOfWoodenBuildings;
+                    probStone = ThirdEpochProbOfStoneBuildings;
+                    break;
+            }
+
+            if (rnd < probWooden)
+                return Material.Wood;
+            if (rnd < probWooden + probStone)
+                return Material.Stone;
+            
+            return Material.Bricks;
         }
     }
 }

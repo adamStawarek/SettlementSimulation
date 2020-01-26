@@ -25,6 +25,7 @@ namespace SettlementSimulation.Engine.Models
         public List<(IRoad oldRoad, IRoad newRoad)> UpdatedRoads { get; set; }
         public MutationResult FloodMutationResult { get; set; }
         public MutationResult EarthquakeMutationResult { get; set; }
+        public MutationResult FireMutationResult { get; set; }
 
         public SettlementUpdate Crossover(SettlementUpdate other)
         {
@@ -58,7 +59,12 @@ namespace SettlementSimulation.Engine.Models
                         {
                             road.RemoveBuilding(b);
                             road.AddBuilding(new Residence()//otherwise some roads would have no buildings
-                                {Position = b.Position, Road = road, Direction = b.Direction});
+                            {
+                                Position = b.Position,
+                                Road = road, 
+                                Direction = b.Direction,
+                                Material = b.Material
+                            });
                         });
                         if (!road.Buildings.Any())
                             continue;

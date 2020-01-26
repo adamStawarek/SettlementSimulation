@@ -14,6 +14,7 @@ namespace SettlementSimulation.Engine.Interfaces
         List<IBuilding> Buildings { get; }
         int Length { get; }
         RoadType Type { get; }
+        int Age { get; set; }
 
         List<Point> GetPossibleBuildingPositions(PossibleBuildingPositions model);
         List<Point> GetPossibleRoadPositions(PossibleRoadPositions model);

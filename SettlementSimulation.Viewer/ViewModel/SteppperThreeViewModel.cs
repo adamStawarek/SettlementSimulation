@@ -190,7 +190,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             var buildingsCount = SettlementState.Roads.Sum(r => r.Buildings.Count);
             buildingsPerIteration.Add(buildingsCount);
 
-            if (SettlementState.CurrentGeneration % 10 == 0)
+            if (SettlementState.CurrentIteration % 10 == 0)
             {
                 SettlementGraphValues.First().Values.Add((double)buildingsPerIteration.Last());
             }

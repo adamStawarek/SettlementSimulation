@@ -9,27 +9,37 @@
   "FloodMutationDistanceToWater": 10,
   "FloodMutationProbability": 0.001,
   "EarthquakeMutationProbability": 0.001,
+  "FireMutationProbability": 0.005,
   "EpochInfos": [
     {
       "Epoch": 1,
       "Buildings": 500,
       "ProbNewRoad": 0.5,
       "ProbNewBuildings": 0.5,
-      "ProbUpdate": 0.0
+      "ProbUpdate": 0.0,
+      "ProbOfWoodenBuildings": 0.85,
+      "ProbOfStoneBuildings": 0.01,
+      "ProbOfBricksBuildings": 0.05
     },
     {
       "Epoch": 2,
       "Buildings": 4500,
       "ProbNewRoad": 0.7,
       "ProbNewBuildings": 0.3,
-      "ProbUpdate": 0.1
+      "ProbUpdate": 0.1,
+      "ProbOfWoodenBuildings": 0.35,
+      "ProbOfStoneBuildings": 0.55,
+      "ProbOfBricksBuildings": 0.1
     },
     {
       "Epoch": 3,
       "Buildings": 4500,
       "ProbNewRoad": 0.1,
       "ProbNewBuildings": 0.1,
-      "ProbUpdate": 0.8
+      "ProbUpdate": 0.8,
+      "ProbOfWoodenBuildings": 0.1,
+      "ProbOfStoneBuildings": 0.2,
+      "ProbOfBricksBuildings": 0.7
     }
   ]
 }

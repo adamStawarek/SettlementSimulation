@@ -73,7 +73,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         public void MarketRule_IsSatisfied_When_No_Other_Markets()
         {
             //add randomly 100 residences
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var market = new Market()
             {
                 Position = new Point(50, 51)
@@ -81,9 +81,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
             market.Road = road;
             _settlement.AddBuildingToRoad(road, market);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
-                var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+                var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
                 if (!buildingPositions.Any())
                     continue;
 
@@ -97,7 +97,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -106,7 +106,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         public void MarketRule_Is_Not_Satisfied_When_Exists_Other_Market_Which_Is_Less_Than_50_Pixels_Away()
         {
             //add randomly 100 residences
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var market1 = new Market()
             {
                 Position = new Point(50, 51)
@@ -120,9 +120,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
             market2.Road = road;
             _settlement.AddBuildingToRoad(road, market2);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
-                var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+                var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
                 if (!buildingPositions.Any())
                     continue;
 
@@ -135,7 +135,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -143,7 +143,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test, Ignore("Dynamic settings")]
         public void MarketRule_IsSatisfied_When_Exists_Other_Market_But_It_Further_Than_50_Pixels_Away()
         {
-            IRoad road1 = _settlement.Genes.First();
+            IRoad road1 = _settlement.Roads.First();
             var market1 = new Market()
             {
                 Position = new Point(50, 51)
@@ -168,9 +168,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
             _settlement.AddBuildingToRoad(road1, market2);
 
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
-                var buildingPositions = road1.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+                var buildingPositions = road1.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
                 if (!buildingPositions.Any())
                     continue;
 
@@ -183,7 +183,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -191,16 +191,16 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test, Ignore("Dynamic settings")]
         public void SchoolRule_IsSatisfied__When_Ratio_Schools_Per_Residences_Is_Less_Than_1_To_100()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var school = new School()
             {
                 Position = new Point(50, 51)
             };
 
-            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
             buildingPositions.Remove(school.Position);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
@@ -212,7 +212,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -220,7 +220,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void SchoolRule_Is_Not_Satisfied__When_Ratio_Schools_Per_Residences_Is_Greater_Than_1_To_100()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var school1 = new School()
             {
                 Position = new Point(50, 51)
@@ -228,9 +228,9 @@ namespace SettlementSimulation.Engine.Tests.Unit
             school1.Road = road;
             _settlement.AddBuildingToRoad(road, school1);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
-                var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+                var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
                 if (!buildingPositions.Any())
                     continue;
 
@@ -248,7 +248,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -256,16 +256,16 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test, Ignore("Dynamic settings")]
         public void ChurchRule_IsSatisfied_When_There_Are_More_Than_100_Residences_And_No_Other_Churches_In_Neighborhood()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var church = new Church()
             {
                 Position = new Point(50, 51)
             };
 
-            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
             buildingPositions.Remove(church.Position);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
@@ -277,7 +277,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -285,16 +285,16 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void ChurchRule_Is_Not_Satisfied_When_There_Are_More_Less_100_ResidencesAnd_In_Neighborhood()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var church = new Church()
             {
                 Position = new Point(50, 51)
             };
 
-            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
             buildingPositions.Remove(church.Position);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 10)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 10)
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
@@ -306,7 +306,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -314,7 +314,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void ChurchRule_Is_Not_Satisfied_When_There_Is_Other_Church_In_Neighborhood()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var church = new Church()
             {
                 Position = new Point(50, 51)
@@ -327,10 +327,10 @@ namespace SettlementSimulation.Engine.Tests.Unit
             existingChurch.Road = road;
             _settlement.AddBuildingToRoad(road, existingChurch);
 
-            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
             buildingPositions.Remove(church.Position);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 10)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 10)
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
@@ -342,7 +342,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -350,16 +350,16 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test, Ignore("Dynamic settings")]
         public void AdministrationRule_IsSatisfied_When_Distance_To_SettlementCenter_Is_Less_Than_40_Pixels()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var administration = new Administration()
             {
                 Position = new Point(50, 51)
             };
 
-            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
             buildingPositions.Remove(administration.Position);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
@@ -371,7 +371,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -379,16 +379,16 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void AdministrationRule_Is_Not_Satisfied_When_Distance_To_SettlementCenter_Is_Greater_Than_40_Pixels()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
             var administration = new Administration()
             {
                 Position = new Point(99, 51)
             };
 
-            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Genes, _settlement.Fields));
+            var buildingPositions = road.GetPossibleBuildingPositions(new PossibleBuildingPositions(_settlement.Roads, _settlement.Fields));
             buildingPositions.Remove(administration.Position);
 
-            while (_settlement.Genes.SelectMany(g => g.Buildings).Count() < 120)
+            while (_settlement.Roads.SelectMany(g => g.Buildings).Count() < 120)
             {
                 var position = buildingPositions[RandomProvider.Next(buildingPositions.Count)];
                 var building = new Residence { Position = position };
@@ -400,7 +400,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -408,7 +408,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void PortRule_IsSatisfied_When_Distance_To_Water_Is_Less_Than_10_Pixels_And_There_Is_No_Other_Port()
         {
-            IRoad road1 = _settlement.Genes.First();
+            IRoad road1 = _settlement.Roads.First();
             var roadGenerator = new RoadPointsGenerator();
             var road2 = new Road(roadGenerator.GenerateStraight(new RoadGenerationTwoPoints()
             {
@@ -427,7 +427,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -435,7 +435,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void PortRule_Is_Not_Satisfied_When_Distance_To_Water_Is_Greater_Than_10_Pixels()
         {
-            var road1 = _settlement.Genes.First();
+            var road1 = _settlement.Roads.First();
             var roadGenerator = new RoadPointsGenerator();
             var road2 = new Road(roadGenerator.GenerateStraight(new RoadGenerationTwoPoints()
             {
@@ -454,7 +454,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -462,7 +462,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test, Ignore("Dynamic settings")]
         public void PortRule_Is_Not_Satisfied_When_There_Is_Other_Port()
         {
-            IRoad road1 = _settlement.Genes.First();
+            IRoad road1 = _settlement.Roads.First();
             var roadGenerator = new RoadPointsGenerator();
             var road2 = new Road(roadGenerator.GenerateStraight(new RoadGenerationTwoPoints()
             {
@@ -488,7 +488,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road1,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -496,7 +496,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void UniversityRule_IsSatisfied__When_Ratio_Universities_Per_Schools_Is_Less_Than_1_To_5()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
 
             var schools = new List<School>(5)
             {
@@ -537,7 +537,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }
@@ -545,7 +545,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
         [Test]
         public void UniversityRule_Is_Not_Satisfied__When_Ratio_Universities_Per_Schools_Is_Greater_Than_1_To_5()
         {
-            IRoad road = _settlement.Genes.First();
+            IRoad road = _settlement.Roads.First();
 
             var schools = new List<School>(4)
             {
@@ -582,7 +582,7 @@ namespace SettlementSimulation.Engine.Tests.Unit
             {
                 BuildingRoad = road,
                 Fields = _settlement.Fields,
-                Roads = _settlement.Genes,
+                Roads = _settlement.Roads,
                 SettlementCenter = _settlement.SettlementCenter
             }));
         }

@@ -10,7 +10,5 @@ namespace SettlementSimulation.Engine.Models
         public List<IRoad> Roads { get; set; }
         public IRoad BuildingRoad { get; set; }
         public Point SettlementCenter { get; set; }
-        public Point SettlementUpperLeftBound { get; set; }
-        public Point SettlementBottomRightBound { get; set; }
     }
 }

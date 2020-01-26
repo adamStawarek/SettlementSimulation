@@ -32,6 +32,7 @@ namespace SettlementSimulation.Engine.Models
         public Point Center => new Point((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         public int Length => Segments.Count;
         public RoadType Type => roadType;
+        public int Age { get; set; }
         public bool IsVertical => Start.X.Equals(End.X);
         public List<IBuilding> Buildings => Segments.SelectMany(s => s.Buildings).ToList();
 
@@ -188,8 +189,17 @@ namespace SettlementSimulation.Engine.Models
             var distanceToCenter = model.SettlementCenter.DistanceTo(this.Center);
             if (distanceToCenter < model.AvgDistanceToSettlementCenter)
             {
-                prob += 0.2;
+                prob += 0.15;
             }
+            if (distanceToCenter < 0.5*model.AvgDistanceToSettlementCenter)
+            {
+                prob += 0.15;
+            }
+            if (distanceToCenter > 1.5 * model.AvgDistanceToSettlementCenter)
+            {
+                prob -= 0.15;
+            }
+
             else if (this.Length > 0.5 * MaxRoadLength)
             {
                 prob += 0.05;
@@ -213,6 +223,7 @@ namespace SettlementSimulation.Engine.Models
                     break;
             }
 
+            prob = prob < 0 ? 0.01 : prob;
             roadType = RandomProvider.NextDouble() > prob ? RoadType.Unpaved : RoadType.Paved;
             return roadType;
         }
