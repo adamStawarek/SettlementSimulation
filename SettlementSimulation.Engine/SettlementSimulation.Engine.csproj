@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <TargetFrameworks>netcoreapp3.0;net462</TargetFrameworks>
     <PackageId>SettlementSimulation.Engine</PackageId>
-    <Version>1.4.1</Version>
+    <Version>1.4.2</Version>
     <Authors>Adam Stawarek</Authors>
     <Company>Adam Stawarek</Company>
     <PackageProjectUrl>https://github.com/adamStawarek/Human-settlement-simulation</PackageProjectUrl>
@@ -13,7 +13,7 @@
     <ApplicationIcon />
     <StartupObject />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>C# library for simulation the development of human settlement based on genetic algorithm</Description>
+    <Description>C# library for simulation the development of human settlement</Description>
   </PropertyGroup>
 
   <ItemGroup>

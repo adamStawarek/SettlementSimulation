@@ -11,14 +11,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using LiveCharts;
 using LiveCharts.Wpf;
 using SettlementSimulation.Engine.Enumerators;
 using SettlementSimulation.Engine.Interfaces;
+using Color = System.Drawing.Color;
 using Point = SettlementSimulation.AreaGenerator.Models.Point;
 
 namespace SettlementSimulation.Viewer.ViewModel
@@ -28,10 +32,11 @@ namespace SettlementSimulation.Viewer.ViewModel
         #region fields
         private Bitmap _colorMap;
         private Bitmap _heightMap;
-        private List<int> buildingsPerIteration;
         private SettlementInfo _settlementInfo;
         private StructureGenerator _generator;
         private readonly ViewModelLocator _viewModelLocator;
+        private readonly List<int> _buildingsPerIteration;
+        private readonly string _screenshootPath;
         #endregion
 
         #region properties
@@ -109,12 +114,15 @@ namespace SettlementSimulation.Viewer.ViewModel
         #region commands
         public RelayCommand StartSimulationCommand { get; }
         public RelayCommand StopSimulationCommand { get; }
+        public RelayCommand<object> TakeScreenshotCommand { get; set; }
         #endregion
 
         public StepperThreeViewModel()
         {
             _viewModelLocator = new ViewModelLocator();
-            buildingsPerIteration = new List<int>();
+            _buildingsPerIteration = new List<int>();
+            _screenshootPath = $"{DateTime.Now.ToString("s").Replace(":", "-")}";
+            Directory.CreateDirectory(_screenshootPath);
 
             Messenger.Default.Register<SetSettlementInfoCommand>(this, this.SetSettlementInfo);
             SettlementGraphValues = new SeriesCollection
@@ -133,7 +141,54 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             StartSimulationCommand = new RelayCommand(StartSimulation);
             StopSimulationCommand = new RelayCommand(StopSimulation);
+            TakeScreenshotCommand = new RelayCommand<object>(TakeScreenshot);
             SetUpStructureLegend();
+        }
+
+        private void TakeScreenshot(object obj)
+        {
+            var elements = (object[])obj;
+
+            foreach (var uiElem in elements)
+            {
+                try
+                {
+                    var appendix = elements.ToList().IndexOf(uiElem) == 0 ? "map" : "graph";
+                    var source = uiElem as UIElement;
+                    double renderHeight, renderWidth;
+
+                    var height = renderHeight = source.RenderSize.Height;
+                    var width = renderWidth = source.RenderSize.Width;
+
+                    //Specification for target bitmap like width/height pixel etc.
+                    RenderTargetBitmap renderTarget = new RenderTargetBitmap((int)renderWidth, (int)renderHeight, 96, 96, PixelFormats.Pbgra32);
+                    //creates Visual Brush of UIElement
+                    VisualBrush visualBrush = new VisualBrush(source);
+
+                    DrawingVisual drawingVisual = new DrawingVisual();
+                    using (DrawingContext drawingContext = drawingVisual.RenderOpen())
+                    {
+                        //draws image of element
+                        drawingContext.DrawRectangle(visualBrush, null,
+                            new Rect(new System.Windows.Point(0, 0), new System.Windows.Point(width, height)));
+                    }
+                    //renders image
+                    renderTarget.Render(drawingVisual);
+
+                    //PNG encoder for creating PNG file
+                    PngBitmapEncoder encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(renderTarget));
+                    using (FileStream stream = new FileStream($"{_screenshootPath}/{SettlementState.CurrentIteration + "_" + appendix}.png", FileMode.Create, FileAccess.Write))
+                    {
+                        encoder.Save(stream);
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+            }
+
         }
 
         private void SetSettlementInfo(SetSettlementInfoCommand obj)
@@ -188,12 +243,14 @@ namespace SettlementSimulation.Viewer.ViewModel
         {
             UpdateSettlementBitmap();
             var buildingsCount = SettlementState.Roads.Sum(r => r.Buildings.Count);
-            buildingsPerIteration.Add(buildingsCount);
+            _buildingsPerIteration.Add(buildingsCount);
 
             if (SettlementState.CurrentIteration % 10 == 0)
             {
-                SettlementGraphValues.First().Values.Add((double)buildingsPerIteration.Last());
+                SettlementGraphValues.First().Values.Add((double)_buildingsPerIteration.Last());
             }
+
+            RaisePropertyChanged(nameof(SettlementGraphValues));
         }
 
         private void OnNextEpoch(object sender, EventArgs e)
@@ -243,33 +300,35 @@ namespace SettlementSimulation.Viewer.ViewModel
 
         private void SetUpLogs()
         {
-            App.Current.Dispatcher.Invoke((Action) (() =>
-            {
-                int maxLogs = 10;
-                if (UpdateLogs.Count > maxLogs)
-                {
-                    UpdateLogs.RemoveAt(0);
-                }
+            App.Current.Dispatcher.Invoke((Action)(() =>
+           {
+               int maxLogs = 10;
+               if (UpdateLogs.Count > maxLogs)
+               {
+                   UpdateLogs.RemoveAt(0);
+               }
 
-                switch (SettlementState.LastSettlementUpdate.UpdateType)
-                {
-                    case UpdateType.NewRoads:
-                        UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
-                                       $"({SettlementState.LastSettlementUpdate.NewRoads.Count})");
-                        break;
-                    case UpdateType.NewBuildings:
-                        UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
-                                       $"({SettlementState.LastSettlementUpdate.NewBuildings.Count})");
-                        break;
-                    case UpdateType.NewTypes:
-                        UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
-                                       $"({SettlementState.LastSettlementUpdate.UpdatedBuildings.Count})");
-                        break;
-                }
-            }));
+               switch (SettlementState.LastSettlementUpdate.UpdateType)
+               {
+                   case UpdateType.NewRoads:
+                       UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
+                                      $"({SettlementState.LastSettlementUpdate.NewRoads.Count})");
+                       break;
+                   case UpdateType.NewBuildings:
+                       UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
+                                      $"({SettlementState.LastSettlementUpdate.NewBuildings.Count})");
+                       break;
+                   case UpdateType.NewTypes:
+                       UpdateLogs.Add($"{SettlementState.LastSettlementUpdate.UpdateType}" +
+                                      $"({SettlementState.LastSettlementUpdate.UpdatedBuildings.Count})");
+                       break;
+               }
+           }));
 
             var logs = new List<string>
             {
+                $"Epoch: {SettlementState.CurrentEpoch}",
+                $"Iteration: {SettlementState.CurrentIteration}",
                 $"Roads: {SettlementState.Roads.Count}",
                 $"Buildings: {SettlementState.Roads.Sum(r => r.Buildings.Count)}",
                 $"Average road length: {(int) SettlementState.Roads.Average(r => r.Length)}",
@@ -301,7 +360,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             foreach (var road in roads)
             {
                 var roadPoints = road.Segments.Select(sg => sg.Position).ToList();
-                roadPoints.ForEach(p => 
+                roadPoints.ForEach(p =>
                     MarkPoint(p, originalColorMap, road.Type.Equals(RoadType.Unpaved) ? Color.Black : Color.DarkGray));
             }
 
