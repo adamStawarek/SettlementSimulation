@@ -41,7 +41,7 @@
                 <Button Content="Take snaphoot" Margin="5" Width="200">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
-                            <command:EventToCommand Command="{Binding TakeScreenshotCommand}"
+                            <command:EventToCommand Command="{Binding TakeSnapshotCommand}"
                                                     PassEventArgsToCommand="true">
                                 <command:EventToCommand.CommandParameter>
                                     <MultiBinding Converter="{StaticResource MultiValueConverter}">

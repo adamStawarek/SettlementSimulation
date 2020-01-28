@@ -114,7 +114,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         #region commands
         public RelayCommand StartSimulationCommand { get; }
         public RelayCommand StopSimulationCommand { get; }
-        public RelayCommand<object> TakeScreenshotCommand { get; set; }
+        public RelayCommand<object> TakeSnapshotCommand { get; set; }
         #endregion
 
         public StepperThreeViewModel()
@@ -141,11 +141,11 @@ namespace SettlementSimulation.Viewer.ViewModel
 
             StartSimulationCommand = new RelayCommand(StartSimulation);
             StopSimulationCommand = new RelayCommand(StopSimulation);
-            TakeScreenshotCommand = new RelayCommand<object>(TakeScreenshot);
+            TakeSnapshotCommand = new RelayCommand<object>(TakeSnapshot);
             SetUpStructureLegend();
         }
 
-        private void TakeScreenshot(object obj)
+        private void TakeSnapshot(object obj)
         {
             var elements = (object[])obj;
 
@@ -189,6 +189,9 @@ namespace SettlementSimulation.Viewer.ViewModel
                 }
             }
 
+            File.AppendAllLines(
+                $"{_screenshootPath}/{SettlementState.CurrentIteration + "_logs"}.txt",
+                GeneralStateLogs);
         }
 
         private void SetSettlementInfo(SetSettlementInfoCommand obj)
