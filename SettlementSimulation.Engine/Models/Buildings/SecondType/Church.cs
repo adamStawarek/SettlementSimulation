@@ -18,14 +18,12 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
             var churches = model.Roads.SelectMany(b => b.Buildings).Where(b => b != this && b is Church);
             if (!churches.All(m => m.Position.DistanceTo(this.Position) >= minDistanceBetweenChurches))
             {
-                //("Other markets are too close");
                 return 0;
             }
 
             var residences = model.Roads.SelectMany(b => b.Buildings).Where(b => b is Residence);
             if (residences.Count(r => r.Position.DistanceTo(this.Position) <= 30) < 500)
             {
-                //("Not enough residences in closest neighborhood");
                 return 0;
             }
             return 5;

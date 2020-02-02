@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SettlementSimulation.Engine
 {
-    public class StructureGeneratorBuilder
+    public class SimulationRunnerBuilder
     {
         private Field[,] _fields;
         private List<Point> _mainRoad;
@@ -12,43 +12,43 @@ namespace SettlementSimulation.Engine
         private int _timeout = 10 * 60 * 1000;
         private int? _uniformBreakpointStep;
 
-        public StructureGeneratorBuilder WithFields(Field[,] fields)
+        public SimulationRunnerBuilder WithFields(Field[,] fields)
         {
             this._fields = fields;
             return this;
         }
 
-        public StructureGeneratorBuilder WithMainRoad(IEnumerable<Point> mainRoad)
+        public SimulationRunnerBuilder WithMainRoad(IEnumerable<Point> mainRoad)
         {
             this._mainRoad = new List<Point>(mainRoad);
             return this;
         }
 
-        public StructureGeneratorBuilder WithBreakpoints(IEnumerable<int> breakpoints)
+        public SimulationRunnerBuilder WithBreakpoints(IEnumerable<int> breakpoints)
         {
             this._breakpoints = new List<int>(breakpoints);
             return this;
         }
 
-        public StructureGeneratorBuilder WithBreakpointStep(int step)
+        public SimulationRunnerBuilder WithBreakpointStep(int step)
         {
             _uniformBreakpointStep = step;
             return this;
         }
 
-        public StructureGeneratorBuilder WithMaxIterations(int maxIterations)
+        public SimulationRunnerBuilder WithMaxIterations(int maxIterations)
         {
             this._maxIterations = maxIterations;
             return this;
         }
 
-        public StructureGeneratorBuilder WithTimeout(int timeout)
+        public SimulationRunnerBuilder WithTimeout(int timeout)
         {
             this._timeout = timeout;
             return this;
         }
 
-        public StructureGenerator Build()
+        public SimulationRunner Build()
         {
             if (_uniformBreakpointStep.HasValue)
             {
@@ -59,7 +59,7 @@ namespace SettlementSimulation.Engine
                 }
             }
 
-            var generator = new StructureGenerator(_fields, _mainRoad, _breakpoints,
+            var generator = new SimulationRunner(_fields, _mainRoad, _breakpoints,
                 _maxIterations, _timeout);
 
             return generator;

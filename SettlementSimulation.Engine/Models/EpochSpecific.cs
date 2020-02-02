@@ -52,10 +52,18 @@ namespace SettlementSimulation.Engine.Models
 
         public static bool IncreaseProbabilityOfAddingBuildings(Settlement settlement, Epoch epoch)
         {
-            if (epoch != Epoch.Second) return false;
+            switch (epoch)
+            {
+                case Epoch.First:
+                    return false;
+                case Epoch.Second:
+                    return settlement.Buildings.Count > SecondEpochBuildings / 3 &&
+                           settlement.Roads.Count > SecondEpochBuildings / 10;
+                case Epoch.Third:
+                    return settlement.Buildings.Count < 0.9 * ThirdEpochBuildings;
+            }
 
-            return settlement.Buildings.Count > SecondEpochBuildings / 3 &&
-                   settlement.Roads.Count > SecondEpochBuildings / 10;
+            return false;
         }
 
         public static Material GetMaterialForBuilding(Epoch epoch)

@@ -22,7 +22,7 @@ namespace SettlementSimulation.Engine.Models.Buildings.SecondType
                 return 0;
             }
 
-            return 5;
+            return 7;
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Timers;
 namespace SettlementSimulation.Engine
 {
-    public class StructureGenerator
+    public class SimulationRunner
     {
         #region fields
         private readonly List<int> _breakpoints;
@@ -31,7 +31,7 @@ namespace SettlementSimulation.Engine
         public SettlementState SettlementState { get; private set; }
         #endregion
 
-        public StructureGenerator(Field[,] fields, List<Point> mainRoad,
+        public SimulationRunner(Field[,] fields, List<Point> mainRoad,
             List<int> breakpoints, int maxIterations, int timeout)
         {
             _breakpoints = breakpoints;

@@ -129,7 +129,7 @@ namespace SettlementSimulation.AreaGenerator
             var endFields = verticalRoad ? fields.Where(f => f.Point.Y == max).ToArray() : fields.Where(f => f.Point.X == max).ToArray();
             var end = endFields[rand.Next(0, endFields.Count())];
             var mainRoadPoints = (await FindMainRoad(fieldGrid, start.Point, end.Point)).ToList();
-            mainRoadPoints.ForEach(p => { MarkPoint(new Point(p.X, p.Y), previewBitmap, new Pixel(0, 0, 0),3); });
+            mainRoadPoints.ForEach(p => { MarkPoint(new Point(p.X, p.Y), previewBitmap, new Pixel(0, 255, 255),2); });
             #endregion
 
             var mStep = mainRoadPoints.Count() / 100;

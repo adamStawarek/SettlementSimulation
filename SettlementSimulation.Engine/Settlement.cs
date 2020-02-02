@@ -147,7 +147,11 @@ namespace SettlementSimulation.Engine
             }
         }
 
-        public SettlementUpdate CreateNewSettlementUpdate(UpdateType updateType, Epoch epoch)
+        public SettlementUpdate CreateNewSettlementUpdate(
+            UpdateType updateType,
+            Epoch epoch,
+            int iteration,
+            int maxIterations)
         {
             var roadTypeSetUp = new RoadTypeSetUp()
             {
@@ -217,6 +221,9 @@ namespace SettlementSimulation.Engine
                             possiblePlaces.Count > MaxBuildingsToAddPerIteration
                                 ? MaxBuildingsToAddPerIteration
                                 : possiblePlaces.Count);
+
+                        double coef = (3 * iteration / (maxIterations * 0.1));
+                        buildingsToAdd = (int)(coef * buildingsToAdd);
 
                         for (int i = 0; i < buildingsToAdd; i++)
                         {
@@ -388,7 +395,7 @@ namespace SettlementSimulation.Engine
         public MutationResult InvokeEarthquakeMutation()
         {
             var result = new MutationResult();
-            var buildingsToRemove = RandomProvider.Next((int)(this.Buildings.Count * 0.1), (int)(this.Buildings.Count * 0.2));
+            var buildingsToRemove = RandomProvider.Next((int)(this.Buildings.Count * 0.1));
             for (int i = 0; i < buildingsToRemove; i++)
             {
                 var road = this.Roads[RandomProvider.Next(this.Roads.Count)];

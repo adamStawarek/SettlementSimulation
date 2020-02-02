@@ -33,7 +33,7 @@ namespace SettlementSimulation.Viewer.ViewModel
         private Bitmap _colorMap;
         private Bitmap _heightMap;
         private SettlementInfo _settlementInfo;
-        private StructureGenerator _generator;
+        private SimulationRunner _generator;
         private readonly ViewModelLocator _viewModelLocator;
         private readonly List<int> _buildingsPerIteration;
         private readonly string _screenshootPath;
@@ -212,7 +212,7 @@ namespace SettlementSimulation.Viewer.ViewModel
             var maxIterations = _viewModelLocator.Designer.EndY;
             var breakpoints = _viewModelLocator.Designer.Breakpoints;
 
-            _generator = new StructureGeneratorBuilder()
+            _generator = new SimulationRunnerBuilder()
                 .WithMaxIterations(maxIterations)
                 .WithBreakpoints(breakpoints)
                 .WithFields(_settlementInfo.Fields)

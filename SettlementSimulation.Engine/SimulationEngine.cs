@@ -38,7 +38,8 @@ namespace SettlementSimulation.Engine
             var updateType = GetUpdateType();
 
             var structures = Enumerable.Range(1, 100).ToList()
-                        .Select(s => Settlement.CreateNewSettlementUpdate(updateType, CurrentEpoch))
+                        .Select(s => Settlement.CreateNewSettlementUpdate(
+                            updateType, CurrentEpoch, Iteration, 1000))
                         .ToList();
 
             var settlementUpdate = GetBestStructures(structures);
